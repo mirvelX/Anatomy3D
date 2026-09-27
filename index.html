@@ -40,7 +40,7 @@
           <div class="brand-mark" aria-hidden="true">◈</div>
           <div>
             <h1>Anatomy 3D</h1>
-            <p>Vertebral Atlas · v9.0</p>
+            <p>Vertebral Atlas · v10.0 alpha</p>
           </div>
         </div>
         <section class="section">
@@ -202,6 +202,38 @@
               ><input id="labels" type="checkbox" checked /> მონიშნული ნაწილის
               სახელი</label
             >
+            <div class="range-row">
+              <label for="contextOpacity">დანარჩენის ხილვადობა</label
+              ><output id="contextOpacityVal">12%</output>
+            </div>
+            <input
+              id="contextOpacity"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value="12"
+            />
+            <label class="checkrow"
+              ><input id="soloPart" type="checkbox" /> მხოლოდ არჩეული
+              ნაწილი</label
+            >
+            <div class="range-row">
+              <label for="partSeparation">ნაწილის გამოყოფა</label
+              ><output id="partSeparationVal">0%</output>
+            </div>
+            <input
+              id="partSeparation"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value="0"
+              disabled
+            />
+            <p class="control-note">
+              გამოყოფა სასწავლო სქემაა. ხვრელი ან არხი ძვლოვანი ნაწილი არ არის.
+            </p>
           </div>
         </div>
         <section id="quizPanel" class="quiz hidden" aria-live="polite">
@@ -210,6 +242,12 @@
             ><span id="score" class="stat">სწორი: 0 / 0</span>
           </div>
           <h3 id="quizQuestion">აირჩიე სტრუქტურა</h3>
+          <label for="quizScope">სავარჯიშო მასალა</label>
+          <select id="quizScope">
+            <option value="all">ამ მალის ყველა ნაწილი</option>
+            <option value="unlearned">ჯერ უსწავლელი ნაწილები</option>
+          </select>
+          <p id="quizCycle" class="control-note"></p>
           <p class="sub" style="margin-bottom: 10px">
             დააწკაპუნე 3D მოდელს ან აირჩიე ერთ-ერთი პასუხი.
           </p>
@@ -235,6 +273,8 @@
           <div class="latin" id="detailLatin">Corpus vertebrae</div>
           <div class="georgian" id="detailKa">მალის სხეული</div>
           <p id="detailText"></p>
+          <p id="bookAlias" class="control-note"></p>
+          <p id="sourceInfo" class="source-info"></p>
           <span class="chip" id="detailKind">ძვლოვანი სტრუქტურა</span>
           <div style="margin-top: 13px">
             <button
@@ -247,11 +287,21 @@
           </div>
         </div>
         <div class="rule"></div>
+        <p class="kicker">არჩეული მალის თავისებურება</p>
+        <p id="levelNote"></p>
+        <a id="levelSource" target="_blank" rel="noopener noreferrer"></a>
+        <p class="control-note">
+          ტექსტის წყარო და 3D მოდელის სიზუსტე ცალ-ცალკე მოწმდება. ეს მოდელი ჯერ
+          სქემატურია.
+        </p>
+        <div class="rule"></div>
         <p class="kicker">მეზობელ მალებთან კავშირი</p>
         <div id="linkInformation"></div>
         <div class="rule"></div>
         <p class="kicker">სასწავლო პროგრესი</p>
         <p id="progressText">კითხვის შედეგები შენახულია მხოლოდ ამ ბრაუზერში.</p>
+        <label for="levelProgress" id="levelProgressText"></label>
+        <progress id="levelProgress" max="1" value="0"></progress>
         <button id="exportProgress">სარეზერვო ასლის შენახვა (.json)</button>
         <div style="margin-top: 9px">
           <label for="importProgress" class="import-label"

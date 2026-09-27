@@ -6,8 +6,8 @@ export function shuffle(items, random = Math.random) {
   }
   return result;
 }
-export function createQuestion(defs, random = Math.random) {
-  const available = defs.filter(
+export function quizCandidates(defs) {
+  return defs.filter(
     (d) =>
       d.id !== "all" &&
       ![
@@ -20,8 +20,19 @@ export function createQuestion(defs, random = Math.random) {
         "canal",
       ].includes(d.kind),
   );
-  if (available.length < 2) return null;
-  const [target, ...others] = shuffle(available, random);
+}
+export function createQuestion(defs, random = Math.random, targets = null) {
+  const available = quizCandidates(defs);
+  const candidates =
+    targets === null
+      ? available
+      : available.filter((d) => targets.includes(d.id));
+  if (available.length < 2 || !candidates.length) return null;
+  const [target] = shuffle(candidates, random);
+  const others = shuffle(
+    available.filter((d) => d.id !== target.id),
+    random,
+  );
   return { target, choices: shuffle([target, ...others.slice(0, 3)], random) };
 }
 export function matchesAnswer(question, id, owner) {

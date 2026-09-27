@@ -62,7 +62,11 @@ export async function build(out = resolve(root, "dist")) {
   await writeFile(resolve(out, "sw.js"), worker);
   await writeFile(
     resolve(out, "release.json"),
-    JSON.stringify({ version: "9.0.0", release }),
+    JSON.stringify({
+      version: JSON.parse(await readFile(resolve(root, "package.json"), "utf8"))
+        .version,
+      release,
+    }),
   );
   return { out, release, core };
 }

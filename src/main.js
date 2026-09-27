@@ -19,7 +19,9 @@ import {
   parseBackup,
   WORKSPACE_KEY,
 } from "./storage/workspace.js";
-import { createQuestion, answerQuestion } from "./quiz/quiz.js";
+import { createQuestion, answerQuestion, quizCandidates } from "./quiz/quiz.js";
+import { textbook, sourceFor, levelNote, bookAliases } from "./data/sources.js";
+import { guideParts } from "./rendering/visibility.js";
 import { createScene } from "./geometry/scene.js";
 import { createRenderer } from "./rendering/renderer.js";
 import { registerPwa } from "./pwa/register.js";
@@ -29,6 +31,10 @@ function storageStatus(message) {
   $("storageStatus").classList.toggle("hidden", !message);
 }
 const state = loadWorkspace(() => window.localStorage, storageStatus);
+let seenQuestions = new Set();
+const resetCycle = () => {
+  seenQuestions.clear();
+};
 function saveWorkspace() {
   return persist(() => window.localStorage, state, storageStatus);
 }
@@ -88,6 +94,10 @@ function renderPartList() {
   for (const d of matches) {
     const btn = document.createElement("button");
     btn.className = "part-btn" + (state.selected === d.id ? " active" : "");
+    const learned = !!state.learned[state.vertebra + ":" + d.id];
+    btn.classList.toggle("is-learned", learned);
+    btn.setAttribute("aria-pressed", String(state.selected === d.id));
+    if (learned) btn.title = "ნასწავლია";
     btn.innerHTML =
       '<span><b></b><small></small></span><span class="dot"></span>';
     btn.querySelector("b").textContent = d.latin;
@@ -103,6 +113,29 @@ function renderDetails() {
   $("detailLatin").textContent = d.latin;
   $("detailKa").textContent = d.ka;
   $("detailText").textContent = d.info;
+  $("bookAlias").textContent = bookAliases[d.id]
+    ? "წიგნის ტერმინი: " + bookAliases[d.id]
+    : "";
+  const ref = sourceFor(d.id);
+  $("sourceInfo").replaceChildren();
+  if (ref) {
+    const a = document.createElement("a");
+    a.href = ref.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = `კაციტაძე · გვ. ${ref.page} · ${ref.figure}`;
+    $("sourceInfo").append(a);
+  } else
+    $("sourceInfo").textContent =
+      d.id === "all"
+        ? "მთავარი წყარო: " + textbook.title
+        : "ამ ჩანაწერის წიგნთან შედარება ჯერ დასასრულებელია.";
+  const note = levelNote(state.vertebra);
+  $("levelNote").textContent = note.text;
+  $("levelSource").textContent = `კაციტაძე · გვ. ${note.page}`;
+  $("levelSource").href =
+    `${textbook.url}#page=${note.page + textbook.pdfPageOffset}`;
+  renderDisplayControls();
   $("detailKind").textContent =
     [
       "normal-space",
@@ -161,6 +194,27 @@ function renderProgress() {
     `ნასწავლი სტრუქტურები: ${n} · სწორი პასუხები: ${state.progress.correct} / ${state.progress.total}. მონაცემები ინახება მხოლოდ ამ მოწყობილობის ბრაუზერში.`;
   $("score").textContent =
     `სწორი: ${state.progress.correct} / ${state.progress.total}`;
+  const parts = getVisibleDefs({
+    ...state,
+    assembly: state.vertebra === "COC" ? "above" : "both",
+  }).filter((d) => d.id !== "all");
+  const count = parts.filter(
+    (d) => state.learned[state.vertebra + ":" + d.id],
+  ).length;
+  $("levelProgress").max = parts.length;
+  $("levelProgress").value = count;
+  $("levelProgressText").textContent =
+    `${name(state.vertebra)}: ${count} / ${parts.length} ნასწავლია (შეერთებების ჩათვლით)`;
+}
+function renderDisplayControls() {
+  $("contextOpacity").value = state.contextOpacity;
+  $("contextOpacityVal").textContent = state.contextOpacity + "%";
+  $("contextOpacity").disabled = !state.dim || state.soloPart;
+  $("soloPart").checked = state.soloPart;
+  $("partSeparation").value = state.partSeparation;
+  $("partSeparationVal").textContent = state.partSeparation + "%";
+  $("partSeparation").disabled =
+    state.selected === "all" || guideParts.has(state.selected);
 }
 function updatePanel(persistState = true) {
   displayNeighbors();
@@ -195,6 +249,7 @@ function selectPart(id) {
     return;
   }
   state.selected = id;
+  state.partSeparation = 0;
   renderPartList();
   renderDetails();
   draw();
@@ -213,10 +268,12 @@ function tooltip(msg) {
   $("tooltip").classList.remove("hidden");
 }
 function changeVertebra(id) {
+  resetCycle();
   state.vertebra = id;
   state.selected = "all";
   state.rotation = 0;
   state.explode = 0;
+  state.partSeparation = 0;
   $("explode").value = 0;
   $("rotate").value = 0;
   $("search").value = "";
@@ -293,9 +350,11 @@ document.addEventListener("keydown", (e) => {
 $("vertebra").addEventListener("change", (e) => changeVertebra(e.target.value));
 for (const b of document.querySelectorAll("[data-assembly]"))
   b.onclick = () => {
+    resetCycle();
     state.assembly = b.dataset.assembly;
     state.selected = "all";
     state.explode = 0;
+    state.partSeparation = 0;
     $("explode").value = 0;
     build();
     updatePanel();
@@ -321,8 +380,26 @@ $("zoom").addEventListener("input", (e) => {
 });
 $("isolate").addEventListener("change", (e) => {
   state.dim = e.target.checked;
+  renderDisplayControls();
   draw();
   saveWorkspace();
+});
+$("soloPart").addEventListener("change", (e) => {
+  state.soloPart = e.target.checked;
+  renderDisplayControls();
+  draw();
+  saveWorkspace();
+});
+$("contextOpacity").addEventListener("input", (e) => {
+  state.contextOpacity = +e.target.value;
+  renderDisplayControls();
+  draw();
+  saveWorkspace();
+});
+$("partSeparation").addEventListener("input", (e) => {
+  state.partSeparation = +e.target.value;
+  renderDisplayControls();
+  draw();
 });
 $("labels").addEventListener("change", (e) => {
   state.labels = e.target.checked;
@@ -331,17 +408,45 @@ $("labels").addEventListener("change", (e) => {
 });
 
 function makeQuestion() {
-  const question = createQuestion(visibleDefs());
+  const pool = quizCandidates(visibleDefs()).filter(
+    (d) =>
+      $("quizScope").value !== "unlearned" ||
+      !state.learned[state.vertebra + ":" + d.id],
+  );
+  let remaining = pool.filter((d) => !seenQuestions.has(d.id));
+  if (!remaining.length && pool.length) {
+    resetCycle();
+    remaining = pool;
+  }
+  const question = createQuestion(
+    visibleDefs(),
+    Math.random,
+    remaining.map((d) => d.id),
+  );
+  if (question) seenQuestions.add(question.target.id);
+  $("quizCycle").textContent = pool.length
+    ? `ციკლი: ${seenQuestions.size} / ${pool.length} · თითო ნაწილი ერთხელ`
+    : "ამ არჩევანში უსწავლელი საგამოცდო ნაწილი აღარ არის.";
   state.question = question?.target || null;
   state.answered = false;
   state.selected = "all";
+  state.partSeparation = 0;
+  tooltip("");
+  renderDetails();
   $("quizChoices").replaceChildren();
   if (!question) {
-    $("quizQuestion").textContent = "აირჩიე სხვა მალა ტესტისთვის";
+    $("quizQuestion").textContent = "აირჩიე ყველა ნაწილი ან სხვა მალა";
+    $("quizFeedback").textContent = "";
+    delete $("quizQuestion").dataset.part;
+    $("next").disabled = true;
+    $("reveal").disabled = true;
     draw();
     return;
   }
+  $("next").disabled = false;
+  $("reveal").disabled = false;
   $("quizQuestion").textContent = "მოძებნე: " + question.target.latin;
+  $("quizQuestion").dataset.part = question.target.id;
   for (const d of question.choices) {
     const b = document.createElement("button");
     b.textContent = d.ka;
@@ -360,6 +465,9 @@ function grade(id, owner) {
     (result ? "✓ სწორია! " : "✗ სწორი პასუხია: " + state.question.ka + ". ") +
     state.question.info;
   renderProgress();
+  state.selected = state.question.id;
+  renderDetails();
+  draw();
 }
 $("tabStudy").onclick = () => {
   state.mode = "study";
@@ -368,11 +476,16 @@ $("tabStudy").onclick = () => {
   draw();
 };
 $("tabQuiz").onclick = () => {
+  resetCycle();
   state.mode = "quiz";
   updatePanel();
   makeQuestion();
 };
 $("next").onclick = makeQuestion;
+$("quizScope").onchange = () => {
+  resetCycle();
+  makeQuestion();
+};
 $("reveal").onclick = () => {
   if (!state.question) return;
   $("quizFeedback").textContent =
@@ -382,6 +495,9 @@ $("reveal").onclick = () => {
     ". " +
     state.question.info;
   state.answered = true;
+  state.selected = state.question.id;
+  renderDetails();
+  draw();
 };
 $("learnedBtn").onclick = () => {
   if (state.selected === "all") return;
@@ -418,6 +534,7 @@ $("importProgress").addEventListener("change", async (e) => {
     )
       return;
     Object.assign(state, createState(), restored);
+    resetCycle();
     $("vertebra").value = state.vertebra;
     $("search").value = "";
     $("explode").value = 0;
@@ -436,8 +553,10 @@ $("clearProgress").onclick = () => {
   if (confirm("ნამდვილად გინდა სასწავლო პროგრესის განულება?")) {
     state.progress = { correct: 0, total: 0 };
     state.learned = {};
+    resetCycle();
     renderProgress();
     renderDetails();
+    renderPartList();
     saveWorkspace();
   }
 };
@@ -450,6 +569,7 @@ window.addEventListener("storage", (event) => {
       createState(),
       parseBackup(JSON.parse(event.newValue)),
     );
+    resetCycle();
     $("vertebra").value = state.vertebra;
     $("search").value = "";
     $("explode").value = 0;

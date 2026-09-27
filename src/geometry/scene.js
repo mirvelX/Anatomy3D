@@ -148,6 +148,12 @@ export function createScene(state) {
           0.21,
           0.045,
         );
+        if (id === "C6")
+          emit(
+            owner,
+            "carotidTubercle",
+            ellipsoid([s * (px + 0.62), 0.06, 0.15], [0.13, 0.18, 0.13]),
+          );
       } else
         emit(
           owner,
@@ -205,7 +211,7 @@ export function createScene(state) {
             ellipsoid([s * (px + 0.86), 0.08, 0.69], [0.07, 0.11, 0.12]),
           );
       }
-      if (l)
+      if (l) {
         emit(
           owner,
           "mammillary",
@@ -216,6 +222,17 @@ export function createScene(state) {
             0.065,
           ),
         );
+        emit(
+          owner,
+          "accessory",
+          tube(
+            [s * (px + 0.18), -0.02, 0.68],
+            [s * (px + 0.23), -0.06, 0.94],
+            0.085,
+            0.06,
+          ),
+        );
+      }
     }
     if (c && n < 7) {
       emit(
@@ -265,6 +282,16 @@ export function createScene(state) {
         tube([0, by * 0.73, -0.63], [0, 0.99, -0.63], 0.21, 0.14, 16),
       );
       emit(owner, "dens", ellipsoid([0, 1.005, -0.63], [0.14, 0.14, 0.14]));
+      emit(
+        owner,
+        "densAnterior",
+        ellipsoid([0, 0.76, -0.797], [0.105, 0.15, 0.025]),
+      );
+      emit(
+        owner,
+        "densPosterior",
+        ellipsoid([0, 0.73, -0.457], [0.1, 0.12, 0.025]),
+      );
     }
   }
   function atlas(owner) {

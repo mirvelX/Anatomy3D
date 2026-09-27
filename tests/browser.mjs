@@ -11,6 +11,7 @@ const { server, url } = await serve(() => root);
 const browser = await chromium.launch({
   headless: true,
   channel: process.env.BROWSER_CHANNEL || undefined,
+  executablePath: process.env.BROWSER_EXECUTABLE || undefined,
 });
 const errors = [];
 const ready = (page) =>
@@ -21,7 +22,7 @@ const controlled = (page) =>
   page.waitForFunction(() => !!navigator.serviceWorker.controller);
 const workspace = (page) =>
   page.evaluate(() =>
-    JSON.parse(localStorage.getItem("anatomy3d_workspace_v9")),
+    JSON.parse(localStorage.getItem("anatomy3d_workspace_v10")),
   );
 let checks = 0;
 const pass = (label) => {
@@ -80,6 +81,72 @@ try {
   await ready(page);
   assert.equal((await workspace(page)).learned["L5:body"], true);
   pass("26 selectors and learned-state reload");
+  await page.locator("#vertebra").selectOption("C6");
+  await page
+    .locator("#parts button")
+    .filter({ hasText: "Tuberculum caroticum" })
+    .click();
+  assert.match(
+    await page.locator("#sourceInfo a").getAttribute("href"),
+    /#page=33$/,
+  );
+  await page.locator("#contextOpacity").evaluate((el) => {
+    el.value = "35";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await page.reload();
+  await ready(page);
+  assert.equal(await page.locator("#contextOpacity").inputValue(), "35");
+  await page.locator("#soloPart").check();
+  const joinedImage = await page.locator("#gl").screenshot();
+  await page.locator("#partSeparation").evaluate((el) => {
+    el.value = "80";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const separatedImage = await page.locator("#gl").screenshot();
+  assert.notDeepEqual(joinedImage, separatedImage);
+  await page.locator("#learnedBtn").click();
+  await page
+    .locator("#parts button")
+    .filter({ hasText: "Foramen vertebrale" })
+    .click();
+  assert.ok(await page.locator("#partSeparation").isDisabled());
+  assert.ok(
+    await page.evaluate(() => {
+      const c = document.querySelector("#gl"),
+        gl = c.getContext("webgl");
+      const pixels = new Uint8Array(c.width * c.height * 4);
+      gl.readPixels(0, 0, c.width, c.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      return pixels.some((v, i) => i % 4 === 0 && v > 100);
+    }),
+    "isolated foramen guide must render",
+  );
+  pass("book source, persistent opacity, separation and isolated space guide");
+  await page.locator("#soloPart").uncheck();
+  await page.locator("#tabQuiz").click();
+  await page.locator("#quizScope").selectOption("unlearned");
+  const cycleTargets = new Set();
+  for (let i = 0; i < 5; i++) {
+    const target = await page
+      .locator("#quizQuestion")
+      .getAttribute("data-part");
+    assert.notEqual(target, "carotidTubercle");
+    assert.equal(cycleTargets.has(target), false);
+    cycleTargets.add(target);
+    await page.locator("#next").click();
+  }
+  const beforeReveal = (await workspace(page)).progress;
+  const targetLabel = (
+    await page.locator("#quizQuestion").textContent()
+  ).replace("მოძებნე: ", "");
+  await page.locator("#reveal").click();
+  assert.equal(await page.locator("#detailLatin").textContent(), targetLabel);
+  assert.deepEqual((await workspace(page)).progress, beforeReveal);
+  await page.locator("#quizScope").selectOption("all");
+  await page.locator("#tabStudy").click();
+  pass(
+    "unlearned practice cycle excludes learned parts and reveal is unscored",
+  );
   await page.locator("#tabQuiz").click();
   await page.locator("#quizChoices button").first().click();
   const score = (await workspace(page)).progress.total;
@@ -91,7 +158,7 @@ try {
   await page.locator("#exportProgress").click();
   const download = await downloadPromise;
   const backup = JSON.parse(await readFile(await download.path(), "utf8"));
-  assert.equal(backup.schemaVersion, 9);
+  assert.equal(backup.schemaVersion, 10);
   assert.equal(backup.learned["L5:body"], true);
   const before = await workspace(page);
   page.once("dialog", (dialog) => dialog.dismiss());
@@ -149,6 +216,54 @@ try {
   pass("mobile has no horizontal overflow");
   await context.close();
 
+  const v9Context = await browser.newContext();
+  const v9Page = await v9Context.newPage();
+  v9Page.on("pageerror", (e) => errors.push(e.message));
+  await v9Page.addInitScript(() => {
+    if (!localStorage.getItem("anatomy3d_workspace_v9"))
+      localStorage.setItem(
+        "anatomy3d_workspace_v9",
+        JSON.stringify({
+          app: "Anatomy 3D",
+          version: "9.0",
+          schemaVersion: 9,
+          workspace: {
+            vertebra: "C2",
+            assembly: "both",
+            selected: "dens",
+            dim: true,
+            labels: true,
+          },
+          learned: { "C2:dens": true },
+          progress: { correct: 5, total: 8 },
+        }),
+      );
+  });
+  await v9Page.goto(url);
+  await ready(v9Page);
+  await controlled(v9Page);
+  assert.equal(await v9Page.locator("#vertebra").inputValue(), "C2");
+  const originalV9 = await v9Page.evaluate(() =>
+    localStorage.getItem("anatomy3d_workspace_v9"),
+  );
+  await v9Page
+    .locator("#parts button")
+    .filter({ hasText: "Facies articularis posterior dentis" })
+    .click();
+  await v9Page.locator("#learnedBtn").click();
+  await v9Page.reload();
+  await ready(v9Page);
+  assert.equal((await workspace(v9Page)).learned["C2:densPosterior"], true);
+  assert.equal((await workspace(v9Page)).progress.total, 8);
+  assert.equal(
+    await v9Page.evaluate(() => localStorage.getItem("anatomy3d_workspace_v9")),
+    originalV9,
+  );
+  pass(
+    "v9 progress migration preserves original and new structure after reload",
+  );
+  await v9Context.close();
+
   const fallback = await browser.newContext();
   const canvasPage = await fallback.newPage();
   canvasPage.on("pageerror", (e) => errors.push(e.message));
@@ -157,11 +272,31 @@ try {
   assert.match(await canvasPage.locator(".stage-help").textContent(), /Canvas/);
   for (const id of ["C1", "C2", "T12", "L5", "SAC", "COC"])
     await canvasPage.locator("#vertebra").selectOption(id);
+  await canvasPage.locator("#vertebra").selectOption("C6");
+  await canvasPage
+    .locator("#parts button")
+    .filter({ hasText: "Tuberculum caroticum" })
+    .click();
+  await canvasPage.locator("#soloPart").check();
+  const canvasBefore = await canvasPage.locator("#gl").screenshot();
+  await canvasPage.locator("#partSeparation").evaluate((el) => {
+    el.value = "100";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  assert.notDeepEqual(
+    await canvasPage.locator("#gl").screenshot(),
+    canvasBefore,
+  );
+  await canvasPage
+    .locator("#parts button")
+    .filter({ hasText: "Foramen vertebrale" })
+    .click();
+  assert.ok(await canvasPage.locator("#partSeparation").isDisabled());
   await canvasPage.screenshot({
     path: "test-results/canvas.png",
     fullPage: true,
   });
-  pass("Canvas fallback");
+  pass("Canvas fallback including isolation and part separation");
   await fallback.close();
 
   const blocked = await browser.newContext();
@@ -215,9 +350,9 @@ try {
   );
   await old.reload();
   await ready(old);
-  assert.match(await old.locator(".brand p").textContent(), /v9.0/);
+  assert.match(await old.locator(".brand p").textContent(), /v10.0 alpha/);
   assert.equal((await workspace(old)).learned["L5:body"], true);
-  pass("real v8 worker to v9 migration");
+  pass("real v8 worker to v10 migration");
 
   const freshContext = await browser.newContext();
   const fresh = await freshContext.newPage();
@@ -237,7 +372,7 @@ try {
   const nextHtml = await readFile(resolve(next, "index.html"), "utf8");
   await writeFile(
     resolve(next, "index.html"),
-    nextHtml.replace("v9.0", "v9.0 test"),
+    nextHtml.replace("v10.0 alpha", "v10.0 alpha test"),
   );
   root = next;
   await fresh.evaluate(
@@ -247,7 +382,9 @@ try {
   await fresh.locator("#updateNotice").waitFor({ state: "visible" });
   await fresh.locator("#applyUpdate").click();
   await fresh.waitForFunction(() =>
-    document.querySelector(".brand p")?.textContent.includes("v9.0 test"),
+    document
+      .querySelector(".brand p")
+      ?.textContent.includes("v10.0 alpha test"),
   );
   await ready(fresh);
   pass("first-install tab reloads after accepting a later update");
@@ -259,7 +396,9 @@ try {
   assert.doesNotMatch(await old.locator(".brand p").textContent(), /test/);
   await old.locator("#applyUpdate").click();
   await old.waitForFunction(() =>
-    document.querySelector(".brand p")?.textContent.includes("v9.0 test"),
+    document
+      .querySelector(".brand p")
+      ?.textContent.includes("v10.0 alpha test"),
   );
   await ready(old);
   assert.equal((await workspace(old)).learned["L5:body"], true);
@@ -278,7 +417,7 @@ try {
   await old.locator("#offlineStatus").waitFor({ state: "visible" });
   await old.reload();
   await ready(old);
-  assert.match(await old.locator(".brand p").textContent(), /v9.0 test/);
+  assert.match(await old.locator(".brand p").textContent(), /v10.0 alpha test/);
   assert.equal((await workspace(old)).learned["L5:body"], true);
   pass("failed update keeps working release");
   await upgrade.close();

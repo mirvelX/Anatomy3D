@@ -1,4 +1,12 @@
 import { add, sub, mul, dot, cross, norm } from "../geometry/math.js";
+import {
+  activePart,
+  visiblePart,
+  opacityFor,
+  separationOffset,
+  guideParts,
+  hasSelection,
+} from "./visibility.js";
 export function createRenderer(state, scene) {
   const $ = (id) => document.getElementById(id);
   const gl = new URLSearchParams(location.search).has("canvas")
@@ -146,7 +154,7 @@ export function createRenderer(state, scene) {
       });
     }
   }
-  function modelFor(owner) {
+  function modelFor(owner, part) {
     const p = scene.poses.find((x) => x.owner === owner),
       cy = p?.y || 0;
     let m = translate(0, cy, 0);
@@ -164,7 +172,7 @@ export function createRenderer(state, scene) {
       );
       m = matMul(m, turn);
     }
-    return m;
+    return matMul(m, translate(...separationOffset(state, { owner, part })));
   }
   function cameraMats() {
     const width = $("gl").width,
@@ -187,21 +195,7 @@ export function createRenderer(state, scene) {
       ),
     };
   }
-  function isActive(m) {
-    if (state.selected === "all" || state.mode === "quiz") return false;
-    const f = state.selected;
-    if (
-      f === "disc" ||
-      f === "facetLink" ||
-      f === "interforamen" ||
-      f === "ligament"
-    )
-      return m.owner === "link" && m.part === f;
-    if (m.owner !== "target") return false;
-    if (f === "arch") return ["pedicle", "lamina"].includes(m.part);
-    if (f === "foramen" || f === "canal") return false;
-    return f === m.part;
-  }
+  const isActive = (m) => activePart(state, m);
   function colorFor(m) {
     if (isActive(m)) return [1, 0.84, 0.4];
     if (m.part === "disc") return [0.76, 0.66, 0.96];
@@ -218,35 +212,10 @@ export function createRenderer(state, scene) {
     if (m.owner === "target") return [0.96, 0.79, 0.61];
     return [0.5, 0.76, 0.9];
   }
-  function isGuide(m) {
-    return [
-      "foramen",
-      "canal",
-      "incSup",
-      "incInf",
-      "atlasForamen",
-      "transForamen",
-      "atlasTransForamen",
-      "sacForamina",
-      "sacCanal",
-      "interforamen",
-    ].includes(m.part);
-  }
-  function meshVisible(m) {
-    const f = state.selected;
-    if (m.part === "interforamen" && state.mode === "quiz") return false;
-    if (m.part === "interforamen" && f !== "interforamen") return false;
-    if (
-      ["incSup", "incInf", "foramen", "canal", "atlasForamen"].includes(
-        m.part,
-      ) &&
-      f !== m.part
-    )
-      return false;
-    return true;
-  }
+  const isGuide = (m) => guideParts.has(m.part);
+  const meshVisible = (m) => visiblePart(state, m);
   function drawMesh(m, vp, picking = false, alpha = 1) {
-    const model = modelFor(m.owner),
+    const model = modelFor(m.owner, m.part),
       mvp = matMul(vp, model);
     gl.uniformMatrix4fv(u.mvp, false, mvp);
     gl.uniformMatrix4fv(u.model, false, model);
@@ -294,12 +263,12 @@ export function createRenderer(state, scene) {
       others = meshes.filter((m) => meshVisible(m) && !isActive(m));
     // Render transparent inactive parts without depth writes, then active parts in front.
     const faded =
-      state.selected !== "all" && state.mode !== "quiz" && state.dim;
+      hasSelection(state) && state.dim && state.contextOpacity < 100;
     if (faded) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.depthMask(false);
-      for (const m of others) drawMesh(m, vp, false, 0.12);
+      for (const m of others) drawMesh(m, vp, false, opacityFor(state, m));
       gl.depthMask(true);
       gl.disable(gl.BLEND);
       gl.clear(gl.DEPTH_BUFFER_BIT);
@@ -308,9 +277,9 @@ export function createRenderer(state, scene) {
   }
 
   // Offline Canvas software renderer: preserves orbit, highlights and geometry picking when WebGL is disabled.
-  function softwareTransform(point, owner) {
+  function softwareTransform(point, owner, part) {
     const pose = scene.poses.find((p) => p.owner === owner);
-    let [x, y, z] = point;
+    let [x, y, z] = add(point, separationOffset(state, { owner, part }));
     if (
       pose?.id === "C1" &&
       scene.poses.some((p) => p.id === "C2") &&
@@ -389,7 +358,7 @@ export function createRenderer(state, scene) {
                 ? [240, 207, 164]
                 : [141, 194, 225];
       for (const tri of tris) {
-        const pts = tri.map((v) => softwareTransform(v, owner)),
+        const pts = tri.map((v) => softwareTransform(v, owner, part)),
           p = pts.map(projectFallback),
           normal = norm(cross(sub(pts[1], pts[0]), sub(pts[2], pts[0]))),
           light = 0.47 + 0.51 * Math.abs(dot(normal, norm([-0.45, 0.8, 1]))),
@@ -407,7 +376,12 @@ export function createRenderer(state, scene) {
       }
     }
     all.sort((a, b) => a.depth - b.depth);
-    fallbackFaces = all.slice().reverse();
+    fallbackFaces = all
+      .slice()
+      .reverse()
+      .filter((m) => opacityFor(state, m) > 0);
+    if (hasSelection(state) && state.dim && state.contextOpacity < 100)
+      fallbackFaces.sort((a, b) => Number(b.highlight) - Number(a.highlight));
     function paint(t) {
       const v = t.p,
         c = t.rgb;
@@ -416,10 +390,10 @@ export function createRenderer(state, scene) {
       ctx2d.lineTo(v[1].x, v[1].y);
       ctx2d.lineTo(v[2].x, v[2].y);
       ctx2d.closePath();
-      ctx2d.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${state.selected !== "all" && state.mode !== "quiz" && state.dim && !t.highlight ? 0.14 : 1})`;
+      ctx2d.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${opacityFor(state, t)})`;
       ctx2d.fill();
     }
-    if (state.selected !== "all" && state.mode !== "quiz" && state.dim) {
+    if (hasSelection(state) && state.dim && state.contextOpacity < 100) {
       all.filter((p) => !p.highlight).forEach(paint);
       all.filter((p) => p.highlight).forEach(paint);
     } else all.forEach(paint);
@@ -511,8 +485,20 @@ export function createRenderer(state, scene) {
     gl.disable(gl.BLEND);
     gl.depthMask(true);
     for (const m of meshes) {
-      if (!meshVisible(m)) continue;
+      if (!meshVisible(m) || opacityFor(state, m) === 0) continue;
+      if (
+        hasSelection(state) &&
+        state.dim &&
+        state.contextOpacity < 100 &&
+        isActive(m)
+      )
+        continue;
       drawMesh(m, vp, true);
+    }
+    if (hasSelection(state) && state.dim && state.contextOpacity < 100) {
+      gl.clear(gl.DEPTH_BUFFER_BIT);
+      for (const m of meshes)
+        if (meshVisible(m) && isActive(m)) drawMesh(m, vp, true);
     }
     const pixel = new Uint8Array(4);
     gl.readPixels(px, py, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);

@@ -91,4 +91,5 @@ test("practice targets can exclude learned/seen structures while retaining distr
   assert.equal(q.choices.length, 4);
   assert.equal(createQuestion(defs, Math.random, []), null);
   assert.equal(createQuestion(defs, Math.random, ["sacBase"]), null);
+  assert.equal(createQuestion(defs, Math.random, ["transForamen"]), null);
 });

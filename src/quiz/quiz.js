@@ -10,6 +10,7 @@ export function quizCandidates(defs) {
   return defs.filter(
     (d) =>
       d.id !== "all" &&
+      d.id !== "transForamen" &&
       ![
         "normal-space",
         "typical-space",

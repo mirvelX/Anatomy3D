@@ -1,0 +1,290 @@
+import { chromium } from "playwright";
+import assert from "node:assert/strict";
+import { resolve } from "node:path";
+import { readFile, writeFile, mkdir, cp } from "node:fs/promises";
+import { build } from "../scripts/build.mjs";
+import { serve } from "../scripts/serve.mjs";
+import { ids } from "../src/data/anatomy.js";
+const result = await build();
+let root = result.out;
+const { server, url } = await serve(() => root);
+const browser = await chromium.launch({
+  headless: true,
+  channel: process.env.BROWSER_CHANNEL || undefined,
+});
+const errors = [];
+const ready = (page) =>
+  page.waitForFunction(
+    () => document.querySelector("#vertebra")?.options.length === 26,
+  );
+const controlled = (page) =>
+  page.waitForFunction(() => !!navigator.serviceWorker.controller);
+const workspace = (page) =>
+  page.evaluate(() =>
+    JSON.parse(localStorage.getItem("anatomy3d_workspace_v9")),
+  );
+let checks = 0;
+const pass = (label) => {
+  checks++;
+  console.log("PASS " + label);
+};
+async function eventually(check) {
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    if (await check()) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw Error("Timed out waiting for service worker transition");
+}
+try {
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 950 },
+  });
+  const page = await context.newPage();
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "anatomy3d_workspace_v8",
+      JSON.stringify({
+        vertebra: "C1",
+        assembly: "both",
+        selected: "antArch",
+        progress: { correct: 2, total: 3 },
+        learned: { "C1:antArch": true },
+      }),
+    ),
+  );
+  await page.goto(url);
+  await ready(page);
+  await controlled(page);
+  assert.equal(
+    await page.evaluate(
+      () => !!document.querySelector("#gl").getContext("webgl"),
+    ),
+    true,
+  );
+  assert.equal(await page.locator("#vertebra").inputValue(), "C1");
+  assert.equal((await workspace(page)).progress.total, 3);
+  pass("v8 progress migration");
+  for (const id of ids) {
+    await page.locator("#vertebra").selectOption(id);
+    assert.ok((await page.locator("#parts button").count()) > 1);
+  }
+  await page.locator("#vertebra").selectOption("L5");
+  await page
+    .locator("#parts button")
+    .filter({ hasText: "Corpus vertebrae" })
+    .click();
+  await page.locator("#learnedBtn").click();
+  await page.reload();
+  await ready(page);
+  assert.equal((await workspace(page)).learned["L5:body"], true);
+  pass("26 selectors and learned-state reload");
+  await page.locator("#tabQuiz").click();
+  await page.locator("#quizChoices button").first().click();
+  const score = (await workspace(page)).progress.total;
+  await page.locator("#quizChoices button").first().click();
+  assert.equal((await workspace(page)).progress.total, score);
+  pass("quiz scores once");
+  await page.locator("#tabStudy").click();
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#exportProgress").click();
+  const download = await downloadPromise;
+  const backup = JSON.parse(await readFile(await download.path(), "utf8"));
+  assert.equal(backup.schemaVersion, 9);
+  assert.equal(backup.learned["L5:body"], true);
+  const before = await workspace(page);
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.locator("#importProgress").setInputFiles({
+    name: "invalid.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify({ ...backup, progress: { correct: -5, total: 0 } }),
+    ),
+  });
+  await page.waitForFunction(
+    () => document.querySelector("#importProgress").value === "",
+  );
+  assert.deepEqual((await workspace(page)).progress, before.progress);
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.locator("#importProgress").setInputFiles({
+    name: "backup.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
+  await page.waitForFunction(
+    () => document.querySelector("#importProgress").value === "",
+  );
+  pass("backup export/import and rejected invalid score");
+  const sibling = await context.newPage();
+  await sibling.goto(url);
+  await ready(sibling);
+  await page.locator("#vertebra").selectOption("C2");
+  await sibling.waitForFunction(
+    () => document.querySelector("#vertebra").value === "C2",
+  );
+  assert.deepEqual(
+    (await workspace(sibling)).progress,
+    (await workspace(page)).progress,
+  );
+  await sibling.close();
+  pass("open tabs synchronize saved progress");
+  await context.setOffline(true);
+  await page.reload();
+  await ready(page);
+  await page.locator("#vertebra").selectOption("C2");
+  assert.ok(await page.locator("#parts button").count());
+  await context.setOffline(false);
+  pass("offline reload with full modules");
+  await mkdir("test-results", { recursive: true });
+  await page.screenshot({ path: "test-results/desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "test-results/mobile.png", fullPage: true });
+  assert.equal(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+    true,
+  );
+  pass("mobile has no horizontal overflow");
+  await context.close();
+
+  const fallback = await browser.newContext();
+  const canvasPage = await fallback.newPage();
+  canvasPage.on("pageerror", (e) => errors.push(e.message));
+  await canvasPage.goto(url + "/?canvas=1");
+  await ready(canvasPage);
+  assert.match(await canvasPage.locator(".stage-help").textContent(), /Canvas/);
+  for (const id of ["C1", "C2", "T12", "L5", "SAC", "COC"])
+    await canvasPage.locator("#vertebra").selectOption(id);
+  await canvasPage.screenshot({
+    path: "test-results/canvas.png",
+    fullPage: true,
+  });
+  pass("Canvas fallback");
+  await fallback.close();
+
+  const blocked = await browser.newContext();
+  const denied = await blocked.newPage();
+  denied.on("pageerror", (e) => errors.push(e.message));
+  await denied.addInitScript(() =>
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new DOMException("blocked", "SecurityError");
+      },
+    }),
+  );
+  await denied.goto(url);
+  await ready(denied);
+  assert.equal(await denied.locator("#storageStatus").isVisible(), true);
+  await denied.locator("#vertebra").selectOption("C1");
+  pass("storage unavailable remains usable");
+  await blocked.close();
+
+  const upgrade = await browser.newContext();
+  const old = await upgrade.newPage();
+  old.on("pageerror", (e) => errors.push(e.message));
+  root = resolve("tests/fixtures/v8");
+  await old.goto(url);
+  await ready(old);
+  await controlled(old);
+  await old
+    .locator("#parts button")
+    .filter({ hasText: "Corpus vertebrae" })
+    .click();
+  await old.locator("#learnedBtn").click();
+  root = result.out;
+  await old.evaluate(async () => {
+    window.__oldController = navigator.serviceWorker.controller;
+    const r = await navigator.serviceWorker.getRegistration();
+    await r.update();
+  });
+  await eventually(() =>
+    old.evaluate(async () => {
+      const registration = await navigator.serviceWorker.getRegistration();
+      const keys = await caches.keys();
+      return (
+        registration.active !== window.__oldController &&
+        !registration.installing &&
+        !registration.waiting &&
+        registration.active?.state === "activated" &&
+        registration.active === navigator.serviceWorker.controller &&
+        keys.some((key) => key.startsWith("anatomy3d-v9-"))
+      );
+    }),
+  );
+  await old.reload();
+  await ready(old);
+  assert.match(await old.locator(".brand p").textContent(), /v9.0/);
+  assert.equal((await workspace(old)).learned["L5:body"], true);
+  pass("real v8 worker to v9 migration");
+
+  const freshContext = await browser.newContext();
+  const fresh = await freshContext.newPage();
+  fresh.on("pageerror", (e) => errors.push(e.message));
+  await fresh.goto(url);
+  await ready(fresh);
+  await controlled(fresh);
+
+  // Simulate a subsequent complete release using a distinct cache ID.
+  const next = resolve("test-results/next");
+  await cp(result.out, next, { recursive: true });
+  const worker = await readFile(resolve(next, "sw.js"), "utf8");
+  await writeFile(
+    resolve(next, "sw.js"),
+    worker.replace(result.release, result.release + "-test"),
+  );
+  const nextHtml = await readFile(resolve(next, "index.html"), "utf8");
+  await writeFile(
+    resolve(next, "index.html"),
+    nextHtml.replace("v9.0", "v9.0 test"),
+  );
+  root = next;
+  await fresh.evaluate(
+    async () =>
+      await (await navigator.serviceWorker.getRegistration()).update(),
+  );
+  await fresh.locator("#updateNotice").waitFor({ state: "visible" });
+  await fresh.locator("#applyUpdate").click();
+  await fresh.waitForFunction(() =>
+    document.querySelector(".brand p")?.textContent.includes("v9.0 test"),
+  );
+  await ready(fresh);
+  pass("first-install tab reloads after accepting a later update");
+  await freshContext.close();
+  await old.evaluate(async () => {
+    await (await navigator.serviceWorker.getRegistration()).update();
+  });
+  await old.locator("#updateNotice").waitFor({ state: "visible" });
+  assert.doesNotMatch(await old.locator(".brand p").textContent(), /test/);
+  await old.locator("#applyUpdate").click();
+  await old.waitForFunction(() =>
+    document.querySelector(".brand p")?.textContent.includes("v9.0 test"),
+  );
+  await ready(old);
+  assert.equal((await workspace(old)).learned["L5:body"], true);
+  pass("subsequent release waits for acceptance and preserves progress");
+
+  const bad = resolve("test-results/incomplete");
+  await cp(next, bad, { recursive: true });
+  const badWorker = (await readFile(resolve(bad, "sw.js"), "utf8"))
+    .replace(result.release + "-test", result.release + "-bad")
+    .replace("./index.html", "./missing-required.html");
+  await writeFile(resolve(bad, "sw.js"), badWorker);
+  root = bad;
+  await old.evaluate(async () => {
+    await (await navigator.serviceWorker.getRegistration()).update();
+  });
+  await old.locator("#offlineStatus").waitFor({ state: "visible" });
+  await old.reload();
+  await ready(old);
+  assert.match(await old.locator(".brand p").textContent(), /v9.0 test/);
+  assert.equal((await workspace(old)).learned["L5:body"], true);
+  pass("failed update keeps working release");
+  await upgrade.close();
+  assert.deepEqual(errors, [], "Uncaught browser errors");
+  console.log(`${checks} browser scenarios passed; no uncaught page errors.`);
+} finally {
+  await browser.close();
+  server.close();
+}

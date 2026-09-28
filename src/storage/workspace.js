@@ -1,7 +1,8 @@
 import { ids, byId } from "../data/anatomy.js";
 import { visibleDefs } from "../data/rules.js";
 
-export const WORKSPACE_KEY = "anatomy3d_workspace_v9";
+export const WORKSPACE_KEY = "anatomy3d_workspace_v10";
+export const PREVIOUS_KEY = "anatomy3d_workspace_v9";
 export const LEGACY_KEY = "anatomy3d_workspace_v8";
 const SCORE_KEY = "vertebraAtlasV7";
 export function createState() {
@@ -10,6 +11,9 @@ export function createState() {
     assembly: "below",
     selected: "all",
     dim: true,
+    contextOpacity: 12,
+    soloPart: false,
+    partSeparation: 0,
     explode: 0,
     rotation: 0,
     zoom: 1,
@@ -40,6 +44,13 @@ function normalizeWorkspace(value = {}) {
   if (result.vertebra === "COC" && ["below", "both"].includes(result.assembly))
     result.assembly = "above";
   if (typeof value.dim === "boolean") result.dim = value.dim;
+  if (typeof value.soloPart === "boolean") result.soloPart = value.soloPart;
+  if (
+    Number.isFinite(value.contextOpacity) &&
+    value.contextOpacity >= 0 &&
+    value.contextOpacity <= 100
+  )
+    result.contextOpacity = value.contextOpacity;
   if (typeof value.labels === "boolean") result.labels = value.labels;
   if (visibleDefs(result).some((d) => d.id === value.selected))
     result.selected = value.selected;
@@ -76,14 +87,16 @@ function learnedEntries(value, strict) {
 export function makeBackup(state) {
   return {
     app: "Anatomy 3D",
-    version: "9.0",
-    schemaVersion: 9,
+    version: "10.0.0-alpha.1",
+    schemaVersion: 10,
     exported_at: new Date().toISOString(),
     workspace: {
       vertebra: state.vertebra,
       assembly: state.assembly,
       selected: state.selected,
       dim: state.dim,
+      contextOpacity: state.contextOpacity,
+      soloPart: state.soloPart,
       labels: state.labels,
     },
     learned: state.learned,
@@ -97,7 +110,7 @@ export function parseBackup(data) {
     !validProgress(data.progress)
   )
     throw Error("Invalid backup");
-  if (data.schemaVersion !== undefined && data.schemaVersion !== 9)
+  if (data.schemaVersion !== undefined && ![9, 10].includes(data.schemaVersion))
     throw Error("Unsupported schema");
   if (data.schemaVersion === undefined && data.version !== "8.0")
     throw Error("Unsupported legacy backup");
@@ -120,6 +133,16 @@ export function loadWorkspace(getStorage, report = () => {}) {
         storage.setItem(WORKSPACE_KEY + "_recovery_" + Date.now(), current);
         report(
           "შენახული მონაცემები დაზიანებულია. ძველი ასლით აღდგენას ვცდილობთ; დაზიანებული ასლი შენარჩუნებულია.",
+        );
+      }
+    }
+    const previous = storage.getItem(PREVIOUS_KEY);
+    if (previous !== null) {
+      try {
+        return parseBackup(JSON.parse(previous));
+      } catch {
+        report(
+          "v9-ის პროგრესის წაკითხვა ვერ მოხერხდა; მისი ორიგინალი შენარჩუნებულია.",
         );
       }
     }

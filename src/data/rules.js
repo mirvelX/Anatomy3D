@@ -35,6 +35,8 @@ function visibleDefs(state) {
         );
       case "cervical":
         return id.startsWith("C") && !atlas;
+      case "c6":
+        return id === "C6";
       case "thoracic-typical":
         return id.startsWith("T") && +id.slice(1) <= 9;
       case "thoracic-last":

@@ -556,3 +556,39 @@ input[type="range"] {
 .status-banner button {
   margin-left: 12px;
 }
+
+.control-note,
+.source-info {
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: #adc4d4;
+}
+.source-info a,
+#levelSource {
+  color: #8ee1ef;
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+}
+#levelNote {
+  line-height: 1.75;
+  font-size: 0.86rem;
+}
+#levelProgress {
+  width: 100%;
+  accent-color: #58c4bd;
+  margin: 8px 0 16px;
+}
+.part-btn.is-learned .dot {
+  background: #58c4bd;
+  box-shadow: 0 0 0 2px #58c4bd33;
+}
+input:disabled {
+  opacity: 0.45;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid #8ee1ef;
+  outline-offset: 3px;
+}

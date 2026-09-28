@@ -8,6 +8,7 @@ import {
   parseBackup,
   makeBackup,
   WORKSPACE_KEY,
+  PREVIOUS_KEY,
   LEGACY_KEY,
 } from "../src/storage/workspace.js";
 function memory(initial = {}) {
@@ -70,9 +71,39 @@ test("current and legacy backup round trips; validates before mutation", () => {
   assert.throws(() =>
     parseBackup({ ...backup, progress: { correct: 4, total: 1 } }),
   );
-  assert.throws(() => parseBackup({ ...backup, schemaVersion: 10 }));
+  assert.throws(() => parseBackup({ ...backup, schemaVersion: 999 }));
   assert.throws(() => parseBackup({ ...backup, learned: { "L5:dens": true } }));
   assert.deepEqual(state.progress, { correct: 2, total: 3 });
+});
+
+test("v9 migration retains exact original and v10 additions survive backups", () => {
+  const old = {
+    ...makeBackup(createState()),
+    version: "9.0",
+    schemaVersion: 9,
+    learned: { "C2:dens": true },
+    progress: { correct: 4, total: 7 },
+  };
+  const bytes = JSON.stringify(old);
+  const storage = memory({ [PREVIOUS_KEY]: bytes });
+  const state = loadWorkspace(() => storage);
+  assert.deepEqual(state.progress, old.progress);
+  state.learned["C6:carotidTubercle"] = true;
+  state.learned["L3:accessory"] = true;
+  state.learned["C2:densPosterior"] = true;
+  state.contextOpacity = 27;
+  state.soloPart = true;
+  assert.ok(saveWorkspace(() => storage, state));
+  assert.equal(storage.getItem(PREVIOUS_KEY), bytes);
+  assert.deepEqual(
+    loadWorkspace(() => storage),
+    state,
+  );
+  assert.deepEqual(parseBackup(makeBackup(state)), state);
+  assert.equal(makeBackup(state).schemaVersion, 10);
+  const invalid = makeBackup(state);
+  invalid.workspace.contextOpacity = -20;
+  assert.equal(parseBackup(invalid).contextOpacity, 12);
 });
 test("normalizes unavailable selection and coccyx neighbors", () => {
   const backup = makeBackup(createState());

@@ -8,6 +8,7 @@ const SCORE_KEY = "vertebraAtlasV7";
 export function createState() {
   return {
     vertebra: "L5",
+    meshMode: "schematic",
     assembly: "below",
     selected: "all",
     dim: true,
@@ -39,6 +40,7 @@ export function validProgress(value) {
 function normalizeWorkspace(value = {}) {
   const result = createState();
   if (ids.includes(value.vertebra)) result.vertebra = value.vertebra;
+  if (value.meshMode === "atlas") result.meshMode = "atlas";
   if (["solo", "above", "below", "both"].includes(value.assembly))
     result.assembly = value.assembly;
   if (result.vertebra === "COC" && ["below", "both"].includes(result.assembly))
@@ -87,11 +89,12 @@ function learnedEntries(value, strict) {
 export function makeBackup(state) {
   return {
     app: "Anatomy 3D",
-    version: "10.0.0-alpha.1",
+    version: "10.1.0-alpha.1",
     schemaVersion: 10,
     exported_at: new Date().toISOString(),
     workspace: {
       vertebra: state.vertebra,
+      meshMode: state.meshMode,
       assembly: state.assembly,
       selected: state.selected,
       dim: state.dim,

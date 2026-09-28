@@ -21,6 +21,7 @@ export async function build(out = resolve(root, "dist")) {
   await walk("src");
   await walk("styles");
   await walk("icons");
+  await walk("assets");
   files.push("index.html", "sw.js", "manifest.webmanifest");
   files.sort();
   const hash = createHash("sha256");
@@ -31,7 +32,7 @@ export async function build(out = resolve(root, "dist")) {
   const release = hash.digest("hex").slice(0, 16),
     prefix = "releases/" + release;
   await mkdir(out, { recursive: true });
-  for (const dir of ["src", "styles"])
+  for (const dir of ["src", "styles", "assets"])
     await cp(resolve(root, dir), resolve(out, prefix, dir), {
       recursive: true,
     });
@@ -50,7 +51,7 @@ export async function build(out = resolve(root, "dist")) {
     "./index.html",
     "./manifest.webmanifest",
     ...files
-      .filter((file) => /^(src|styles)[\\/]/.test(file))
+      .filter((file) => /^(src|styles|assets)[\\/]/.test(file))
       .map((file) => "./" + prefix + "/" + file.replaceAll("\\", "/")),
     ...files
       .filter((file) => file.startsWith("icons"))

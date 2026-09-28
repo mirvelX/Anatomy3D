@@ -10,6 +10,8 @@ export function serve(getRoot, port = 0) {
     ".css": "text/css; charset=utf-8",
     ".png": "image/png",
     ".json": "application/json",
+    ".obj": "text/plain; charset=utf-8",
+    ".txt": "text/plain; charset=utf-8",
     ".webmanifest": "application/manifest+json",
   };
   const server = createServer(async (req, res) => {

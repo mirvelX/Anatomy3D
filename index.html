@@ -40,7 +40,7 @@
           <div class="brand-mark" aria-hidden="true">◈</div>
           <div>
             <h1>Anatomy 3D</h1>
-            <p>Vertebral Atlas · v10.0 alpha</p>
+            <p>Vertebral Atlas · v10.1 alpha</p>
           </div>
         </div>
         <section class="section">
@@ -74,6 +74,50 @@
             L5 + Os sacrum
           </div>
         </section>
+        <section class="section pilot-panel">
+          <p class="kicker">ახალი · 3D მოდელების პილოტი</p>
+          <div
+            class="pilot-shortcuts"
+            role="group"
+            aria-label="BodyParts3D პილოტები"
+          >
+            <button data-pilot="C1">C1 · Atlas</button>
+            <button data-pilot="C2">C2 · Axis</button>
+            <button data-pilot="L3">L3</button>
+          </div>
+          <label for="meshMode">მოდელის წყარო</label>
+          <select id="meshMode">
+            <option value="schematic">სქემატური · ყველა ნაწილი</option>
+            <option value="atlas">BodyParts3D · C1 / C2 / L3</option>
+          </select>
+          <p id="meshStatus" role="status"></p>
+          <button id="meshRetry" class="hidden">ხელახლა ჩატვირთვა</button>
+          <p id="meshRegionNote" class="sub"></p>
+          <details id="pilotCredits" class="hidden">
+            <summary>მოდელის წყარო და ლიცენზია</summary>
+            <p>
+              BodyParts3D, © The Database Center for Life Science ·
+              <a
+                href="https://creativecommons.org/licenses/by-sa/2.1/jp/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >CC BY-SA 2.1 Japan</a
+              >.
+            </p>
+            <p>
+              შემცირებული ატლასის ზედაპირი; ფოტოსკანი არ არის. კლინიკური და
+              სეგმენტაციის დამოუკიდებელი შემოწმება არ დასრულებულა.
+            </p>
+            <a id="pilotAsset" download>OBJ</a> ·
+            <a id="pilotManifest" target="_blank" rel="noopener"
+              >ფაილის მონაცემები</a
+            >
+            ·
+            <a id="pilotNotice" target="_blank" rel="noopener"
+              >ლიცენზიის ცნობები</a
+            >
+          </details>
+        </section>
         <section class="section" id="studyList">
           <div class="section-title">
             <p class="kicker">03 · ანატომიური ნაწილები</p>
@@ -94,8 +138,8 @@
           ></div>
         </section>
         <div class="note">
-          სასწავლო პროტოტიპი: გეომეტრიული 3D მოდელები <b>არ არის</b> დამოწმებული
-          სამედიცინო სკანები. მათი ანატომიური გადამოწმება ჯერ არ დასრულებულა.
+          სასწავლო პროტოტიპი: მოდელის წარმომავლობა და მისი ანატომიური დამოწმება
+          განსხვავდება. წიგნის მითითება გეომეტრიის დამოწმებას არ ნიშნავს.
         </div>
       </aside>
       <main class="main">
@@ -126,8 +170,11 @@
             tabindex="0"
           ></canvas>
           <div class="stage-head">
-            <strong id="modelLabel">L5 + გავა</strong><br />360° თავისუფალი
-            დათვალიერება<br /><span style="color: #b1c9d8"
+            <strong id="modelLabel">L5 + გავა</strong><br /><span
+              id="sceneSource"
+            ></span
+            ><br />360° თავისუფალი დათვალიერება<br /><span
+              style="color: #b1c9d8"
               >დააწკაპუნე სტრუქტურას</span
             >
           </div>
@@ -144,6 +191,7 @@
             </div>
             <div class="camera">
               <button data-view="top">ზემოდან</button
+              ><button data-view="bottom">ქვემოდან</button
               ><button data-view="front">წინიდან</button
               ><button data-view="back">უკნიდან</button
               ><button data-view="side">გვერდიდან</button
@@ -273,6 +321,7 @@
           <div class="latin" id="detailLatin">Corpus vertebrae</div>
           <div class="georgian" id="detailKa">მალის სხეული</div>
           <p id="detailText"></p>
+          <p id="regionReview" class="note"></p>
           <p id="bookAlias" class="control-note"></p>
           <p id="sourceInfo" class="source-info"></p>
           <span class="chip" id="detailKind">ძვლოვანი სტრუქტურა</span>

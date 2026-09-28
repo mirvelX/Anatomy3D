@@ -1,0 +1,238 @@
+{
+  "version": 1,
+  "dataset": "BodyParts3D 4.0 / IS-A / obj_99",
+  "retrieved": "2026-09-28",
+  "archiveUrl": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/isa_BP3D_4.0_obj_99.zip",
+  "archiveBytes": 142903898,
+  "license": "CC-BY-SA-2.1-JP",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.1/jp/",
+  "attribution": "BodyParts3D, © The Database Center for Life Science licensed under CC Attribution-Share Alike 2.1 Japan",
+  "licenseDecision": "Use the license embedded in each OBJ. The archive license page was updated to CC BY 4.0 on 2025-02-27; this pilot conservatively retains the asset-level ShareAlike license and notices.",
+  "licenseEvidence": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "units": "mm",
+  "coordinates": "Original shared whole-body coordinates; X lateral, Y posterior, Z superior. No independent bone rescaling or alignment.",
+  "changes": "Original OBJ bytes unchanged. Separate draft face-index masks; display-only common axis transform, translation, uniform scale and smooth shading. No generated anatomy or textures.",
+  "segmentationStatus": "draft-regions-not-expert-validated",
+  "anatomySource": {
+    "title": "კაციტაძე · ადამიანის ანატომია · I ტომი (2017)",
+    "printedPages": [
+      29,
+      40
+    ],
+    "pdfPages": [
+      30,
+      41
+    ]
+  },
+  "assets": {
+    "C1": {
+      "file": "FJ3176.obj",
+      "fileId": "FJ3176",
+      "representationId": "BP8831",
+      "conceptId": "FMA12519",
+      "sha256": "8ac9ee6d7631edc066a322af278ed508eab4d9c0919e9a77657ead17c14c8a79",
+      "bytes": 148677,
+      "vertices": 1433,
+      "triangles": 2094,
+      "mask": "C1.regions.json",
+      "maskSha256": "b1f23ffefe3887695ed80c4cf539d0136299f5210fdc525a8e0186095bdd4a82",
+      "sourceBoundsMm": [
+        [
+          -41.3646,
+          -87.6442,
+          1462.21
+        ],
+        [
+          40.2307,
+          -40.5958,
+          1481.43
+        ]
+      ],
+      "role": "pilot",
+      "regions": {
+        "atlasTrans": 547,
+        "unsegmented": 119,
+        "mass": 782,
+        "postArch": 362,
+        "antArch": 284
+      },
+      "bookPages": [
+        31,
+        32
+      ],
+      "clinicalValidation": false
+    },
+    "C2": {
+      "file": "FJ3177.obj",
+      "fileId": "FJ3177",
+      "representationId": "BP8459",
+      "conceptId": "FMA12520",
+      "sha256": "ae446bbf47561c5ff2a2c0a03bfb158ba2581477ae5078ac89cc95b92637adab",
+      "bytes": 161899,
+      "vertices": 1540,
+      "triangles": 2288,
+      "mask": "C2.regions.json",
+      "maskSha256": "a13f6b7a11345d9a9cd8ec3ca9e170dc85a031aed9a1f97a3f1156d5eb6bcf16",
+      "sourceBoundsMm": [
+        [
+          -25.9616,
+          -86.5391,
+          1433.17
+        ],
+        [
+          24.5742,
+          -36.6709,
+          1478.35
+        ]
+      ],
+      "role": "pilot",
+      "regions": {
+        "unsegmented": 1574,
+        "transverse": 96,
+        "body": 260,
+        "dens": 157,
+        "spinous": 201
+      },
+      "bookPages": [
+        31,
+        32
+      ],
+      "clinicalValidation": false
+    },
+    "C3": {
+      "file": "FJ3161.obj",
+      "fileId": "FJ3161",
+      "representationId": "BP9108",
+      "conceptId": "FMA12521",
+      "sha256": "8f0de55a4feef85c256501a8afff7bb5aa3f77f4681af4c91801da87b54db103",
+      "bytes": 139572,
+      "vertices": 1323,
+      "triangles": 2030,
+      "mask": "C3.regions.json",
+      "maskSha256": "ce4a3e7c4d99e65206fa48fdda6fe8abaaf15abbd64b456aebdd0207ade1811f",
+      "sourceBoundsMm": [
+        [
+          -29.8428,
+          -87.8132,
+          1417.0
+        ],
+        [
+          28.5393,
+          -38.1331,
+          1445.74
+        ]
+      ],
+      "role": "neighbor-only",
+      "regions": {
+        "unsegmented": 2030
+      },
+      "bookPages": [
+        31,
+        32
+      ],
+      "clinicalValidation": false
+    },
+    "L2": {
+      "file": "FJ3159.obj",
+      "fileId": "FJ3159",
+      "representationId": "BP8995",
+      "conceptId": "FMA13073",
+      "sha256": "5e6301d2020ba73167e71c274848ddcbec0f7936d9f26a78f2de8ffa82f095c7",
+      "bytes": 214016,
+      "vertices": 1875,
+      "triangles": 3214,
+      "mask": "L2.regions.json",
+      "maskSha256": "8f0cfd5d1917fa72ac0cb2f6dd00e87a962723a37d6605e3f572e683a3340396",
+      "sourceBoundsMm": [
+        [
+          -40.3509,
+          -114.72,
+          992.316
+        ],
+        [
+          39.0608,
+          -34.3488,
+          1039.76
+        ]
+      ],
+      "role": "neighbor-only",
+      "regions": {
+        "unsegmented": 3214
+      },
+      "bookPages": [
+        32,
+        33
+      ],
+      "clinicalValidation": false
+    },
+    "L3": {
+      "file": "FJ3162.obj",
+      "fileId": "FJ3162",
+      "representationId": "BP8227",
+      "conceptId": "FMA13074",
+      "sha256": "aa58bbebf75e858d5258926b3f85ef6bc27f765464e87bfc828baf24156bf155",
+      "bytes": 214360,
+      "vertices": 1849,
+      "triangles": 3272,
+      "mask": "L3.regions.json",
+      "maskSha256": "696d870171fb73fa45cf69ff91bc5138c62c9f38ec2dd8043df4350e9f3cdfff",
+      "sourceBoundsMm": [
+        [
+          -40.2029,
+          -115.353,
+          967.693
+        ],
+        [
+          38.841,
+          -29.514,
+          1009.73
+        ]
+      ],
+      "role": "pilot",
+      "regions": {
+        "transverse": 489,
+        "body": 540,
+        "unsegmented": 1925,
+        "spinous": 318
+      },
+      "bookPages": [
+        32,
+        33
+      ],
+      "clinicalValidation": false
+    },
+    "L4": {
+      "file": "FJ3165.obj",
+      "fileId": "FJ3165",
+      "representationId": "BP8133",
+      "conceptId": "FMA13075",
+      "sha256": "2b02ea3874d39295b15a7de2a2b2dd1367cf5a00a5ba5f87519f2a7064b2286f",
+      "bytes": 229803,
+      "vertices": 1968,
+      "triangles": 3512,
+      "mask": "L4.regions.json",
+      "maskSha256": "61bf59c21f2c2a56faa34c7756312fbf277f6611de3505dd48fad8e717c6ce22",
+      "sourceBoundsMm": [
+        [
+          -42.7661,
+          -110.405,
+          938.664
+        ],
+        [
+          41.4154,
+          -26.1562,
+          983.402
+        ]
+      ],
+      "role": "neighbor-only",
+      "regions": {
+        "unsegmented": 3512
+      },
+      "bookPages": [
+        32,
+        33
+      ],
+      "clinicalValidation": false
+    }
+  }
+}

@@ -126,6 +126,16 @@ export function createRenderer(state, scene) {
       gl.deleteBuffer(m.normBuffer);
     }
     meshes = [];
+    const smooth = new Map();
+    if (scene.realMesh)
+      for (const tris of scene.grouped.values())
+        for (const tri of tris) {
+          const n = cross(sub(tri[1], tri[0]), sub(tri[2], tri[0]));
+          for (const p of tri) {
+            const key = p.join(",");
+            smooth.set(key, add(smooth.get(key) || [0, 0, 0], n));
+          }
+        }
     for (const [key, tris] of scene.grouped) {
       if (!tris.length) continue;
       const [owner, part] = key.split("|"),
@@ -135,7 +145,7 @@ export function createRenderer(state, scene) {
         const n = norm(cross(sub(tri[1], tri[0]), sub(tri[2], tri[0])));
         for (const p of tri) {
           pos.push(...p);
-          normal.push(...n);
+          normal.push(...(scene.realMesh ? norm(smooth.get(p.join(","))) : n));
         }
       }
       const posBuffer = gl.createBuffer();
@@ -159,6 +169,7 @@ export function createRenderer(state, scene) {
       cy = p?.y || 0;
     let m = translate(0, cy, 0);
     if (
+      !scene.realMesh &&
       p?.id === "C1" &&
       scene.poses.some((x) => x.id === "C2") &&
       state.rotation !== 0
@@ -281,6 +292,7 @@ export function createRenderer(state, scene) {
     const pose = scene.poses.find((p) => p.owner === owner);
     let [x, y, z] = add(point, separationOffset(state, { owner, part }));
     if (
+      !scene.realMesh &&
       pose?.id === "C1" &&
       scene.poses.some((p) => p.id === "C2") &&
       state.rotation
@@ -510,6 +522,10 @@ export function createRenderer(state, scene) {
     return meshes.find((m) => m.pick === n) || null;
   }
   function setView(v) {
+    if (v === "bottom") {
+      yaw = 0.11;
+      pitch = -1.48;
+    }
     if (v === "top") {
       yaw = 0.11;
       pitch = 1.48;

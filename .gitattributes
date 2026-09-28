@@ -5,3 +5,4 @@
 *.html text eol=lf
 *.json text eol=lf
 *.png binary
+assets/bodyparts3d/*.obj -text

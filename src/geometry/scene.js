@@ -1,5 +1,6 @@
 import { above, below, jointType } from "../data/anatomy.js";
 import { V, add, sub, mul, dot, cross, norm } from "./math.js";
+import { pilotAvailable, buildPilotScene } from "./pilot.js";
 export function createScene(state) {
   function ellipsoid(c, r, lat = 10, lon = 18) {
     const out = [];
@@ -591,7 +592,19 @@ export function createScene(state) {
     bounds.width = sac ? 4.7 : 4.4;
   }
 
+  let realMesh = false,
+    omitted = [];
   function build() {
+    realMesh = pilotAvailable(state);
+    if (realMesh) {
+      const pilot = buildPilotScene(state);
+      grouped = pilot.grouped;
+      poses = pilot.poses;
+      bounds = pilot.bounds;
+      omitted = pilot.omitted;
+      return;
+    }
+    omitted = [];
     grouped.clear();
     poses = makePoses();
     for (const p of poses) {
@@ -607,6 +620,12 @@ export function createScene(state) {
   }
   return {
     build,
+    get realMesh() {
+      return realMesh;
+    },
+    get omitted() {
+      return omitted;
+    },
     get grouped() {
       return grouped;
     },

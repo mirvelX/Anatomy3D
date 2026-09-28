@@ -25,6 +25,13 @@ import { guideParts } from "./rendering/visibility.js";
 import { createScene } from "./geometry/scene.js";
 import { createRenderer } from "./rendering/renderer.js";
 import { registerPwa } from "./pwa/register.js";
+import {
+  loadPilot,
+  pilotParts,
+  pilotLevels,
+  pilotManifest,
+  pilotAssetUrl,
+} from "./geometry/pilot.js";
 const $ = (id) => document.getElementById(id);
 function storageStatus(message) {
   $("storageStatus").textContent = message;
@@ -39,14 +46,67 @@ function saveWorkspace() {
   return persist(() => window.localStorage, state, storageStatus);
 }
 const connected = () => getConnections(state),
-  visibleDefs = () => getVisibleDefs(state);
+  visibleDefs = () => {
+    const parts = pilotParts(state);
+    return getVisibleDefs(state).filter((d) => !parts || parts.has(d.id));
+  };
 const scene = createScene(state),
   renderer = createRenderer(state, scene);
 const { draw, pick, setView } = renderer;
 function build() {
   scene.build();
+  if (!visibleDefs().some((d) => d.id === state.selected))
+    state.selected = "all";
   renderer.compileMeshes();
   draw();
+}
+let pilotStatus = "idle";
+function renderModelStatus() {
+  $("meshMode").value = state.meshMode;
+  $("meshStatus").dataset.mode = scene.realMesh ? "atlas" : "schematic";
+  $("sceneSource").textContent = scene.realMesh
+    ? "BodyParts3D · საცდელი სეგმენტაცია"
+    : "სქემატური ხედი";
+  const requested =
+    state.meshMode === "atlas" && pilotLevels.includes(state.vertebra);
+  $("meshStatus").textContent = scene.realMesh
+    ? "BodyParts3D · რეალური ატლასის ზედაპირი · სეგმენტაცია საცდელია"
+    : requested && pilotStatus === "loading"
+      ? "მოდელები იტვირთება… ამ დროისთვის სქემატური ხედი ჩანს."
+      : requested && pilotStatus === "error"
+        ? "მოდელი ვერ ჩაიტვირთა. სქემატური ხედი მუშაობს; სცადე ხელახლა."
+        : "სქემატური გეომეტრია · რეალური mesh პილოტი: C1, C2, L3";
+  $("meshRetry").classList.toggle("hidden", pilotStatus !== "error");
+  $("pilotCredits").classList.toggle("hidden", !scene.realMesh);
+  $("meshRegionNote").textContent = scene.realMesh
+    ? "ნაჩვენებია მხოლოდ საცდელად გამოყოფილი უბნები. საზღვრები მიახლოებითია; წვრილი ზედაპირები ჯერ არ არის სეგმენტირებული. ყველა ნაწილისთვის აირჩიე სქემატური ხედი."
+    : "სქემატური ნაწილები სასწავლო ილუსტრაციებია; გეომეტრია დამოწმებული არ არის.";
+  if (scene.realMesh) {
+    const asset = pilotManifest.assets[state.vertebra];
+    $("pilotAsset").href = pilotAssetUrl(asset.file);
+    $("pilotAsset").textContent = `${state.vertebra} · ${asset.fileId} · OBJ`;
+  }
+  $("rotate").disabled =
+    scene.realMesh ||
+    !connected().some(([a, b]) => jointType(a, b) === "atlantoaxial");
+}
+async function ensurePilot() {
+  if (state.meshMode !== "atlas" || pilotStatus === "loading") return;
+  pilotStatus = "loading";
+  renderModelStatus();
+  try {
+    await loadPilot();
+    pilotStatus = "ready";
+  } catch {
+    pilotStatus = "error";
+  }
+  // A learner may have switched modes/levels while the request was running.
+  build();
+  updatePanel();
+  if (state.mode === "quiz") {
+    resetCycle();
+    makeQuestion();
+  }
 }
 function populateSelector() {
   const groups = [
@@ -113,6 +173,10 @@ function renderDetails() {
   $("detailLatin").textContent = d.latin;
   $("detailKa").textContent = d.ka;
   $("detailText").textContent = d.info;
+  $("regionReview").textContent =
+    scene.realMesh && d.id !== "all"
+      ? "საცდელი ზედაპირული უბანი — საზღვრების სპეციალისტის მიერ შემოწმება არ დასრულებულა. იზოლაცია აჩვენებს ზედაპირის ნაწილს."
+      : "";
   $("bookAlias").textContent = bookAliases[d.id]
     ? "წიგნის ტერმინი: " + bookAliases[d.id]
     : "";
@@ -185,7 +249,26 @@ function renderConnection() {
     const p = document.createElement("p");
     p.textContent = explainConnection(a, b);
     box.append(title, p);
+    if (scene.realMesh) {
+      const source = document.createElement("a");
+      source.href =
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/9-6-anatomy-of-selected-synovial-joints";
+      source.target = "_blank";
+      source.rel = "noopener noreferrer";
+      source.textContent = "დამატებითი წყარო: OpenStax · სახსრების აღწერა";
+      box.appendChild(source);
+    }
     el.appendChild(box);
+  }
+  if (scene.realMesh) {
+    const p = document.createElement("p");
+    p.className = "note";
+    p.textContent =
+      "მალები წყაროს საერთო მასშტაბსა და მდებარეობას ინარჩუნებს. დისკოები, იოგები და სახსრის კონტაქტები ამ პილოტში მოდელირებული არ არის. ბრუნვა გამორთულია; დაშორება მხოლოდ დათვალიერებისთვისაა." +
+      (scene.omitted.length
+        ? " არ არის ნაჩვენები: " + scene.omitted.map(name).join(", ") + "."
+        : "");
+    el.prepend(p);
   }
 }
 function renderProgress() {
@@ -218,6 +301,7 @@ function renderDisplayControls() {
 }
 function updatePanel(persistState = true) {
   displayNeighbors();
+  renderModelStatus();
   renderPartList();
   renderDetails();
   renderConnection();
@@ -283,6 +367,7 @@ function changeVertebra(id) {
   updatePanel();
   if (state.mode === "quiz") makeQuestion();
   tooltip("");
+  if (state.meshMode === "atlas" && pilotStatus === "idle") ensurePilot();
 }
 let drag = null;
 $("gl").addEventListener("pointerdown", (e) => {
@@ -310,11 +395,18 @@ $("gl").addEventListener("pointerup", (e) => {
     const found = pick(e);
     if (found) {
       if (state.mode === "quiz") {
+        if (scene.realMesh && found.part === "unsegmented") {
+          tooltip("ამ უბნის სეგმენტაცია ჯერ არ დასრულებულა.");
+          drag = null;
+          return;
+        }
         if (found.owner === "target" || found.owner === "link")
           grade(found.part, found.owner);
       } else if (found.owner === "target" || found.owner === "link") {
         const p = found.part;
         if (visibleDefs().some((x) => x.id === p)) selectPart(p);
+        else if (scene.realMesh && p === "unsegmented")
+          tooltip("ამ უბნის სეგმენტაცია ჯერ არ დასრულებულა.");
         else if (p === "mass") selectPart("atlasSup");
       } else {
         tooltip(
@@ -348,6 +440,31 @@ document.addEventListener("keydown", (e) => {
     setView("reset");
 });
 $("vertebra").addEventListener("change", (e) => changeVertebra(e.target.value));
+$("meshMode").onchange = () => {
+  state.meshMode = $("meshMode").value;
+  state.selected = "all";
+  state.rotation = 0;
+  state.partSeparation = 0;
+  resetCycle();
+  build();
+  updatePanel();
+  if (state.mode === "quiz") makeQuestion();
+  ensurePilot();
+};
+$("meshRetry").onclick = ensurePilot;
+for (const button of document.querySelectorAll("[data-pilot]"))
+  button.onclick = () => {
+    state.meshMode = "atlas";
+    state.assembly =
+      button.dataset.pilot === "C1"
+        ? "below"
+        : button.dataset.pilot === "C2"
+          ? "above"
+          : "both";
+    $("vertebra").value = button.dataset.pilot;
+    changeVertebra(button.dataset.pilot);
+    ensurePilot();
+  };
 for (const b of document.querySelectorAll("[data-assembly]"))
   b.onclick = () => {
     resetCycle();
@@ -541,6 +658,7 @@ $("importProgress").addEventListener("change", async (e) => {
     $("rotate").value = 0;
     build();
     updatePanel();
+    ensurePilot();
   } catch {
     alert(
       "ამ ფაილის წაკითხვა ვერ მოხერხდა. აირჩიე ამ აპიდან შენახული ვალიდური JSON ასლი.",
@@ -576,6 +694,7 @@ window.addEventListener("storage", (event) => {
     $("rotate").value = 0;
     build();
     updatePanel(false);
+    if (state.meshMode === "atlas" && pilotStatus !== "ready") ensurePilot();
   } catch {
     /* Leave the current session intact if another tab writes bad data. */
   }
@@ -585,3 +704,6 @@ renderer.init();
 build();
 updatePanel();
 registerPwa(saveWorkspace);
+$("pilotNotice").href = pilotAssetUrl("NOTICE.txt");
+$("pilotManifest").href = pilotAssetUrl("manifest.json");
+if (state.meshMode === "atlas") ensurePilot();

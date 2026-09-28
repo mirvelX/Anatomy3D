@@ -1,4 +1,15 @@
-# Anatomy 3D · v10.0 alpha
+# v10.1 mesh pilot
+
+C1, C2 and L3 now have licensed BodyParts3D atlas surfaces, 11 provisional
+study regions, highlight/isolation and native-coordinate neighbors C3/L2/L4.
+Use the C1/C2/L3 shortcuts and the model-source selector. Existing schematic
+study/exam and saved progress remain available. This is an alpha pilot, not
+completed anatomical segmentation or clinical validation.
+
+See [asset research, book references and limitations](docs/v10.1-pilot.md) and
+[asset-level license/attribution](assets/bodyparts3d/NOTICE.txt).
+
+## v10.0 alpha — ისტორია
 
 პირველი განვითარების Preview: წიგნის მითითებები, C6-ის საძილე ბორცვი, კბილის სასახსრე ზედაპირები და წელის დამატებითი მორჩი; იზოლირება, რეგულირებადი გამჭვირვალობა და ნაწილის გამოყოფა; უსწავლელი ნაწილების სავარჯიშო. მოდელები ჯერ სქემატურია.
 
@@ -61,4 +72,3 @@ Service worker-ის აქტივაცია ეყრდნობა [MDN-
 უკან დასაბრუნებლად გამოიყენეთ Netlify-ის წინა წარმატებული deploy ან შეთანხმებული revert. v8 ძველ გასაღებებს წაიკითხავს და v9-ში მოგვიანებით მიღებული პროგრესი ავტომატურად არ გადაიტანება უკან; rollback-მდე ჩამოტვირთეთ v9 JSON ასლი და შეინარჩუნეთ v9 გასაღები. ეს მონაცემები ხელმისაწვდომი იქნება v9-ზე დაბრუნებისას.
 
 შემდგომი ეტაპებია ლიცენზირებული, ანატომიურად გადამოწმებული მოდელები, შეერთებების სიზუსტე, ტერმინების რეცენზია და სრულფასოვანი საგამოცდო სესიები.
-

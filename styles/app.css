@@ -592,3 +592,41 @@ a:focus-visible {
   outline: 2px solid #8ee1ef;
   outline-offset: 3px;
 }
+:root {
+  --pilot-accent: #91dac9;
+}
+.pilot-panel {
+  padding: 12px;
+  border: 1px solid #457268;
+  border-radius: 12px;
+}
+.pilot-shortcuts {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.pilot-shortcuts button {
+  flex: 1;
+}
+#meshStatus {
+  color: var(--pilot-accent);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+#meshRegionNote,
+#pilotCredits {
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+#pilotCredits a {
+  color: #a5dce7;
+}
+#pilotCredits summary {
+  cursor: pointer;
+}
+#regionReview:empty {
+  display: none;
+}
+.camera {
+  flex-wrap: wrap;
+}

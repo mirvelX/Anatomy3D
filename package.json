@@ -1,6 +1,6 @@
 {
   "name": "anatomy3d",
-  "version": "10.2.0-alpha.2",
+  "version": "10.2.0-alpha.3",
   "private": true,
   "packageManager": "pnpm@11.19.0",
   "type": "module",

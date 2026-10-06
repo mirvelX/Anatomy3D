@@ -632,3 +632,136 @@ a:focus-visible {
   flex-wrap: wrap;
 }
 
+
+
+/* v10.9 polish — keeps the v10.1 three-column study workflow. */
+:root{
+  --panel:#101e2e;
+  --panel-2:#14283b;
+  --line:#304b62;
+  --accent:#70d8df;
+  --accent-soft:#183f4a;
+  --bone:#e6c99a;
+  --selected:#ffc74f;
+}
+body{
+  background:
+    radial-gradient(circle at 50% -10%,#16354a 0,#091321 38%),
+    #091321;
+}
+.sidebar,.rightbar{
+  background:linear-gradient(180deg,#101f2f 0%,#0e1b2a 100%);
+}
+.brand-mark{
+  display:grid;
+  place-items:center;
+  width:44px;height:44px;
+  background:linear-gradient(145deg,#62dce2,#286f8d);
+  border:1px solid #7be6e933;
+}
+.level-shortcuts{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+  margin-top:3px;
+}
+.level-shortcuts button{
+  min-width:0;
+  padding:7px 4px;
+  font-size:.7rem;
+  border-radius:8px;
+  color:#c9e1ec;
+  background:#142a3d;
+}
+.level-shortcuts button:hover{
+  border-color:#5da7b5;
+  background:#1a394d;
+}
+.main{
+  background:
+    radial-gradient(ellipse at 50% 10%,#1a3850 0%,#0d1c2c 48%,#091522 100%);
+}
+.topline{
+  margin-bottom:13px;
+}
+.curriculum-launch{
+  order:3;
+}
+.stage{
+  border-color:#395a70;
+  background:#102438;
+  box-shadow:0 18px 55px #0004,inset 0 1px #ffffff08;
+}
+#gl{
+  height:min(61vh,590px);
+  min-height:380px;
+}
+.stage-head{
+  background:#0b1927e8;
+  border-color:#45687c;
+  box-shadow:0 6px 24px #0004;
+}
+.stage-help{
+  background:#0c1c2adc;
+}
+.stage-bottom{
+  background:linear-gradient(180deg,#152b40,#112437);
+}
+.controlbox,.details,.connection,.quiz{
+  box-shadow:inset 0 1px #ffffff05;
+}
+.controlbox{
+  background:linear-gradient(180deg,#11283e,#0f2235);
+}
+.part-btn{
+  transition:background .15s,border-color .15s,transform .15s;
+}
+.part-btn:hover{
+  transform:translateX(2px);
+}
+.part-btn.active{
+  border-color:#72ccd3;
+  background:#1a4652;
+}
+.rightbar .latin{
+  color:#f1ca83;
+}
+#learnedBtn{
+  width:100%;
+}
+.camera button{
+  background:#172f43;
+}
+.camera button:hover{
+  border-color:#6ac1cc;
+}
+@media (min-width:1251px){
+  .sidebar,.rightbar{
+    position:sticky;
+    top:0;
+    align-self:start;
+    max-height:100vh;
+    overflow:auto;
+  }
+}
+@media (max-width:780px){
+  .level-shortcuts{
+    display:flex;
+    overflow-x:auto;
+    padding-bottom:3px;
+  }
+  .level-shortcuts button{
+    min-width:52px;
+  }
+  #gl{
+    height:48vh;
+    min-height:330px;
+  }
+  .stage-head{
+    max-width:calc(100% - 125px);
+  }
+  .stage-help{
+    max-width:112px;
+    font-size:.66rem;
+  }
+}

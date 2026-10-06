@@ -1,26 +1,4 @@
-# v10.8 interactive curriculum update
-
-The main v10.x branch now includes the seven user-provided interactive lab pages
-for v10.2 through v10.8, accessible from the curriculum workspace. They cover
-general arthrology, vertebral connections, thoracic connections, upper-limb
-girdle connections, free upper-limb connections, pelvis connections and free
-lower-limb connections.
-
-The labs are published as user-provided teaching visualizations. Their procedural
-geometry is not counted as anatomically reviewed mesh coverage. The existing
-BodyParts3D C1/C2/L3 pilot remains unchanged.
-
-Adds nine draft study modules and 278 records with Georgian/Latin search,
-progress, quizzes and source-review tracking. New mesh coverage is **0/278**:
-missing approved models are explicitly marked and cannot be highlighted or isolated.
-The exact new source PDFs and Kacitadze scan still require review.
-
-The existing v10.1 C1/C2/L3 mesh implementation is unchanged.
-See [requirements, source limitations and remaining work](docs/v10-curriculum.md).
-Use `npm run audit:curriculum` for per-structure gaps.
-This branch is preview-only; do not merge or deploy production without user approval.
-
-## v10.1 mesh pilot
+# v10.1 mesh pilot
 
 C1, C2 and L3 now have licensed BodyParts3D atlas surfaces, 11 provisional
 study regions, highlight/isolation and native-coordinate neighbors C3/L2/L4.

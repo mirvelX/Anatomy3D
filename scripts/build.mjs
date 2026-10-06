@@ -22,7 +22,6 @@ export async function build(out = resolve(root, "dist")) {
   await walk("styles");
   await walk("icons");
   await walk("assets");
-  await walk("labs");
   files.push("index.html", "sw.js", "manifest.webmanifest");
   files.sort();
   const hash = createHash("sha256");
@@ -44,7 +43,6 @@ export async function build(out = resolve(root, "dist")) {
     "instagram-share.png",
   ])
     await cp(resolve(root, file), resolve(out, file), { recursive: true });
-  await cp(resolve(root, "labs"), resolve(out, "labs"), { recursive: true });
   const html = (await readFile(resolve(root, "index.html"), "utf8"))
     .replace("./styles/app.css", `./${prefix}/styles/app.css`)
     .replace("./src/main.js", `./${prefix}/src/main.js`);
@@ -55,9 +53,6 @@ export async function build(out = resolve(root, "dist")) {
     ...files
       .filter((file) => /^(src|styles|assets)[\\/]/.test(file))
       .map((file) => "./" + prefix + "/" + file.replaceAll("\\", "/")),
-    ...files
-      .filter((file) => file.startsWith("labs"))
-      .map((file) => "./" + file.replaceAll("\\", "/")),
     ...files
       .filter((file) => file.startsWith("icons"))
       .map((file) => "./" + file.replaceAll("\\", "/")),

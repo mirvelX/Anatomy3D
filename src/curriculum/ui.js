@@ -14,6 +14,10 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     <main class="curriculum-main"><div class="curriculum-module-head"><div><p data-version class="curriculum-eyebrow"></p><h3 data-title></h3><p data-latin></p></div><span data-progress></span></div>
     <progress data-bar max="1" value="0" aria-label="მოდულის სასწავლო პროგრესი"></progress>
     <p data-context class="curriculum-context"></p>
+    <section data-lab hidden class="curriculum-lab">
+      <div><p class="curriculum-eyebrow">v10.2 · ARTHROLOGIA GENERALIS</p><h4>ინტერაქტიული 3D სასწავლო სქემა</h4><p>Gemini-ს მიერ მომზადებული v10.2 ვიზუალური ლაბორატორია. გეომეტრია არის კონცეპტუალური სახსრის სქემა და არ ითვლება ანატომიურად დამოწმებულ mesh-ად.</p></div>
+      <a data-lab-link class="curriculum-lab-link" href="./labs/arthrology-v10.2.html" target="_blank" rel="noopener noreferrer">3D ლაბორატორიის გახსნა ↗</a>
+    </section>
     <div class="curriculum-tools"><label>მოძებნე ქართულად ან ლათინურად<input data-search type="search" placeholder="მაგ. Capsula articularis"></label><label>ჯგუფი<select data-group><option value="">ყველა ჯგუფი</option></select></label><button data-mode aria-pressed="false">გამოცდა</button><button data-row hidden>მაჯის რიგების სწავლა</button><button data-compare>ორი სტრუქტურის შედარება</button></div>
     <section data-comparison hidden><h4>სტრუქტურების შედარება</h4><label>მეორე სტრუქტურა<select data-compare-select></select></label><div data-compare-result></div></section>
     <section data-quiz hidden class="curriculum-quiz" aria-label="გამოცდა"><p>ქართული → ლათინური · სამუშაო მასალა</p><h4 data-question></h4><div data-choices class="curriculum-choices"></div><p data-feedback role="status"></p><button data-next>შემდეგი კითხვა →</button><p data-score></p></section>
@@ -105,7 +109,7 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     $('title').textContent = module.ka; $('latin').textContent = module.latin; $('version').textContent = `v${module.version} · სამუშაო მასალა`;
     $('search').value = ''; $('group').replaceChildren(new Option('ყველა ჯგუფი', ''));
     for (const group of new Set(module.entries.map(e => e.group))) $('group').append(new Option(group, group));
-    $('row').hidden = module.id !== 'hand'; $('context').textContent = context;
+    $('row').hidden = module.id !== 'hand'; $('context').textContent = context; $('lab').hidden = module.id !== 'arthrology';
     $('compare-select').replaceChildren(...module.entries.map(e => new Option(`${e.latin} · ${e.ka}`, e.id)));
     $('comparison').hidden = true;
     for (const b of $('modules').children) b.setAttribute('aria-current', b.dataset.module === module.id ? 'page' : 'false');

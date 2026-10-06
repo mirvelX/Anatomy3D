@@ -13,8 +13,21 @@ try {
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(url);
   await page.locator('#openCurriculum').click();
-  assert.equal(await page.locator('[data-lab]').isVisible(),true);
-  assert.ok((await page.locator('[data-lab-link]').getAttribute('href')).includes('labs/arthrology-v10.2.html'));
+  assert.equal(await page.locator('[data-labs] a').count(),7);
+  const labs = [
+    ['labs/anatomy3d_v10_2.html','v10.2'],
+    ['labs/anatomy3d_v10_3.html','v10.3'],
+    ['labs/anatomy3d_v10_4.html','v10.4'],
+    ['labs/anatomy3d_v10_5.html','v10.5'],
+    ['labs/anatomy3d_v10_6.html','v10.6'],
+    ['labs/anatomy3d_v10_7.html','v10.7'],
+    ['labs/anatomy3d_v10_8.html','v10.8'],
+  ];
+  for (const [path,version] of labs) {
+    const response = await page.request.get(new URL(path,url).href);
+    assert.equal(response.status(),200,path);
+    assert.ok((await response.text()).includes(version),path);
+  }
   for(const m of modules){
     await page.locator(`[data-module="${m.id}"]`).click();
     assert.equal(await page.locator('[data-list] button').count(),m.entries.length);

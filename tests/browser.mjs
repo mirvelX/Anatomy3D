@@ -14,10 +14,14 @@ const browser = await chromium.launch({
   executablePath: process.env.BROWSER_EXECUTABLE || undefined,
 });
 const errors = [];
-const ready = (page) =>
-  page.waitForFunction(
+const ready = async (page) => {
+  await page.waitForFunction(
     () => document.querySelector("#vertebra")?.options.length === 26,
   );
+  assert.equal(await page.locator("#spineMenu").isVisible(), false);
+  await page.locator("#category").selectOption("spine");
+  assert.equal(await page.locator("#spineMenu").isVisible(), true);
+};
 const controlled = (page) =>
   page.waitForFunction(() => !!navigator.serviceWorker.controller);
 const workspace = (page) =>

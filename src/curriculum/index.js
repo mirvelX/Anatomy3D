@@ -1,7 +1,8 @@
 import arthrology from './arthrology.js';
 import vertebral from './vertebral.js';
+import { skeleton, cavity, connections } from './thorax.js';
 import { validateModules } from './schema.js';
-export const modules = [arthrology, vertebral];
+export const modules = [arthrology, vertebral, skeleton, cavity, connections];
 validateModules(modules);
 export const entries = modules.flatMap(m => m.entries);
 export const byId = Object.fromEntries(entries.map(e => [e.id, e]));

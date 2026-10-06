@@ -36,3 +36,134 @@
 .curriculum-lab-link:hover{background:#205b58}
 @media(max-width:950px){.curriculum-lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.curriculum-lab-grid{grid-template-columns:1fr}.curriculum-labs-head{align-items:start;flex-direction:column}}
+
+
+/* v10.9 — make the curriculum feel like the v10.1 vertebra atlas. */
+#curriculum{
+  background:#0d1a28;
+  border-color:#36566a;
+  box-shadow:0 28px 110px #000b;
+}
+.curriculum-head{
+  background:linear-gradient(180deg,#132a3d,#102234);
+  border-bottom:1px solid #355166;
+}
+.curriculum-head>div>p:last-child{
+  color:#a9bfcc;
+  margin:.45rem 0 0;
+  font-size:.78rem;
+  line-height:1.55;
+}
+.curriculum-notice{
+  background:#182c3d;
+  border-bottom:1px solid #314c60;
+  color:#c1d2dc;
+}
+.curriculum-shell{
+  grid-template-columns:260px minmax(0,1fr);
+}
+.curriculum-nav{
+  background:linear-gradient(180deg,#101f2f,#0d1b29);
+}
+.curriculum-nav nav button{
+  background:#162b3e;
+  border-color:#345066;
+}
+.curriculum-nav nav button:hover{
+  background:#1c3a4e;
+  border-color:#5b8da0;
+}
+.curriculum-nav button[aria-current=page]{
+  background:#1b4b53;
+  border-color:#73cbd0;
+  box-shadow:inset 3px 0 #79d7d8;
+}
+.curriculum-main{
+  background:
+    radial-gradient(ellipse at 50% 0,#17354a 0,#0d1b2a 42%,#0a1622 100%);
+}
+.curriculum-module-head{
+  padding-bottom:4px;
+}
+.curriculum-module-head h3{
+  font-size:1.45rem;
+}
+.curriculum-tools{
+  background:#102437;
+  border:1px solid #304d62;
+  border-radius:13px;
+  padding:12px;
+  margin:15px 0;
+}
+.curriculum-study{
+  grid-template-columns:minmax(240px,.8fr) minmax(340px,1.35fr);
+}
+.curriculum-list{
+  background:#0f2030;
+  border:1px solid #2e495d;
+  border-radius:13px;
+  padding:8px;
+}
+.curriculum-list button{
+  background:#142a3c;
+  border-color:#314d61;
+}
+.curriculum-list button:hover{
+  background:#1a3a4c;
+  border-color:#5a8fa0;
+}
+.curriculum-list button[aria-pressed=true]{
+  background:#1b4a52;
+  border-color:#77cfd1;
+}
+.curriculum-detail{
+  background:linear-gradient(180deg,#142a3c,#102234);
+  border-color:#35536a;
+  box-shadow:0 10px 30px #0002;
+}
+.curriculum-model{
+  background:#0f2435;
+  border:1px solid #355a67;
+  border-left:3px solid #6bc7c8;
+}
+.curriculum-model-open{
+  display:inline-flex;
+  margin-top:8px;
+  padding:9px 12px;
+  border-radius:9px;
+  border:1px solid #68bcb9;
+  color:#c9fff5;
+  background:#174946;
+  text-decoration:none;
+  font-size:.78rem;
+  font-weight:700;
+}
+.curriculum-model-open:hover{
+  background:#205c57;
+}
+.curriculum-labs{
+  background:#102437;
+  border-color:#345568;
+}
+.curriculum-lab-card{
+  background:#152b3c;
+}
+.curriculum-lab-card:hover{
+  transform:translateY(-1px);
+}
+.curriculum-source{
+  background:#0d1e2c;
+  border-color:#2f495c;
+}
+@media(max-width:850px){
+  #curriculum{
+    width:100vw;
+    max-width:100vw;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+  }
+  .curriculum-shell{grid-template-columns:1fr}
+  .curriculum-main{padding:16px}
+  .curriculum-study{grid-template-columns:1fr}
+}

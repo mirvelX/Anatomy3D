@@ -1,0 +1,84 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
+import { mkdir } from 'node:fs/promises';
+import { serve } from '../scripts/serve.mjs';
+import { modules } from '../src/curriculum/index.js';
+const root = fileURLToPath(new URL('../',import.meta.url));
+const {server,url}=await serve(()=>root);
+const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined});
+const errors=[];
+try {
+  const page=await browser.newPage({viewport:{width:1440,height:1000}});
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(url);
+  await page.locator('#openCurriculum').click();
+  assert.equal(await page.locator('[data-labs] a').count(),7);
+  const labs = [
+    ['labs/anatomy3d_v10_2.html','v10.2'],
+    ['labs/anatomy3d_v10_3.html','v10.3'],
+    ['labs/anatomy3d_v10_4.html','v10.4'],
+    ['labs/anatomy3d_v10_5.html','v10.5'],
+    ['labs/anatomy3d_v10_6.html','v10.6'],
+    ['labs/anatomy3d_v10_7.html','v10.7'],
+    ['labs/anatomy3d_v10_8.html','v10.8'],
+  ];
+  for (const [path,version] of labs) {
+    const response = await page.request.get(new URL(path,url).href);
+    assert.equal(response.status(),200,path);
+    assert.ok((await response.text()).includes(version),path);
+  }
+  for(const m of modules){
+    await page.locator(`[data-module="${m.id}"]`).click();
+    assert.equal(await page.locator('[data-list] button').count(),m.entries.length);
+    await page.locator('[data-list] button').last().click();
+    assert.ok((await page.locator('[data-detail]').innerText()).includes(m.entries.at(-1).latin));
+    await page.locator('[data-learn]').click();
+    assert.ok((await page.locator('[data-progress]').innerText()).startsWith('1 /'));
+    await page.locator('#curriculum [data-mode]').click();
+    await page.locator('[data-choices] button').first().click();
+    assert.ok((await page.locator('[data-feedback]').innerText()).length>0);
+    await page.locator('#curriculum [data-mode]').click();
+    console.log(`PASS v${m.version}: navigation, details, learned, quiz`);
+  }
+  await page.reload(); await page.locator('#openCurriculum').click();
+  for(const m of modules){await page.locator(`[data-module="${m.id}"]`).click();assert.ok((await page.locator('[data-progress]').innerText()).startsWith('1 /'));}
+  await page.locator('[data-module="hand"]').click();
+  await page.locator('[data-row]').click();
+  assert.equal(await page.locator('[data-choices] button').count(),2);
+  await page.locator('[data-choices] button').first().click();
+  assert.ok((await page.locator('[data-feedback]').innerText()).length>0);
+  await page.locator('#curriculum [data-mode]').click();
+  await page.locator('[data-compare]').click();
+  await page.locator('[data-compare-select]').selectOption('hand.lunate');
+  assert.ok((await page.locator('[data-compare-result]').innerText()).includes('Os lunatum'));
+  const beforeImport=await page.locator('[data-progress]').innerText();
+  await page.locator('[data-import]').setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('broken')});
+  await page.waitForFunction(()=>document.querySelector('[data-storage]').textContent.includes('ფაილი ვერ აღდგა'));
+  assert.equal(await page.locator('[data-progress]').innerText(),beforeImport);
+  await page.locator('[data-import]').setInputFiles({name:'progress.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({version:1,learned:{'hand.lunate':true},score:{correct:0,total:0}}))});
+  await page.waitForFunction(()=>document.querySelector('[data-progress]').textContent.startsWith('2 /'));
+  const download=page.waitForEvent('download');await page.locator('[data-export]').click();
+  assert.equal((await download).suggestedFilename(),'anatomy3d-curriculum-progress.json');
+  await page.keyboard.press('Escape');
+  await page.locator('[data-pilot="C2"]').click();
+  await page.locator('#openConnections').click();
+  assert.ok((await page.locator('[data-context]').innerText()).includes('C2'));
+  assert.ok((await page.locator('[data-title]').innerText()).includes('ხერხემლის'));
+  console.log('PASS hand rows, comparison, safe import, export and C2 connections context');
+  await page.locator('[data-search]').fill('no-matching-anatomy');
+  assert.equal(await page.locator('[data-list] button').count(),0);
+  await page.locator('#curriculum [data-mode]').click();assert.equal(await page.locator('[data-choices] button').count(),0);
+  await page.keyboard.press('Escape');assert.equal(await page.locator('#curriculum').isVisible(),false);
+  await page.locator('[data-pilot="C1"]').click();
+  await page.waitForFunction(()=>document.querySelector('#meshStatus').dataset.mode==='atlas');
+  assert.equal(await page.locator('#parts button').count(),5);
+  await page.locator('#openCurriculum').click();await page.locator('[data-module]').first().click();
+  await mkdir('test-results',{recursive:true});await page.screenshot({path:'test-results/curriculum-desktop.png'});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'test-results/curriculum-mobile.png'});
+  assert.ok(await page.locator('#curriculum').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+  assert.deepEqual(errors,[]);
+  console.log('PASS reload persistence, empty search, Escape, unchanged C1 mesh and mobile width');
+} finally {await browser.close();await new Promise(r=>server.close(r));}
+

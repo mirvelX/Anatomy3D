@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy3D v10.5 - Juncturae Cinguli Membri Superioris</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; }
+        .interactive-panel { pointer-events: auto; max-height: 100vh; overflow-y: auto; }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); color: white; border-right: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body class="text-white">
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="interactive-panel glass-panel w-80 p-6 flex flex-col gap-6 shadow-2xl shadow-black relative z-20">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400">Anatomy3D <span class="text-gray-400 text-sm">v10.5</span></h1>
+                <p class="text-sm text-gray-300 italic mt-1">Juncturae Cinguli Membri Superioris</p>
+                <div class="w-full h-px bg-gray-700 mt-4"></div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold text-white mb-3">სარტყლის შეერთებები</h2>
+                <div class="flex flex-col gap-2">
+                    
+                    <button onclick="highlightJoint('sternoclavicular')" id="btn-sternoclavicular" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-purple-500">
+                        <div class="font-medium text-purple-300">მკერდ-ლავიწის სახსარი</div>
+                        <div class="text-xs text-gray-400">Art. sternoclavicularis</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('acromioclavicular')" id="btn-acromioclavicular" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-teal-500">
+                        <div class="font-medium text-teal-300">ბეჭ-ლავიწის სახსარი</div>
+                        <div class="text-xs text-gray-400">Art. acromioclavicularis</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('ligaments')" id="btn-ligaments" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-blue-500">
+                        <div class="font-medium text-blue-300">საკუთარი იოგები (სინდესმოზი)</div>
+                        <div class="text-xs text-gray-400">Syndesmosis cinguli membri...</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('all')" id="btn-all" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent text-center mt-2 text-white">
+                        <div class="font-medium">სრული ხედი (Girdle)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="elements-control" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                <h2 class="text-md font-semibold text-gray-200 mb-3">ვიზუალიზაციის კონტროლი</h2>
+                
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">ძვლის გამჭვირვალობა</span>
+                        <input type="range" id="bone-opacity" min="10" max="100" value="100" class="w-24 cursor-pointer accent-blue-500">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">სასახსრე დისკო</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="disc-toggle" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-auto pt-4 text-xs text-gray-500 border-t border-slate-700">
+                Data Struct: v10.5 JSON parsed.<br>
+                Source: კაციტაძე / კონსპექტი
+            </div>
+        </div>
+
+        <div class="ml-auto p-6 pointer-events-none flex flex-col items-end w-96 relative z-20">
+            <div id="info-panel" class="glass-panel p-5 rounded-xl transition-all duration-300 opacity-0 transform translate-x-8 pointer-events-auto shadow-lg shadow-black/50">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 id="info-title-geo" class="text-xl font-bold text-white"></h3>
+                    <span id="info-badge" class="px-2 py-1 text-xs font-bold rounded bg-slate-700 text-slate-300"></span>
+                </div>
+                <h4 id="info-title-lat" class="text-md text-blue-300 italic mb-3 font-serif"></h4>
+                <div class="w-full h-px bg-slate-600 mb-3"></div>
+                <p id="info-desc" class="text-sm text-gray-300 leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0f172a, 0.02);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(5, 5, 12);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(3, 0, 0); // Focus shifted slightly right to center the clavicle
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        mainLight.position.set(10, 15, 15);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.DirectionalLight(0xa5b4fc, 0.4);
+        fillLight.position.set(-10, 5, -15);
+        scene.add(fillLight);
+
+        const materials = {
+            bone: new THREE.MeshStandardMaterial({ 
+                color: 0xeae6d8, roughness: 0.8, metalness: 0.1, transparent: true, opacity: 1 
+            }),
+            cartilage: new THREE.MeshStandardMaterial({
+                color: 0xbce6eb, roughness: 0.4, transparent: true, opacity: 0.9
+            }),
+            capsuleSC: new THREE.MeshStandardMaterial({
+                color: 0xc084fc, roughness: 0.6, transparent: true, opacity: 0.6, side: THREE.DoubleSide // Sternoclavicular
+            }),
+            capsuleAC: new THREE.MeshStandardMaterial({
+                color: 0x2dd4bf, roughness: 0.6, transparent: true, opacity: 0.6, side: THREE.DoubleSide // Acromioclavicular
+            }),
+            ligament: new THREE.MeshStandardMaterial({
+                color: 0x60a5fa, roughness: 0.7, transparent: true, opacity: 0.85, side: THREE.DoubleSide // Syndesmosis
+            }),
+            disc: new THREE.MeshStandardMaterial({
+                color: 0xfab160, roughness: 0.5, transparent: true, opacity: 0.9 // Articular disc
+            })
+        };
+
+        const girdleGroup = new THREE.Group();
+        scene.add(girdleGroup);
+
+        const meshes = {
+            bones: [],
+            scJoint: [],
+            acJoint: [],
+            ligaments: [],
+            disc: null
+        };
+
+        function createSternum() {
+            // Just Manubrium sterni and incisura clavicularis for context
+            const manubriumGeo = new THREE.BoxGeometry(1.5, 2, 0.5);
+            const manubrium = new THREE.Mesh(manubriumGeo, materials.bone);
+            manubrium.position.set(-0.5, -1, 0);
+            
+            // Sternal articular facet for clavicle
+            const facetGeo = new THREE.SphereGeometry(0.5, 16, 16);
+            facetGeo.scale(1, 0.5, 1);
+            const facet = new THREE.Mesh(facetGeo, materials.cartilage);
+            facet.position.set(0.3, 0, 0);
+            manubrium.add(facet);
+            
+            meshes.bones.push(manubrium);
+            return manubrium;
+        }
+
+        function createClavicle() {
+            // Clavicle (S-shaped curve)
+            class ClavicleCurve extends THREE.Curve {
+                constructor() { super(); }
+                getPoint(t, optionalTarget = new THREE.Vector3()) {
+                    const x = t * 6; // Length
+                    const z = Math.sin(t * Math.PI * 2) * -0.5; // S-shape in Z plane
+                    const y = Math.sin(t * Math.PI) * 0.3; // Slight arc in Y
+                    return optionalTarget.set(x, y, z);
+                }
+            }
+
+            const path = new ClavicleCurve();
+            const tubeGeo = new THREE.TubeGeometry(path, 32, 0.3, 12, false);
+            const clavicle = new THREE.Mesh(tubeGeo, materials.bone);
+            clavicle.position.set(0.8, 0.1, 0); // Start near sternum
+            
+            meshes.bones.push(clavicle);
+            return clavicle;
+        }
+
+        function createScapulaFragments() {
+            const scapulaGroup = new THREE.Group();
+            scapulaGroup.position.set(6.8, 0.2, -0.2); // Position at lateral end of clavicle
+
+            // Acromion (connects to clavicle)
+            const acromionGeo = new THREE.BoxGeometry(1, 0.4, 1.5);
+            const acromion = new THREE.Mesh(acromionGeo, materials.bone);
+            acromion.position.set(0.5, 0, 0);
+            scapulaGroup.add(acromion);
+            meshes.bones.push(acromion);
+
+            // Processus coracoideus (points anterior/lateral)
+            const coracoidGeo = new THREE.CylinderGeometry(0.25, 0.3, 1.2);
+            const coracoid = new THREE.Mesh(coracoidGeo, materials.bone);
+            coracoid.rotation.x = Math.PI / 2.5;
+            coracoid.rotation.z = Math.PI / 6;
+            coracoid.position.set(-0.5, -0.6, 1);
+            scapulaGroup.add(coracoid);
+            meshes.bones.push(coracoid);
+            
+            // Base/Spine fragment for visual connection
+            const baseGeo = new THREE.BoxGeometry(0.8, 1, 0.8);
+            const base = new THREE.Mesh(baseGeo, materials.bone);
+            base.position.set(0.5, -0.7, -0.5);
+            scapulaGroup.add(base);
+            meshes.bones.push(base);
+
+            return scapulaGroup;
+        }
+
+        girdleGroup.add(createSternum());
+        girdleGroup.add(createClavicle());
+        girdleGroup.add(createScapulaFragments());
+
+        // 1. Articulatio Sternoclavicularis
+        const scCapsuleGeo = new THREE.SphereGeometry(0.65, 16, 16);
+        const scCapsule = new THREE.Mesh(scCapsuleGeo, materials.capsuleSC);
+        scCapsule.position.set(0.6, 0.1, 0);
+        girdleGroup.add(scCapsule);
+        meshes.scJoint.push(scCapsule);
+
+        // Discus articularis inside SC joint
+        const discGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
+        const discMesh = new THREE.Mesh(discGeo, materials.disc);
+        discMesh.rotation.z = Math.PI / 2;
+        discMesh.position.set(0.5, 0.1, 0);
+        girdleGroup.add(discMesh);
+        meshes.disc = discMesh;
+
+        // 2. Articulatio Acromioclavicularis
+        const acCapsuleGeo = new THREE.SphereGeometry(0.55, 16, 16);
+        const acCapsule = new THREE.Mesh(acCapsuleGeo, materials.capsuleAC);
+        acCapsule.position.set(6.8, 0.2, -0.2); // At clavicle-acromion junction
+        girdleGroup.add(acCapsule);
+        meshes.acJoint.push(acCapsule);
+
+        // 3. Ligaments (Syndesmoses)
+        // Lig. coracoclaviculare (connects Coracoid to Clavicle)
+        const ccLigGeo = new THREE.CylinderGeometry(0.15, 0.1, 0.8);
+        const ccLig = new THREE.Mesh(ccLigGeo, materials.ligament);
+        ccLig.position.set(5.5, -0.2, 0.5);
+        ccLig.rotation.x = -Math.PI / 6;
+        girdleGroup.add(ccLig);
+        meshes.ligaments.push(ccLig);
+        
+        // Lig. coracoacromiale (connects Coracoid to Acromion - shoulder vault)
+        const caLigGeo = new THREE.PlaneGeometry(0.3, 1.5);
+        const caLig = new THREE.Mesh(caLigGeo, materials.ligament);
+        caLig.position.set(6.5, -0.1, 0.5);
+        caLig.rotation.x = Math.PI / 2.5;
+        caLig.rotation.y = -Math.PI / 4;
+        girdleGroup.add(caLig);
+        meshes.ligaments.push(caLig);
+
+        const anatomyData = {
+            'sternoclavicular': {
+                name_geo: 'მკერდ-ლავიწის სახსარი',
+                name_lat: 'Articulatio sternoclavicularis',
+                type: 'Diarthrosis (Sphoeroidea - funct.)',
+                desc: 'ერთადერთი სახსარი, რომელიც ზედა კიდურს აკავშირებს ტანის ჩონჩხთან. სასახსრე ზედაპირების შეუსაბამობას ასწორებს შიგა სასახსრე დისკო (Discus articularis). ფუნქციურად მრავალღერძიანია.'
+            },
+            'acromioclavicular': {
+                name_geo: 'ბეჭ-ლავიწის სახსარი',
+                name_lat: 'Articulatio acromioclavicularis',
+                type: 'Diarthrosis (Plana)',
+                desc: 'ლავიწის აკრომიონულ ბოლოსა და ბეჭის აკრომიონს შორის. ბრტყელი, მცირედ მოძრავი სახსარია. ხშირად შეიცავს დისკოს. გამაგრებულია ბეჭ-ლავიწის იოგით.'
+            },
+            'ligaments': {
+                name_geo: 'ბეჭის საკუთარი იოგები',
+                name_lat: 'Syndesmosis scapulae',
+                type: 'Syndesmosis',
+                desc: 'მოიცავს ნისკარტ-ლავიწის იოგს (Lig. coracoclaviculare), რომელიც აფიქსირებს ლავიწს და ნისკარტ-აკრომიონის იოგს (Lig. coracoacromiale), რომელიც ქმნის მხრის სახსრის თაღს და იცავს მას ზემოდან.'
+            },
+            'all': {
+                name_geo: 'ზედა კიდურის სარტყელი',
+                name_lat: 'Cingulum membri superioris',
+                type: 'Generalis',
+                desc: 'ზედა კიდურის სარტყელი შედგება ბეჭისა და ლავიწისაგან. იგი გამოირჩევა დიდი მობილურობით და უზრუნველყოფს თავისუფალი კიდურის მოძრაობის ფართო დიაპაზონს.'
+            }
+        };
+
+        const infoPanel = document.getElementById('info-panel');
+        
+        function updateInfo(key) {
+            const data = anatomyData[key];
+            if(!data) return;
+            
+            document.getElementById('info-title-geo').textContent = data.name_geo;
+            document.getElementById('info-title-lat').textContent = data.name_lat;
+            document.getElementById('info-badge').textContent = data.type;
+            document.getElementById('info-desc').textContent = data.desc;
+            
+            infoPanel.classList.remove('opacity-0', 'translate-x-8');
+            infoPanel.classList.add('opacity-100', 'translate-x-0');
+
+            ['btn-sternoclavicular', 'btn-acromioclavicular', 'btn-ligaments', 'btn-all'].forEach(id => {
+                document.getElementById(id).classList.remove('bg-slate-700', 'ring-2', 'ring-offset-2', 'ring-offset-slate-900');
+            });
+            
+            if(key !== 'all') {
+                document.getElementById(`btn-${key}`).classList.add('bg-slate-700', 'ring-2', 'ring-offset-2', 'ring-offset-slate-900');
+            }
+        }
+
+        window.highlightJoint = function(type) {
+            updateInfo(type);
+            
+            // Reset opacity globally based on slider
+            materials.bone.opacity = document.getElementById('bone-opacity').value / 100;
+            materials.cartilage.opacity = 0.9;
+            materials.capsuleSC.opacity = 0.15;
+            materials.capsuleAC.opacity = 0.15;
+            materials.ligament.opacity = 0.15;
+            materials.disc.opacity = document.getElementById('disc-toggle').checked ? 0.9 : 0;
+
+            if (type === 'sternoclavicular') {
+                materials.capsuleSC.opacity = 0.9;
+                materials.bone.opacity = 0.3; // Make bones more transparent to see disc
+                gsapCamera(0, 3, 6, 0.5, 0, 0); // Zoom to Sternum
+            } 
+            else if (type === 'acromioclavicular') {
+                materials.capsuleAC.opacity = 0.9;
+                materials.bone.opacity = 0.4;
+                gsapCamera(9, 3, 5, 7, 0, 0); // Zoom to Acromion
+            } 
+            else if (type === 'ligaments') {
+                materials.ligament.opacity = 1;
+                materials.bone.opacity = 0.4;
+                gsapCamera(8, 2, 6, 6, -0.5, 0); // Focus on coracoid region
+            }
+            else {
+                // All
+                materials.bone.opacity = document.getElementById('bone-opacity').value / 100;
+                materials.capsuleSC.opacity = 0.6;
+                materials.capsuleAC.opacity = 0.6;
+                materials.ligament.opacity = 0.8;
+                gsapCamera(5, 5, 12, 3, 0, 0); // Default view
+            }
+        };
+
+        function gsapCamera(cX, cY, cZ, tX, tY, tZ) {
+            const camTarget = new THREE.Vector3(cX, cY, cZ);
+            const lookTarget = new THREE.Vector3(tX, tY, tZ);
+            const speed = 0.04;
+            
+            const anim = () => {
+                camera.position.lerp(camTarget, speed);
+                controls.target.lerp(lookTarget, speed);
+                if (camera.position.distanceTo(camTarget) > 0.1) {
+                    requestAnimationFrame(anim);
+                }
+            };
+            anim();
+        }
+
+        document.getElementById('bone-opacity').addEventListener('input', (e) => {
+            materials.bone.opacity = e.target.value / 100;
+        });
+
+        document.getElementById('disc-toggle').addEventListener('change', (e) => {
+            materials.disc.visible = e.target.checked;
+        });
+
+        highlightJoint('all');
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Slight idle rotation for presentation
+            const time = Date.now() * 0.0005;
+            girdleGroup.position.y = Math.sin(time) * 0.1;
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

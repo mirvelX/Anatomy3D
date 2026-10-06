@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy3D v10.4 - Juncturae Thoracis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; }
+        .interactive-panel { pointer-events: auto; max-height: 100vh; overflow-y: auto; }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); color: white; border-right: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body class="text-white">
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="interactive-panel glass-panel w-80 p-6 flex flex-col gap-6 shadow-2xl shadow-black relative z-20">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400">Anatomy3D <span class="text-gray-400 text-sm">v10.4</span></h1>
+                <p class="text-sm text-gray-300 italic mt-1">Juncturae Thoracis</p>
+                <div class="w-full h-px bg-gray-700 mt-4"></div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold text-white mb-3">გულმკერდის შეერთებები</h2>
+                <div class="flex flex-col gap-2">
+                    
+                    <button onclick="highlightJoint('costovertebral')" id="btn-costovertebral" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-purple-500">
+                        <div class="font-medium text-purple-300">ნეკნ-ხერხემლის სახსრები</div>
+                        <div class="text-xs text-gray-400">Art. costovertebrales</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('sternocostal')" id="btn-sternocostal" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-teal-500">
+                        <div class="font-medium text-teal-300">მკერდ-ნეკნის სახსრები</div>
+                        <div class="text-xs text-gray-400">Art. sternocostales</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('synchondrosis')" id="btn-synchondrosis" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-orange-500">
+                        <div class="font-medium text-orange-300">მკერდის ძვლის სინქონდროზები</div>
+                        <div class="text-xs text-gray-400">Synchondroses sternales</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('all')" id="btn-all" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent text-center mt-2 text-white">
+                        <div class="font-medium">სრული ხედი (Thorax)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="elements-control" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                <h2 class="text-md font-semibold text-gray-200 mb-3">ვიზუალიზაციის კონტროლი</h2>
+                
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">ძვლოვანი ქსოვილი</span>
+                        <input type="range" id="bone-opacity" min="10" max="100" value="100" class="w-24 cursor-pointer accent-blue-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-auto pt-4 text-xs text-gray-500 border-t border-slate-700">
+                Data Struct: v10.4 JSON parsed.<br>
+                Source: კაციტაძე / კონსპექტი
+            </div>
+        </div>
+
+        <div class="ml-auto p-6 pointer-events-none flex flex-col items-end w-96 relative z-20">
+            <div id="info-panel" class="glass-panel p-5 rounded-xl transition-all duration-300 opacity-0 transform translate-x-8 pointer-events-auto shadow-lg shadow-black/50">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 id="info-title-geo" class="text-xl font-bold text-white"></h3>
+                    <span id="info-badge" class="px-2 py-1 text-xs font-bold rounded bg-slate-700 text-slate-300"></span>
+                </div>
+                <h4 id="info-title-lat" class="text-md text-blue-300 italic mb-3 font-serif"></h4>
+                <div class="w-full h-px bg-slate-600 mb-3"></div>
+                <p id="info-desc" class="text-sm text-gray-300 leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0f172a, 0.02);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(15, 5, 15);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 0, 0);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        mainLight.position.set(10, 15, 15);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.DirectionalLight(0xa5b4fc, 0.4);
+        fillLight.position.set(-10, 5, -15);
+        scene.add(fillLight);
+
+        const materials = {
+            bone: new THREE.MeshStandardMaterial({ 
+                color: 0xeae6d8, roughness: 0.8, metalness: 0.1, transparent: true, opacity: 1 
+            }),
+            cartilage: new THREE.MeshStandardMaterial({
+                color: 0xbce6eb, roughness: 0.4, transparent: true, opacity: 0.9
+            }),
+            capsuleCostovertebral: new THREE.MeshStandardMaterial({
+                color: 0xc084fc, roughness: 0.6, transparent: true, opacity: 0.6 // Purple-ish
+            }),
+            capsuleSternocostal: new THREE.MeshStandardMaterial({
+                color: 0x2dd4bf, roughness: 0.6, transparent: true, opacity: 0.6 // Teal-ish
+            }),
+            synchondrosis: new THREE.MeshStandardMaterial({
+                color: 0xfbd38d, roughness: 0.7, transparent: true, opacity: 0.8 // Orange-ish
+            })
+        };
+
+        const thoraxGroup = new THREE.Group();
+        scene.add(thoraxGroup);
+
+        const meshes = {
+            bones: [],
+            costovertebralJoints: [],
+            sternocostalJoints: [],
+            synchondroses: []
+        };
+
+        function createSternum() {
+            const sternumGroup = new THREE.Group();
+
+            // Manubrium sterni
+            const manubriumGeo = new THREE.BoxGeometry(2, 2.5, 0.5);
+            const manubrium = new THREE.Mesh(manubriumGeo, materials.bone);
+            manubrium.position.set(0, 4, 6);
+            sternumGroup.add(manubrium);
+            meshes.bones.push(manubrium);
+
+            // Symphysis/Synchondrosis manubriosternalis
+            const synch1Geo = new THREE.BoxGeometry(1.9, 0.3, 0.45);
+            const synch1 = new THREE.Mesh(synch1Geo, materials.synchondrosis);
+            synch1.position.set(0, 2.6, 6);
+            sternumGroup.add(synch1);
+            meshes.synchondroses.push(synch1);
+
+            // Corpus sterni
+            const corpusGeo = new THREE.BoxGeometry(1.6, 5, 0.4);
+            const corpus = new THREE.Mesh(corpusGeo, materials.bone);
+            corpus.position.set(0, 0, 6.1);
+            sternumGroup.add(corpus);
+            meshes.bones.push(corpus);
+
+            // Synchondrosis xiphosternalis
+            const synch2Geo = new THREE.BoxGeometry(1.2, 0.3, 0.35);
+            const synch2 = new THREE.Mesh(synch2Geo, materials.synchondrosis);
+            synch2.position.set(0, -2.65, 6.1);
+            sternumGroup.add(synch2);
+            meshes.synchondroses.push(synch2);
+
+            // Processus xiphoideus
+            const xiphoidGeo = new THREE.ConeGeometry(0.6, 1.5, 4);
+            const xiphoid = new THREE.Mesh(xiphoidGeo, materials.bone);
+            xiphoid.rotation.y = Math.PI / 4;
+            xiphoid.position.set(0, -3.5, 6.1);
+            sternumGroup.add(xiphoid);
+            meshes.bones.push(xiphoid);
+
+            return sternumGroup;
+        }
+
+        function createVertebra(yPos) {
+            const vertGroup = new THREE.Group();
+            
+            const bodyGeo = new THREE.CylinderGeometry(1.8, 1.9, 1.5, 32);
+            bodyGeo.scale(1, 1, 0.8);
+            const body = new THREE.Mesh(bodyGeo, materials.bone);
+            vertGroup.add(body);
+            meshes.bones.push(body);
+
+            const archGeo = new THREE.BoxGeometry(1, 1, 2);
+            const arch = new THREE.Mesh(archGeo, materials.bone);
+            arch.position.set(0, 0, -2);
+            vertGroup.add(arch);
+            meshes.bones.push(arch);
+
+            const transGeo = new THREE.CylinderGeometry(0.3, 0.3, 3.5);
+            const transProc = new THREE.Mesh(transGeo, materials.bone);
+            transProc.rotation.z = Math.PI / 2;
+            transProc.position.set(0, 0, -1);
+            vertGroup.add(transProc);
+            meshes.bones.push(transProc);
+
+            vertGroup.position.set(0, yPos, -4);
+            return vertGroup;
+        }
+
+        function createRibPair(yPos, width, sternumY) {
+            const pairGroup = new THREE.Group();
+
+            // Custom curve for rib (simplified arc)
+            class RibCurve extends THREE.Curve {
+                constructor(scale = 1, isRight = true) {
+                    super();
+                    this.scale = scale;
+                    this.isRight = isRight;
+                }
+                getPoint(t, optionalTarget = new THREE.Vector3()) {
+                    const dir = this.isRight ? 1 : -1;
+                    // Start at vertebra (-4 Z), curve out to X, come back to sternum (6 Z)
+                    const x = Math.sin(t * Math.PI) * width * dir;
+                    const z = -4 + (t * 10); // from -4 to 6
+                    // Arc down slightly then up to sternum
+                    const yOffset = Math.sin(t * Math.PI) * -1.5; 
+                    
+                    return optionalTarget.set(x, yOffset, z);
+                }
+            }
+
+            const pathRight = new RibCurve(1, true);
+            const pathLeft = new RibCurve(1, false);
+            
+            const tubeGeoR = new THREE.TubeGeometry(pathRight, 20, 0.3, 8, false);
+            const tubeGeoL = new THREE.TubeGeometry(pathLeft, 20, 0.3, 8, false);
+
+            const ribRight = new THREE.Mesh(tubeGeoR, materials.bone);
+            const ribLeft = new THREE.Mesh(tubeGeoL, materials.bone);
+            
+            pairGroup.add(ribRight);
+            pairGroup.add(ribLeft);
+            meshes.bones.push(ribRight, ribLeft);
+
+            // Costovertebral Joints (Art. capitis costae & Art. costotransversaria)
+            const cvCapsuleGeo = new THREE.SphereGeometry(0.7, 16, 16);
+            const cvCapsuleR = new THREE.Mesh(cvCapsuleGeo, materials.capsuleCostovertebral);
+            cvCapsuleR.position.set(1.5, 0, -3.8); // Near vertebra
+            const cvCapsuleL = new THREE.Mesh(cvCapsuleGeo, materials.capsuleCostovertebral);
+            cvCapsuleL.position.set(-1.5, 0, -3.8);
+            
+            pairGroup.add(cvCapsuleR, cvCapsuleL);
+            meshes.costovertebralJoints.push(cvCapsuleR, cvCapsuleL);
+
+            // Sternocostal Joints & Cartilage
+            const scCartilageGeo = new THREE.CylinderGeometry(0.35, 0.3, 1.5);
+            
+            const scCartR = new THREE.Mesh(scCartilageGeo, materials.cartilage);
+            scCartR.rotation.z = Math.PI / 2;
+            scCartR.rotation.y = -0.3;
+            scCartR.position.set(1.2, 0, 5.8);
+            
+            const scCartL = new THREE.Mesh(scCartilageGeo, materials.cartilage);
+            scCartL.rotation.z = Math.PI / 2;
+            scCartL.rotation.y = 0.3;
+            scCartL.position.set(-1.2, 0, 5.8);
+
+            pairGroup.add(scCartR, scCartL);
+            
+            // Sternocostal capsules
+            const scCapsuleGeo = new THREE.SphereGeometry(0.6, 16, 16);
+            const scCapsuleR = new THREE.Mesh(scCapsuleGeo, materials.capsuleSternocostal);
+            scCapsuleR.position.set(0.9, 0, 6);
+            const scCapsuleL = new THREE.Mesh(scCapsuleGeo, materials.capsuleSternocostal);
+            scCapsuleL.position.set(-0.9, 0, 6);
+
+            pairGroup.add(scCapsuleR, scCapsuleL);
+            meshes.sternocostalJoints.push(scCapsuleR, scCapsuleL);
+
+            pairGroup.position.y = yPos;
+            // Adjust the front part to match sternum Y
+            scCartR.position.y += sternumY - yPos;
+            scCartL.position.y += sternumY - yPos;
+            scCapsuleR.position.y += sternumY - yPos;
+            scCapsuleL.position.y += sternumY - yPos;
+
+            return pairGroup;
+        }
+
+        thoraxGroup.add(createSternum());
+        
+        // Add a few vertebrae and ribs
+        thoraxGroup.add(createVertebra(2));
+        thoraxGroup.add(createVertebra(0));
+        thoraxGroup.add(createVertebra(-2));
+
+        // Ribs: yPos, width, sternumY_offset
+        thoraxGroup.add(createRibPair(2, 6, 2.5));
+        thoraxGroup.add(createRibPair(0, 6.5, 0));
+        thoraxGroup.add(createRibPair(-2, 7, -2.5));
+
+
+        const anatomyData = {
+            'costovertebral': {
+                name_geo: 'ნეკნ-ხერხემლის სახსრები',
+                name_lat: 'Art. costovertebrales',
+                type: 'Diarthrosis',
+                desc: 'მოიცავს ნეკნის თავის სახსარს (Art. capitis costae) და ნეკნ-განივ სახსარს (Art. costotransversaria). ისინი ფუნქციურად კომბინირებულია და ქმნიან ცილინდრულ სახსარს, რაც უზრუნველყოფს ნეკნის აწევა-დაწევას სუნთქვისას.'
+            },
+            'sternocostal': {
+                name_geo: 'მკერდ-ნეკნის სახსრები',
+                name_lat: 'Articulationes sternocostales',
+                type: 'Diarthrosis / Synchondrosis',
+                desc: 'ჭეშმარიტი ნეკნების (II-VII) ხრტილების შეერთება მკერდის ძვალთან. I ნეკნი უკავშირდება უწყვეტად (სინქონდროზი). აქვთ მჭიდრო კაფსულა და ხშირად სასახსრე ღრუ შიგა იოგითაა გაყოფილი.'
+            },
+            'synchondrosis': {
+                name_geo: 'მკერდის ძვლის სინქონდროზები',
+                name_lat: 'Synchondroses sternales',
+                type: 'Synarthrosis (Synchondrosis)',
+                desc: 'მკერდის ტარის, სხეულისა და მახვილისებრი მორჩის ხრტილოვანი შეერთებები. ასაკის მატებასთან ერთად ხრტილი ძვლდება და ყალიბდება ძვლოვანი შეერთება (Synostosis).'
+            },
+            'all': {
+                name_geo: 'გულმკერდის ყაფაზი',
+                name_lat: 'Thorax / Compages thoracis',
+                type: 'Generalis',
+                desc: 'გულმკერდის ჩონჩხი წარმოდგენილია გულმკერდის მალებით, ნეკნებითა და მკერდის ძვლით. მათი შეერთებები უზრუნველყოფს სუნთქვით ბიომექანიკას და შინაგანი ორგანოების დაცვას.'
+            }
+        };
+
+        const infoPanel = document.getElementById('info-panel');
+        
+        function updateInfo(key) {
+            const data = anatomyData[key];
+            if(!data) return;
+            
+            document.getElementById('info-title-geo').textContent = data.name_geo;
+            document.getElementById('info-title-lat').textContent = data.name_lat;
+            document.getElementById('info-badge').textContent = data.type;
+            document.getElementById('info-desc').textContent = data.desc;
+            
+            infoPanel.classList.remove('opacity-0', 'translate-x-8');
+            infoPanel.classList.add('opacity-100', 'translate-x-0');
+
+            ['btn-costovertebral', 'btn-sternocostal', 'btn-synchondrosis', 'btn-all'].forEach(id => {
+                document.getElementById(id).classList.remove('bg-slate-700', 'ring-2', 'ring-offset-2', 'ring-offset-slate-900');
+            });
+            
+            if(key !== 'all') {
+                document.getElementById(`btn-${key}`).classList.add('bg-slate-700', 'ring-2', 'ring-offset-2', 'ring-offset-slate-900');
+            }
+        }
+
+        window.highlightJoint = function(type) {
+            updateInfo(type);
+            
+            // Reset opacity
+            materials.bone.opacity = document.getElementById('bone-opacity').value / 100;
+            materials.cartilage.opacity = 0.9;
+            materials.capsuleCostovertebral.opacity = 0.15;
+            materials.capsuleSternocostal.opacity = 0.15;
+            materials.synchondrosis.opacity = 0.2;
+
+            if (type === 'costovertebral') {
+                materials.capsuleCostovertebral.opacity = 0.9;
+                materials.bone.opacity = 0.4;
+                gsapCamera(-10, 5, -12, -4); // Look from back
+            } 
+            else if (type === 'sternocostal') {
+                materials.capsuleSternocostal.opacity = 0.9;
+                materials.bone.opacity = 0.4;
+                gsapCamera(10, 2, 12, 6); // Look from front
+            } 
+            else if (type === 'synchondrosis') {
+                materials.synchondrosis.opacity = 1;
+                materials.bone.opacity = 0.3;
+                gsapCamera(0, 0, 15, 6); // Look straight at sternum
+            }
+            else {
+                // All
+                materials.bone.opacity = document.getElementById('bone-opacity').value / 100;
+                materials.capsuleCostovertebral.opacity = 0.6;
+                materials.capsuleSternocostal.opacity = 0.6;
+                materials.synchondrosis.opacity = 0.8;
+                gsapCamera(15, 5, 15, 0); // Default isometric view
+            }
+        };
+
+        function gsapCamera(x, y, z, targetZ) {
+            const targetPos = new THREE.Vector3(x, y, z);
+            const lookTarget = new THREE.Vector3(0, 0, targetZ);
+            const speed = 0.04;
+            
+            const anim = () => {
+                camera.position.lerp(targetPos, speed);
+                controls.target.lerp(lookTarget, speed);
+                if (camera.position.distanceTo(targetPos) > 0.1) {
+                    requestAnimationFrame(anim);
+                }
+            };
+            anim();
+        }
+
+        document.getElementById('bone-opacity').addEventListener('input', (e) => {
+            materials.bone.opacity = e.target.value / 100;
+        });
+
+        highlightJoint('all');
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Gentle breathing animation for the thorax
+            const time = Date.now() * 0.001;
+            thoraxGroup.scale.y = 1 + Math.sin(time) * 0.02;
+            thoraxGroup.scale.x = 1 + Math.sin(time) * 0.01;
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

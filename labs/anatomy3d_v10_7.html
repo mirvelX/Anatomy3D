@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy3D v10.7 - Juncturae Pelvis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; }
+        .interactive-panel { pointer-events: auto; max-height: 100vh; overflow-y: auto; }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); color: white; border-right: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body class="text-white">
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="interactive-panel glass-panel w-80 p-6 flex flex-col gap-6 shadow-2xl shadow-black relative z-20">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400">Anatomy3D <span class="text-gray-400 text-sm">v10.7</span></h1>
+                <p class="text-sm text-gray-300 italic mt-1">Juncturae Pelvis</p>
+                <div class="w-full h-px bg-gray-700 mt-4"></div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold text-white mb-3">მენჯის შეერთებები</h2>
+                <div class="flex flex-col gap-2">
+                    
+                    <button onclick="highlightJoint('sacroiliac')" id="btn-sacroiliac" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-purple-500">
+                        <div class="font-medium text-purple-300">გავა-თეძოს სახსარი</div>
+                        <div class="text-xs text-gray-400">Articulatio sacroiliaca</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('symphysis')" id="btn-symphysis" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-teal-500">
+                        <div class="font-medium text-teal-300">ბოქვენის სიმფიზი</div>
+                        <div class="text-xs text-gray-400">Symphysis pubica</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('ligaments')" id="btn-ligaments" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent hover:border-blue-500">
+                        <div class="font-medium text-blue-300">მენჯის იოგები</div>
+                        <div class="text-xs text-gray-400">Syndesmosis pelvis</div>
+                    </button>
+                    
+                    <button onclick="highlightJoint('all')" id="btn-all" class="text-left px-3 py-2 bg-slate-800/80 hover:bg-slate-700 rounded transition border border-transparent text-center mt-2 text-white">
+                        <div class="font-medium">სრული ხედი (Pelvis)</div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="elements-control" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                <h2 class="text-md font-semibold text-gray-200 mb-3">ვიზუალიზაციის კონტროლი</h2>
+                
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">ძვლის გამჭვირვალობა</span>
+                        <input type="range" id="bone-opacity" min="10" max="100" value="100" class="w-24 cursor-pointer accent-blue-500">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">ბოქვენთაშუა დისკო</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="disc-toggle" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-auto pt-4 text-xs text-gray-500 border-t border-slate-700">
+                Data Struct: v10.7 JSON parsed.<br>
+                Source: კაციტაძე / კონსპექტი
+            </div>
+        </div>
+
+        <div class="ml-auto p-6 pointer-events-none flex flex-col items-end w-96 relative z-20">
+            <div id="info-panel" class="glass-panel p-5 rounded-xl transition-all duration-300 opacity-0 transform translate-x-8 pointer-events-auto shadow-lg shadow-black/50">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 id="info-title-geo" class="text-xl font-bold text-white"></h3>
+                    <span id="info-badge" class="px-2 py-1 text-xs font-bold rounded bg-slate-700 text-slate-300"></span>
+                </div>
+                <h4 id="info-title-lat" class="text-md text-blue-300 italic mb-3 font-serif"></h4>
+                <div class="w-full h-px bg-slate-600 mb-3"></div>
+                <p id="info-desc" class="text-sm text-gray-300 leading-relaxed"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0f172a, 0.015);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 20);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 0, 0); 
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        mainLight.position.set(10, 15, 15);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.DirectionalLight(0xa5b4fc, 0.4);
+        fillLight.position.set(-10, 5, -15);
+        scene.add(fillLight);
+
+        const materials = {
+            bone: new THREE.MeshStandardMaterial({ 
+                color: 0xeae6d8, roughness: 0.8, metalness: 0.1, transparent: true, opacity: 1 
+            }),
+            capsuleSI: new THREE.MeshStandardMaterial({
+                color: 0xc084fc, roughness: 0.6, transparent: true, opacity: 0.6 // Sacroiliac joint
+            }),
+            symphysis: new THREE.MeshStandardMaterial({
+                color: 0x2dd4bf, roughness: 0.5, transparent: true, opacity: 0.9 // Pubic symphysis disc
+            }),
+            ligament: new THREE.MeshStandardMaterial({
+                color: 0x60a5fa, roughness: 0.7, transparent: true, opacity: 0.85, side: THREE.DoubleSide // Sacrotuberous/Sacrospinous
+            }),
+            membrane: new THREE.MeshStandardMaterial({
+                color: 0x94a3b8, roughness: 0.8, transparent: true, opacity: 0.5, side: THREE.DoubleSide // Obturator membrane
+            })
+        };
+
+        const pelvisGroup = new THREE.Group();
+        scene.add(pelvisGroup);
+
+        const meshes = {
+            bones: [],
+            siJoints: [],
+            symphysisDisc: null,
+            ligaments: [],
+            membranes: []
+        };
+
+        function createSacrum() {
+            const sacrumGroup = new THREE.Group();
+            
+            // Os sacrum (Wedge shape)
+            const sacrumGeo = new THREE.CylinderGeometry(2, 0.5, 4, 32);
+            sacrumGeo.scale(1, 1, 0.6); // Flatten front-to-back
+            const sacrum = new THREE.Mesh(sacrumGeo, materials.bone);
+            sacrum.rotation.x = -Math.PI / 8; // Pelvic tilt
+            sacrum.position.set(0, 2, -3);
+            sacrumGroup.add(sacrum);
+            meshes.bones.push(sacrum);
+
+            // Os coccygis (Tailbone)
+            const coccyxGeo = new THREE.ConeGeometry(0.5, 1.5, 16);
+            coccyxGeo.scale(1, 1, 0.6);
+            const coccyx = new THREE.Mesh(coccyxGeo, materials.bone);
+            coccyx.rotation.x = -Math.PI / 6;
+            coccyx.position.set(0, -0.8, -3.8);
+            sacrumGroup.add(coccyx);
+            meshes.bones.push(coccyx);
+
+            return sacrumGroup;
+        }
+
+        function createOsCoxae(isLeft) {
+            const sideGroup = new THREE.Group();
+            const sign = isLeft ? -1 : 1;
+            
+            // Ala ossis ilii (Iliac blade) - broad flat part
+            const iliumGeo = new THREE.SphereGeometry(2.5, 16, 16);
+            iliumGeo.scale(1, 1.2, 0.3); // Flatten into a blade
+            const ilium = new THREE.Mesh(iliumGeo, materials.bone);
+            ilium.position.set(3.5 * sign, 3, -1.5);
+            ilium.rotation.y = (-Math.PI / 4) * sign;
+            ilium.rotation.z = (Math.PI / 8) * sign;
+            sideGroup.add(ilium);
+            meshes.bones.push(ilium);
+
+            // Corpus ossis ilii & Acetabulum region
+            const acetabulumGeo = new THREE.SphereGeometry(1.2, 16, 16);
+            const acetabulum = new THREE.Mesh(acetabulumGeo, materials.bone);
+            acetabulum.position.set(3.5 * sign, 0, 0);
+            sideGroup.add(acetabulum);
+            meshes.bones.push(acetabulum);
+
+            // Os pubis (Anterior part)
+            const pubisGeo = new THREE.CylinderGeometry(0.4, 0.4, 4, 16);
+            const pubis = new THREE.Mesh(pubisGeo, materials.bone);
+            pubis.rotation.z = (Math.PI / 2.5) * sign;
+            pubis.rotation.y = (Math.PI / 4) * sign;
+            pubis.position.set(1.8 * sign, -1.5, 1.8);
+            sideGroup.add(pubis);
+            meshes.bones.push(pubis);
+
+            // Ramus inferior ossis pubis & Ramus ossis ischii
+            const lowerRamusGeo = new THREE.CylinderGeometry(0.4, 0.4, 3, 16);
+            const lowerRamus = new THREE.Mesh(lowerRamusGeo, materials.bone);
+            lowerRamus.rotation.z = (-Math.PI / 3) * sign;
+            lowerRamus.rotation.y = (-Math.PI / 6) * sign;
+            lowerRamus.position.set(2 * sign, -3.5, 1);
+            sideGroup.add(lowerRamus);
+            meshes.bones.push(lowerRamus);
+
+            // Tuber ischiadicum (Ischial tuberosity - the part we sit on)
+            const ischiumGeo = new THREE.SphereGeometry(0.8, 16, 16);
+            const ischium = new THREE.Mesh(ischiumGeo, materials.bone);
+            ischium.position.set(3 * sign, -3.5, -0.5);
+            sideGroup.add(ischium);
+            meshes.bones.push(ischium);
+
+            // Corpus ossis ischii (connecting tuberosity to acetabulum)
+            const ischiumBodyGeo = new THREE.CylinderGeometry(0.5, 0.5, 3.5, 16);
+            const ischiumBody = new THREE.Mesh(ischiumBodyGeo, materials.bone);
+            ischiumBody.position.set(3.3 * sign, -1.8, -0.3);
+            sideGroup.add(ischiumBody);
+            meshes.bones.push(ischiumBody);
+
+            // Foramen obturatum is formed by the pubic and ischial rami.
+            const membraneGeo = new THREE.PlaneGeometry(1.8, 2.5);
+            const membrane = new THREE.Mesh(membraneGeo, materials.membrane);
+            membrane.position.set(2.8 * sign, -2, 1);
+            membrane.rotation.y = (Math.PI / 6) * sign;
+            membrane.rotation.x = -Math.PI / 8;
+            sideGroup.add(membrane);
+            meshes.membranes.push(membrane);
+
+            // Articulatio sacroiliaca (Capsule)
+            const siCapsuleGeo = new THREE.SphereGeometry(1.2, 16, 16);
+            siCapsuleGeo.scale(0.5, 1.5, 1);
+            const siCapsule = new THREE.Mesh(siCapsuleGeo, materials.capsuleSI);
+            siCapsule.position.set(1.5 * sign, 2.5, -2.5);
+            siCapsule.rotation.y = (Math.PI / 6) * sign;
+            sideGroup.add(siCapsule);
+            meshes.siJoints.push(siCapsule);
+
+            // Lig. sacrotuberale (Sacrum to Ischial tuberosity)
+            const sacrotubGeo = new THREE.CylinderGeometry(0.15, 0.2, 4);
+            const sacrotubLig = new THREE.Mesh(sacrotubGeo, materials.ligament);
+            sacrotubLig.position.set(1.5 * sign, -1.2, -2);
+            sacrotubLig.rotation.z = (-Math.PI / 4) * sign;
+            sacrotubLig.rotation.x = -Math.PI / 6;
+            sideGroup.add(sacrotubLig);
+            meshes.ligaments.push(sacrotubLig);
+            
+            // Lig. sacrospinale (Sacrum to Ischial spine - simplified)
+            const sacrospinGeo = new THREE.CylinderGeometry(0.1, 0.1, 2.5);
+            const sacrospinLig = new THREE.Mesh(sacrospinGeo, materials.ligament);
+            sacrospinLig.position.set(1.5 * sign, 0.5, -2);
+            sacrospinLig.rotation.z = (-Math.PI / 2.5) * sign;
+            sideGroup.add(sacrospinLig);
+            meshes.ligaments.push(sacrospinLig);
+
+            return sideGroup;
+        }
+
+        pelvisGroup.add(createSacrum());
+        pelvisGroup.add(createOsCoxae(true)); // Left
+        pelvisGroup.add(createOsCoxae(false)); // Right
+
+        // Symphysis pubica (Discus interpubicus) - Midline
+        const symphysisGeo = new THREE.BoxGeometry(0.4, 2, 1);
+        const symphysisDisc = new THREE.Mesh(symphysisGeo, materials.symphysis);
+        symphysisDisc.position.set(0, -2.5, 2.8);
+        symphysisDisc.rotation.x = Math.PI / 8; // Match pubic angle
+        pelvisGroup.add(symphysisDisc);
+        meshes.symphysisDisc = symphysisDisc;
+
+
+        const anatomyData = {
+            'sacroiliac': {
+                name_geo: 'გავა-თეძოს სახსარი',
+                name_lat: 'Articulatio sacroiliaca',
+                type: 'Diarthrosis (Plana)',
+                desc: 'მძლავრი, ბრტყელი და მცირედ მოძრავი სახსარი გავისა და თეძოს ძვლებს შორის. აქვს ძალიან მჭიდრო კაფსულა. მისი მთავარი ფუნქციაა ტანის სიმძიმის ქვედა კიდურებზე გადაცემა.'
+            },
+            'symphysis': {
+                name_geo: 'ბოქვენის სიმფიზი',
+                name_lat: 'Symphysis pubica',
+                type: 'Symphysis (Hemiarthrosis)',
+                desc: 'ორივე ბოქვენის ძვლის შეერთება შუა ხაზზე. მათ შორის მოთავსებულია ბოქვენთაშუა დისკო (Discus interpubicus), რომლის შიგნითაც ვიწრო ნაპრალია.'
+            },
+            'ligaments': {
+                name_geo: 'მენჯის საკუთარი იოგები',
+                name_lat: 'Syndesmosis pelvis',
+                type: 'Syndesmosis',
+                desc: 'მოიცავს გავა-კუკუხოს (Lig. sacrotuberale) და გავა-წვეტის (Lig. sacrospinale) იოგებს, რომლებიც მცირე და დიდი საჯდომ ამონაჭდევებს ხვრელებად აქცევენ, ასევე დამხურავ აპკს (Membrana obturatoria).'
+            },
+            'all': {
+                name_geo: 'მენჯი მთლიანობაში',
+                name_lat: 'Pelvis',
+                type: 'Generalis',
+                desc: 'მენჯის რგოლი იქმნება გავის, კუდუსუნისა და ორი მენჯის ძვლის შეერთებით. იგი იცავს მენჯის ღრუს ორგანოებს და წარმოადგენს ტანის საყრდენს.'
+            }
+        };
+
+        const infoPanel = document.getElementById('info-panel');
+        
+        function updateInfo(key) {
+            const data = anatomyData[key];
+            if(!data) return;
+            
+            document.getElementById('info-title-geo').textContent = data.name_geo;
+            document.getElementById('info-title-lat').textContent = data.name_lat;
+            document.getElementById('info-badge').textContent = data.type;
+            document.getElementById('info-desc').textContent = data.desc;
+            
+            infoPanel.classList.remove('opacity-0', 'translate-x-8');
+            infoPanel.classList.add('opacity-100', 'translate-x-0');
+
+            ['btn-sacroiliac', 'btn-symphysis', 'btn-ligaments', 'btn-all'].forEach(id => {
+                document.getElementById(id).classList.remove('bg-slate-700', 'ring-2', 'ring-offset-2', 'ring-offset-slate-900');
+            });
+            
+            if(key !== 'all') {
+                document.getElementById(`btn-${key}`).classList.add('bg-slate-700', 'ring-2', 'ring-offset-2', 'ring-offset-slate-900');
+            }
+        }
+
+        window.highlightJoint = function(type) {
+            updateInfo(type);
+            
+            // Reset opacity globally based on slider
+            materials.bone.opacity = document.getElementById('bone-opacity').value / 100;
+            materials.capsuleSI.opacity = 0.15;
+            materials.ligament.opacity = 0.15;
+            materials.membrane.opacity = 0.15;
+            materials.symphysis.opacity = document.getElementById('disc-toggle').checked ? 0.9 : 0;
+
+            if (type === 'sacroiliac') {
+                materials.capsuleSI.opacity = 0.9;
+                materials.bone.opacity = 0.4;
+                gsapCamera(0, 6, -12, 0, 2, -2); // Look from back, slightly above
+            } 
+            else if (type === 'symphysis') {
+                materials.symphysis.opacity = 1;
+                materials.bone.opacity = 0.4;
+                gsapCamera(0, -2, 10, 0, -2, 2); // Look directly at symphysis from front
+            } 
+            else if (type === 'ligaments') {
+                materials.ligament.opacity = 1;
+                materials.membrane.opacity = 0.7;
+                materials.bone.opacity = 0.4;
+                gsapCamera(-8, -2, -8, 0, 0, 0); // Look from postero-lateral to see sacrotuberous
+            }
+            else {
+                // All
+                materials.bone.opacity = document.getElementById('bone-opacity').value / 100;
+                materials.capsuleSI.opacity = 0.5;
+                materials.ligament.opacity = 0.7;
+                materials.membrane.opacity = 0.4;
+                gsapCamera(0, 5, 20, 0, 0, 0); // Default isometric view
+            }
+        };
+
+        function gsapCamera(cX, cY, cZ, tX, tY, tZ) {
+            const camTarget = new THREE.Vector3(cX, cY, cZ);
+            const lookTarget = new THREE.Vector3(tX, tY, tZ);
+            const speed = 0.04;
+            
+            const anim = () => {
+                camera.position.lerp(camTarget, speed);
+                controls.target.lerp(lookTarget, speed);
+                if (camera.position.distanceTo(camTarget) > 0.1) {
+                    requestAnimationFrame(anim);
+                }
+            };
+            anim();
+        }
+
+        document.getElementById('bone-opacity').addEventListener('input', (e) => {
+            materials.bone.opacity = e.target.value / 100;
+        });
+
+        document.getElementById('disc-toggle').addEventListener('change', (e) => {
+            materials.symphysis.visible = e.target.checked;
+        });
+
+        highlightJoint('all');
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Slight rotation to show the 3D structure natively
+            const time = Date.now() * 0.0003;
+            pelvisGroup.position.y = Math.sin(time) * 0.1;
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

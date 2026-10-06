@@ -707,3 +707,6 @@ registerPwa(saveWorkspace);
 $("pilotNotice").href = pilotAssetUrl("NOTICE.txt");
 $("pilotManifest").href = pilotAssetUrl("manifest.json");
 if (state.meshMode === "atlas") ensurePilot();
+
+import { initCurriculum } from './curriculum/ui.js';
+initCurriculum({ getLevel: () => state.vertebra });

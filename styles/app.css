@@ -630,3 +630,22 @@ a:focus-visible {
 .camera {
   flex-wrap: wrap;
 }
+
+
+.category-section {
+  padding-bottom: 2px;
+}
+.category-section select {
+  border-color: #4f7189;
+  background: #173047;
+}
+.category-hint {
+  font-size: 0.76rem;
+  margin: 0;
+}
+#spineMenu {
+  display: contents;
+}
+#spineMenu.hidden {
+  display: none;
+}

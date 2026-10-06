@@ -10,7 +10,7 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     <header class="curriculum-head"><div><p class="curriculum-eyebrow">ANATOMY 3D · ახალი თემები · სამუშაო ვერსია</p><h2 id="curriculumTitle">ანატომიის სასწავლო სივრცე</h2></div><button data-close aria-label="სასწავლო სივრცის დახურვა">მალების ატლასზე დაბრუნება ×</button></header>
     <p class="curriculum-notice">მასალა დამუშავებულია კონსპექტის ხელმისაწვდომი ასლით. კაციტაძესთან შედარება დაუსრულებელია. ახალი 3D მოდელები ჯერ არ არის დამატებული.</p>
     <p data-storage role="status" class="curriculum-storage"></p>
-    <div class="curriculum-shell"><aside class="curriculum-nav"><nav aria-label="სასწავლო თემები" data-modules></nav><div class="curriculum-total" data-total></div><button data-export>პროგრესის შენახვა (.json)</button><label>პროგრესის აღდგენა<input data-import type="file" accept=".json,application/json"></label></aside>
+    <div class="curriculum-shell"><aside class="curriculum-nav"><label class="curriculum-mobile-nav">სასწავლო თემა<select data-mobile-module></select></label><nav aria-label="სასწავლო თემები" data-modules></nav><div class="curriculum-total" data-total></div><button data-export>პროგრესის შენახვა (.json)</button><label>პროგრესის აღდგენა<input data-import type="file" accept=".json,application/json"></label></aside>
     <main class="curriculum-main"><div class="curriculum-module-head"><div><p data-version class="curriculum-eyebrow"></p><h3 data-title></h3><p data-latin></p></div><span data-progress></span></div>
     <progress data-bar max="1" value="0" aria-label="მოდულის სასწავლო პროგრესი"></progress>
     <p data-context class="curriculum-context"></p>
@@ -101,6 +101,7 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
   function setQuiz(value) { quiz = value; $('quiz').hidden = !quiz; $('study').hidden = quiz; $('mode').textContent = quiz ? 'სწავლაზე დაბრუნება' : 'გამოცდა'; $('mode').setAttribute('aria-pressed', String(quiz)); if (quiz) nextQuestion(); }
   function selectModule(module) {
     selectedModule = module; selected = module.entries[0]; rowMode = false;
+    $('mobile-module').value = module.id;
     $('title').textContent = module.ka; $('latin').textContent = module.latin; $('version').textContent = `v${module.version} · სამუშაო მასალა`;
     $('search').value = ''; $('group').replaceChildren(new Option('ყველა ჯგუფი', ''));
     for (const group of new Set(module.entries.map(e => e.group))) $('group').append(new Option(group, group));
@@ -110,7 +111,8 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     for (const b of $('modules').children) b.setAttribute('aria-current', b.dataset.module === module.id ? 'page' : 'false');
     setQuiz(false); renderList(); renderDetail(); renderProgress();
   }
-  for (const module of modules) { const b = element('button', `${module.ka}\nv${module.version}`); b.dataset.module = module.id; b.onclick = () => { context = ''; selectModule(module); }; $('modules').append(b); }
+  for (const module of modules) { const b = element('button', `${module.ka}\nv${module.version}`); b.dataset.module = module.id; b.onclick = () => { context = ''; selectModule(module); }; $('modules').append(b); $('mobile-module').append(new Option(module.ka,module.id)); }
+  $('mobile-module').onchange = () => { context=''; selectModule(modules.find(m=>m.id===$('mobile-module').value)); };
   $('search').oninput = $('group').onchange = () => { renderList(); if (quiz) nextQuestion(); };
   $('mode').onclick = () => { rowMode = false; setQuiz(!quiz); };
   $('row').onclick = () => { rowMode = true; setQuiz(true); };

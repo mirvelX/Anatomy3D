@@ -33,7 +33,7 @@ export async function build(out = resolve(root, "dist")) {
   const release = hash.digest("hex").slice(0, 16),
     prefix = "releases/" + release;
   await mkdir(out, { recursive: true });
-  for (const dir of ["src", "styles", "assets", "labs"])
+  for (const dir of ["src", "styles", "assets"])
     await cp(resolve(root, dir), resolve(out, prefix, dir), {
       recursive: true,
     });
@@ -44,6 +44,7 @@ export async function build(out = resolve(root, "dist")) {
     "instagram-share.png",
   ])
     await cp(resolve(root, file), resolve(out, file), { recursive: true });
+  await cp(resolve(root, "labs"), resolve(out, "labs"), { recursive: true });
   const html = (await readFile(resolve(root, "index.html"), "utf8"))
     .replace("./styles/app.css", `./${prefix}/styles/app.css`)
     .replace("./src/main.js", `./${prefix}/src/main.js`);
@@ -52,8 +53,11 @@ export async function build(out = resolve(root, "dist")) {
     "./index.html",
     "./manifest.webmanifest",
     ...files
-      .filter((file) => /^(src|styles|assets|labs)[\\/]/.test(file))
+      .filter((file) => /^(src|styles|assets)[\\/]/.test(file))
       .map((file) => "./" + prefix + "/" + file.replaceAll("\\", "/")),
+    ...files
+      .filter((file) => file.startsWith("labs"))
+      .map((file) => "./" + file.replaceAll("\\", "/")),
     ...files
       .filter((file) => file.startsWith("icons"))
       .map((file) => "./" + file.replaceAll("\\", "/")),

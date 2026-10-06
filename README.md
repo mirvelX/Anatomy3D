@@ -1,4 +1,14 @@
-# v10.x curriculum draft (separate preview branch)
+# v10.8 interactive curriculum update
+
+The main v10.x branch now includes the seven user-provided interactive lab pages
+for v10.2 through v10.8, accessible from the curriculum workspace. They cover
+general arthrology, vertebral connections, thoracic connections, upper-limb
+girdle connections, free upper-limb connections, pelvis connections and free
+lower-limb connections.
+
+The labs are published as user-provided teaching visualizations. Their procedural
+geometry is not counted as anatomically reviewed mesh coverage. The existing
+BodyParts3D C1/C2/L3 pilot remains unchanged.
 
 Adds nine draft study modules and 278 records with Georgian/Latin search,
 progress, quizzes and source-review tracking. New mesh coverage is **0/278**:

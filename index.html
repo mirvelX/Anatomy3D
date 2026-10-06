@@ -43,9 +43,22 @@
             <p>Vertebral Atlas · v10.1 alpha</p>
           </div>
         </div>
+        <section class="section category-section">
+          <div class="section-title">
+            <p class="kicker">01 · კატეგორია</p>
+            <span class="chip">1 ხელმისაწვდომი</span>
+          </div>
+          <label for="category">ჩონჩხის ნაწილი</label>
+          <select id="category">
+            <option value="">აირჩიე კატეგორია</option>
+            <option value="spine">ხერხემალი</option>
+          </select>
+          <p class="sub category-hint">ჯერ ხელმისაწვდომია ხერხემალი. სხვა ძვლებს შემდეგ ეტაპებად დავამატებთ.</p>
+        </section>
+        <div id="spineMenu" class="hidden">
         <section class="section">
           <div class="section-title">
-            <p class="kicker">01 · მალის შერჩევა</p>
+            <p class="kicker">02 · მალის შერჩევა</p>
             <span class="chip">26 დონე</span>
           </div>
           <label for="vertebra">მალა / ძვალი</label
@@ -55,7 +68,7 @@
           </p>
         </section>
         <section class="section">
-          <p class="kicker">02 · მალების შეერთება</p>
+          <p class="kicker">03 · მალების შეერთება</p>
           <div
             class="btn-grid"
             role="group"
@@ -120,7 +133,7 @@
         </section>
         <section class="section" id="studyList">
           <div class="section-title">
-            <p class="kicker">03 · ანატომიური ნაწილები</p>
+            <p class="kicker">04 · ანატომიური ნაწილები</p>
             <span class="stat" id="partCount">0</span>
           </div>
           <label for="search">მოძებნე ქართულად ან ლათინურად</label>
@@ -140,6 +153,7 @@
         <div class="note">
           სასწავლო პროტოტიპი: მოდელის წარმომავლობა და მისი ანატომიური დამოწმება
           განსხვავდება. წიგნის მითითება გეომეტრიის დამოწმებას არ ნიშნავს.
+        </div>
         </div>
       </aside>
       <main class="main">

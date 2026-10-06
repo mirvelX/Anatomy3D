@@ -439,6 +439,13 @@ document.addEventListener("keydown", (e) => {
   )
     setView("reset");
 });
+function updateCategory() {
+  const spine = $("category").value === "spine";
+  $("spineMenu").classList.toggle("hidden", !spine);
+}
+$("category").addEventListener("change", updateCategory);
+updateCategory();
+
 $("vertebra").addEventListener("change", (e) => changeVertebra(e.target.value));
 $("meshMode").onchange = () => {
   state.meshMode = $("meshMode").value;

@@ -13,6 +13,8 @@ try {
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(url);
   await page.locator('#openCurriculum').click();
+  assert.equal(await page.locator('[data-lab]').isVisible(),true);
+  assert.ok((await page.locator('[data-lab-link]').getAttribute('href')).includes('labs/arthrology-v10.2.html'));
   for(const m of modules){
     await page.locator(`[data-module="${m.id}"]`).click();
     assert.equal(await page.locator('[data-list] button').count(),m.entries.length);

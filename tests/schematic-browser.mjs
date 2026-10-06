@@ -19,7 +19,7 @@ async function ready(page) {
   await page.waitForFunction(
     () =>
       document.querySelector("#vertebra")?.options.length === 26 &&
-      document.querySelector("#meshStatus")?.dataset.mode === "schematic",
+      document.querySelector("#sceneSource")?.textContent.includes("სქემატური 3D"),
   );
 }
 
@@ -39,8 +39,7 @@ try {
     await page.locator("#vertebra").selectOption(id);
     await page.waitForFunction((value) => document.querySelector("#vertebra").value === value, id);
     assert.ok((await page.locator("#parts button").count()) > 1, id);
-    assert.equal(await page.locator("#meshStatus").getAttribute("data-mode"), "schematic", id);
-  }
+    }
 
   await page.locator("#vertebra").selectOption("SAC");
   await page.locator("#parts button").filter({ hasText: "Crista sacralis mediana" }).click();

@@ -22,14 +22,13 @@ The downloaded scan has a one-page offset: printed page 29 is PDF page 30. Inspe
 ## Milestones and acceptance criteria
 
 1. **Source-linked foundation (this PR):** book references and level-specific study notes; schematic C6 carotid tubercle, dens articular surfaces and lumbar accessory processes; adjustable fading, true isolation and selected-part separation in WebGL and Canvas; unlearned practice without immediate cycle repeats; v10 storage migration retaining v9 data; automated and visual preview checks. Keep an explicit schematic model notice.
-2. **Detailed model pilot:** evaluate original BodyParts3D data and university photogrammetry, record the exact asset/version/author/license, preserve source coordinates, and prototype C1/C2 plus one typical vertebra per region. Segment the surfaces manually into stable structure IDs; validate against the book from anterior, posterior, superior, inferior and lateral views. No guessed automatic segmentation or AI-generated anatomy passed off as verified. Keep simplified fallback available.
+2. **Schematic 3D refinement:** keep one consistent teaching-model style across all vertebral levels. Improve proportions, structure readability, sacrum/coccyx detail, highlighting, isolation and anatomical views. Do not present the procedural geometry as a scan or anatomically validated surface.
 3. **All-level morphology:** C1–C7, T1–T12, L1–L5, sacrum and coccyx; review exceptional levels C6, C7, T1, T10–T12, L5/S1. Add missing sacral/coccygeal structures. Store review notes, anatomy variants, coordinate units and model provenance. Shared regional descriptions must not imply unique measured geometry for every level.
 4. **Articulation:** define attachment landmarks and facet normals on both bones, align upper/lower pairs and retain a common scale. Add discs only where appropriate, distinguish occipito-atlantal, median/lateral atlanto-axial, zygapophysial and sacrococcygeal connections. Validate contacts and overlaps at rest. Keep illustrative separation distinct from physiological movement; do not claim motion limits without a source.
 5. **Study/exam/progress:** timed or untimed sessions, review missed structures, per-structure history, session resume and transparent scoring; migration/backup tests for every schema. Test source links, model/label correspondence and touch use on the user's Galaxy S23 Ultra.
 
 ## Candidate asset research
 
-- Original BodyParts3D description: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/desc.html
 - Original download entry: https://lifesciencedb.jp/bp3d/info_en/download/index.html
 - UBC lumbar photogrammetry: https://www.clinicalanatomy.ca/back/vertebra3D.html
 

@@ -2,6 +2,16 @@ import { modules, entries, byId, coverage } from './index.js';
 import { sourceCatalog } from './schema.js';
 import { load, save, normalize, question, answer } from './progress.js';
 
+const labCatalog = [
+  { version:'10.2', title:'ძვალთა შეერთებები', latin:'Arthrologia Generalis', href:'./labs/anatomy3d_v10_2.html', modules:['arthrology'] },
+  { version:'10.3', title:'ხერხემლის შეერთებები', latin:'Juncturae Columnae Vertebralis', href:'./labs/anatomy3d_v10_3.html', modules:['vertebral'] },
+  { version:'10.4', title:'გულმკერდის შეერთებები', latin:'Juncturae Thoracis', href:'./labs/anatomy3d_v10_4.html', modules:['thoracic-joints','thorax','cavity'] },
+  { version:'10.5', title:'ზედა კიდურის სარტყლის შეერთებები', latin:'Juncturae Cinguli Membri Superioris', href:'./labs/anatomy3d_v10_5.html', modules:['shoulder'] },
+  { version:'10.6', title:'ზემო კიდურის თავისუფალი ნაწილის შეერთებები', latin:'Juncturae Membri Superioris Liberi', href:'./labs/anatomy3d_v10_6.html', modules:['arm','forearm','hand'] },
+  { version:'10.7', title:'მენჯის შეერთებები', latin:'Juncturae Pelvis', href:'./labs/anatomy3d_v10_7.html', modules:[] },
+  { version:'10.8', title:'ქვემო კიდურის თავისუფალი ნაწილის შეერთებები', latin:'Juncturae Membri Inferioris Liberi', href:'./labs/anatomy3d_v10_8.html', modules:[] },
+];
+
 export function initCurriculum({ getLevel = () => 'L3' } = {}) {
   const dialog = document.createElement('dialog');
   dialog.id = 'curriculum';
@@ -14,10 +24,12 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     <main class="curriculum-main"><div class="curriculum-module-head"><div><p data-version class="curriculum-eyebrow"></p><h3 data-title></h3><p data-latin></p></div><span data-progress></span></div>
     <progress data-bar max="1" value="0" aria-label="მოდულის სასწავლო პროგრესი"></progress>
     <p data-context class="curriculum-context"></p>
-    <section data-lab hidden class="curriculum-lab">
-      <div><p class="curriculum-eyebrow">v10.2 · ARTHROLOGIA GENERALIS</p><h4>ინტერაქტიული 3D სასწავლო სქემა</h4><p>Gemini-ს მიერ მომზადებული v10.2 ვიზუალური ლაბორატორია. გეომეტრია არის კონცეპტუალური სახსრის სქემა და არ ითვლება ანატომიურად დამოწმებულ mesh-ად.</p></div>
-      <a data-lab-link class="curriculum-lab-link" href="./labs/arthrology-v10.2.html" target="_blank" rel="noopener noreferrer">3D ლაბორატორიის გახსნა ↗</a>
+    <section class="curriculum-labs">
+      <div class="curriculum-labs-head"><div><p class="curriculum-eyebrow">v10.2–v10.8 · INTERACTIVE 3D LABS</p><h4>ინტერაქტიული 3D ლაბორატორიები</h4></div><span>7 განახლება</span></div>
+      <div data-labs class="curriculum-lab-grid"></div>
+      <p class="curriculum-lab-disclaimer">ეს ლაბორატორიები არის მომხმარებლის მიერ მოწოდებული ინტერაქტიული სასწავლო ვიზუალიზაციები. არსებული C1/C2/L3 BodyParts3D mesh-ები უცვლელია; ლაბორატორიების procedural გეომეტრია არ ითვლება ანატომიურად დამოწმებულ mesh coverage-ად.</p>
     </section>
+    <section data-lab-context hidden class="curriculum-lab-current"></section>
     <div class="curriculum-tools"><label>მოძებნე ქართულად ან ლათინურად<input data-search type="search" placeholder="მაგ. Capsula articularis"></label><label>ჯგუფი<select data-group><option value="">ყველა ჯგუფი</option></select></label><button data-mode aria-pressed="false">გამოცდა</button><button data-row hidden>მაჯის რიგების სწავლა</button><button data-compare>ორი სტრუქტურის შედარება</button></div>
     <section data-comparison hidden><h4>სტრუქტურების შედარება</h4><label>მეორე სტრუქტურა<select data-compare-select></select></label><div data-compare-result></div></section>
     <section data-quiz hidden class="curriculum-quiz" aria-label="გამოცდა"><p>ქართული → ლათინური · სამუშაო მასალა</p><h4 data-question></h4><div data-choices class="curriculum-choices"></div><p data-feedback role="status"></p><button data-next>შემდეგი კითხვა →</button><p data-score></p></section>
@@ -26,6 +38,16 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
   document.body.append(dialog);
   const $ = name => dialog.querySelector(`[data-${name}]`);
   const report = text => { $('storage').textContent = text; };
+  for (const lab of labCatalog) {
+    const a = document.createElement('a');
+    a.className = 'curriculum-lab-card';
+    a.href = lab.href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.dataset.labVersion = lab.version;
+    a.innerHTML = `<b>v${lab.version}</b><span>${lab.title}</span><small>${lab.latin}</small>`;
+    $('labs').append(a);
+  }
   let storage;
   try { storage = window.localStorage; } catch { storage = { getItem() { throw Error(); }, setItem() { throw Error(); } }; }
   const ids = entries.map(e => e.id);
@@ -109,7 +131,19 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     $('title').textContent = module.ka; $('latin').textContent = module.latin; $('version').textContent = `v${module.version} · სამუშაო მასალა`;
     $('search').value = ''; $('group').replaceChildren(new Option('ყველა ჯგუფი', ''));
     for (const group of new Set(module.entries.map(e => e.group))) $('group').append(new Option(group, group));
-    $('row').hidden = module.id !== 'hand'; $('context').textContent = context; $('lab').hidden = module.id !== 'arthrology';
+    $('row').hidden = module.id !== 'hand'; $('context').textContent = context;
+    const relatedLabs = labCatalog.filter(lab => lab.modules.includes(module.id));
+    const currentLab = $('lab-context');
+    currentLab.replaceChildren();
+    if (relatedLabs.length) {
+      currentLab.hidden = false;
+      currentLab.append(element('strong', 'ამ თემასთან დაკავშირებული 3D ლაბორატორია'));
+      for (const lab of relatedLabs) {
+        const a = element('a', `v${lab.version} · ${lab.title} ↗`, 'curriculum-lab-link');
+        a.href = lab.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        currentLab.append(a);
+      }
+    } else currentLab.hidden = true;
     $('compare-select').replaceChildren(...module.entries.map(e => new Option(`${e.latin} · ${e.ka}`, e.id)));
     $('comparison').hidden = true;
     for (const b of $('modules').children) b.setAttribute('aria-current', b.dataset.module === module.id ? 'page' : 'false');
@@ -126,7 +160,7 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
   $('close').onclick = () => dialog.close();
   $('export').onclick = () => { const a = document.createElement('a'); const url = URL.createObjectURL(new Blob([JSON.stringify(progress, null, 2)], { type: 'application/json' })); a.href = url; a.download = 'anatomy3d-curriculum-progress.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
   $('import').onchange = async () => { try { const file = $('import').files[0]; if (!file || file.size > 1000000) throw Error(); const value = JSON.parse(await file.text()); if (value.version !== 1 || !value.learned || !value.score) throw Error(); const incoming = normalize(value, ids); progress = { ...progress, learned: { ...progress.learned, ...incoming.learned }, score: { correct: Math.max(progress.score.correct, incoming.score.correct), total: Math.max(progress.score.total, incoming.score.total) } }; persist(); renderProgress(); renderList(); renderDetail(); report('პროგრესი დამატებულია; არსებული ნასწავლი ჩანაწერები შენარჩუნდა.'); } catch { report('ფაილი ვერ აღდგა. არსებული პროგრესი შენარჩუნდა.'); } $('import').value = ''; };
-  const launch = element('button', 'ახალი თემები · ძვლები და შეერთებები', 'curriculum-launch'); launch.id = 'openCurriculum';
+  const launch = element('button', 'ახალი თემები · v10.2–v10.8', 'curriculum-launch'); launch.id = 'openCurriculum';
   launch.onclick = () => { context = ''; selectModule(selectedModule); dialog.showModal(); };
   document.querySelector('.topline')?.prepend(launch);
   const connections = element('button', 'Connections · შეერთებების სწავლა'); connections.id = 'openConnections';

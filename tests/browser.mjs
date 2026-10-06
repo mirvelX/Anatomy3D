@@ -14,10 +14,14 @@ const browser = await chromium.launch({
   executablePath: process.env.BROWSER_EXECUTABLE || undefined,
 });
 const errors = [];
-const ready = (page) =>
-  page.waitForFunction(
+const ready = async (page) => {
+  await page.waitForFunction(
     () => document.querySelector("#vertebra")?.options.length === 26,
   );
+  assert.equal(await page.locator("#spineMenu").isVisible(), false);
+  await page.locator("#category").selectOption("spine");
+  assert.equal(await page.locator("#spineMenu").isVisible(), true);
+};
 const controlled = (page) =>
   page.waitForFunction(() => !!navigator.serviceWorker.controller);
 const workspace = (page) =>
@@ -350,7 +354,7 @@ try {
   );
   await old.reload();
   await ready(old);
-  assert.match(await old.locator(".brand p").textContent(), /v10.8 alpha/);
+  assert.match(await old.locator(".brand p").textContent(), /v10.1 alpha/);
   assert.equal((await workspace(old)).learned["L5:body"], true);
   pass("real v8 worker to v10 migration");
 
@@ -372,7 +376,7 @@ try {
   const nextHtml = await readFile(resolve(next, "index.html"), "utf8");
   await writeFile(
     resolve(next, "index.html"),
-    nextHtml.replace("v10.8 alpha", "v10.8 alpha test"),
+    nextHtml.replace("v10.1 alpha", "v10.1 alpha test"),
   );
   root = next;
   await fresh.evaluate(
@@ -384,7 +388,7 @@ try {
   await fresh.waitForFunction(() =>
     document
       .querySelector(".brand p")
-      ?.textContent.includes("v10.8 alpha test"),
+      ?.textContent.includes("v10.1 alpha test"),
   );
   await ready(fresh);
   pass("first-install tab reloads after accepting a later update");
@@ -398,7 +402,7 @@ try {
   await old.waitForFunction(() =>
     document
       .querySelector(".brand p")
-      ?.textContent.includes("v10.8 alpha test"),
+      ?.textContent.includes("v10.1 alpha test"),
   );
   await ready(old);
   assert.equal((await workspace(old)).learned["L5:body"], true);
@@ -417,7 +421,7 @@ try {
   await old.locator("#offlineStatus").waitFor({ state: "visible" });
   await old.reload();
   await ready(old);
-  assert.match(await old.locator(".brand p").textContent(), /v10.8 alpha test/);
+  assert.match(await old.locator(".brand p").textContent(), /v10.1 alpha test/);
   assert.equal((await workspace(old)).learned["L5:body"], true);
   pass("failed update keeps working release");
   await upgrade.close();

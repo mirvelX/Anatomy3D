@@ -21,6 +21,9 @@ async function ready(page) {
   await page.waitForFunction(
     () => document.querySelector("#vertebra")?.options.length === 26,
   );
+  assert.equal(await page.locator("#spineMenu").isVisible(), false);
+  await page.locator("#category").selectOption("spine");
+  assert.equal(await page.locator("#spineMenu").isVisible(), true);
 }
 async function pilot(page, level) {
   await page.locator(`[data-pilot="${level}"]`).click();

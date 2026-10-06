@@ -439,6 +439,13 @@ document.addEventListener("keydown", (e) => {
   )
     setView("reset");
 });
+function updateCategory() {
+  const spine = $("category").value === "spine";
+  $("spineMenu").classList.toggle("hidden", !spine);
+}
+$("category").addEventListener("change", updateCategory);
+updateCategory();
+
 $("vertebra").addEventListener("change", (e) => changeVertebra(e.target.value));
 $("meshMode").onchange = () => {
   state.meshMode = $("meshMode").value;
@@ -707,6 +714,3 @@ registerPwa(saveWorkspace);
 $("pilotNotice").href = pilotAssetUrl("NOTICE.txt");
 $("pilotManifest").href = pilotAssetUrl("manifest.json");
 if (state.meshMode === "atlas") ensurePilot();
-
-import { initCurriculum } from './curriculum/ui.js';
-initCurriculum({ getLevel: () => state.vertebra });

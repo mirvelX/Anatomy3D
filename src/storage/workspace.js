@@ -8,7 +8,6 @@ const SCORE_KEY = "vertebraAtlasV7";
 export function createState() {
   return {
     vertebra: "L5",
-    meshMode: "schematic",
     assembly: "below",
     selected: "all",
     dim: true,
@@ -93,7 +92,6 @@ export function makeBackup(state) {
     exported_at: new Date().toISOString(),
     workspace: {
       vertebra: state.vertebra,
-      meshMode: state.meshMode,
       assembly: state.assembly,
       selected: state.selected,
       dim: state.dim,

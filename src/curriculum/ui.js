@@ -17,8 +17,8 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
   dialog.id = 'curriculum';
   dialog.setAttribute('aria-labelledby', 'curriculumTitle');
   dialog.innerHTML = `
-    <header class="curriculum-head"><div><p class="curriculum-eyebrow">ANATOMY 3D · ახალი თემები · სამუშაო ვერსია</p><h2 id="curriculumTitle">ანატომიის სასწავლო სივრცე</h2></div><button data-close aria-label="სასწავლო სივრცის დახურვა">მალების ატლასზე დაბრუნება ×</button></header>
-    <p class="curriculum-notice">მასალა დამუშავებულია კონსპექტის ხელმისაწვდომი ასლით. კაციტაძესთან შედარება დაუსრულებელია. ახალი 3D მოდელები ჯერ არ არის დამატებული.</p>
+    <header class="curriculum-head"><div><p class="curriculum-eyebrow">ANATOMY 3D · v10.9</p><h2 id="curriculumTitle">ანატომიის სასწავლო ატლასი</h2><p>იგივე სამუშაო პრინციპი, რაც მალების v10.1 ატლასში: თემა → სტრუქტურა → 3D სქემა → აღწერა → პროგრესი.</p></div><button data-close aria-label="სასწავლო სივრცის დახურვა">მალების ატლასზე დაბრუნება ×</button></header>
+    <p class="curriculum-notice">სქემატური 3D ვიზუალები გამოიყენება სასწავლოდ. ტექსტური მასალის კაციტაძესთან გადამოწმება ცალკე სტატუსია და იქ, სადაც ჯერ არ დასრულებულა, ასეა აღნიშნული.</p>
     <p data-storage role="status" class="curriculum-storage"></p>
     <div class="curriculum-shell"><aside class="curriculum-nav"><label class="curriculum-mobile-nav">სასწავლო თემა<select data-mobile-module></select></label><nav aria-label="სასწავლო თემები" data-modules></nav><div class="curriculum-total" data-total></div><button data-export>პროგრესის შენახვა (.json)</button><label>პროგრესის აღდგენა<input data-import type="file" accept=".json,application/json"></label></aside>
     <main class="curriculum-main"><div class="curriculum-module-head"><div><p data-version class="curriculum-eyebrow"></p><h3 data-title></h3><p data-latin></p></div><span data-progress></span></div>
@@ -27,7 +27,7 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     <section class="curriculum-labs">
       <div class="curriculum-labs-head"><div><p class="curriculum-eyebrow">v10.2–v10.8 · INTERACTIVE 3D LABS</p><h4>ინტერაქტიული 3D ლაბორატორიები</h4></div><span>7 განახლება</span></div>
       <div data-labs class="curriculum-lab-grid"></div>
-      <p class="curriculum-lab-disclaimer">ეს ლაბორატორიები არის მომხმარებლის მიერ მოწოდებული ინტერაქტიული სასწავლო ვიზუალიზაციები. არსებული C1/C2/L3 BodyParts3D mesh-ები უცვლელია; ლაბორატორიების procedural გეომეტრია არ ითვლება ანატომიურად დამოწმებულ mesh coverage-ად.</p>
+      <p class="curriculum-lab-disclaimer">ეს ლაბორატორიები არის სქემატური სასწავლო 3D ვიზუალები. ისინი არ წარმოადგენს სკანს ან კლინიკურად დამოწმებულ mesh-ს, მაგრამ გამოიყენება მდებარეობისა და კავშირების გასაგებად.</p>
     </section>
     <section data-lab-context hidden class="curriculum-lab-current"></section>
     <div class="curriculum-tools"><label>მოძებნე ქართულად ან ლათინურად<input data-search type="search" placeholder="მაგ. Capsula articularis"></label><label>ჯგუფი<select data-group><option value="">ყველა ჯგუფი</option></select></label><button data-mode aria-pressed="false">გამოცდა</button><button data-row hidden>მაჯის რიგების სწავლა</button><button data-compare>ორი სტრუქტურის შედარება</button></div>
@@ -79,10 +79,24 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     const pane = $('detail'); pane.replaceChildren();
     pane.append(element('p', selected.group, 'curriculum-eyebrow'), element('h4', selected.latin), element('p', selected.ka, 'curriculum-georgian'), element('p', selected.description));
     const model = element('section', '', 'curriculum-model');
-    model.append(element('strong', '3D მოდელი მოსამზადებელია'), element('p', 'ამ სტრუქტურისთვის საჭიროა ხარისხიანი, ლიცენზირებული mesh და შემოწმებული მონიშვნის უბანი.'));
-    const controls = element('div', '');
-    for (const name of ['მონიშვნა', 'იზოლირება']) { const b = element('button', name); b.disabled = true; b.title = 'ხელმისაწვდომი იქნება დამოწმებული მოდელის დამატების შემდეგ'; controls.append(b); }
-    model.append(controls); pane.append(model);
+    const relatedLab = labCatalog.find(lab => lab.modules.includes(selectedModule.id));
+    if (relatedLab) {
+      model.append(
+        element('strong', 'სქემატური 3D მოდელი'),
+        element('p', 'გახსენით ამ თემის ინტერაქტიული 3D სქემა. სტრუქტურების ზუსტი მონიშვნა ეტაპობრივად დაემატება ერთიან ატლასში.')
+      );
+      const open = element('a', `v${relatedLab.version} · 3D სქემის გახსნა ↗`, 'curriculum-model-open');
+      open.href = relatedLab.href;
+      open.target = '_blank';
+      open.rel = 'noopener noreferrer';
+      model.append(open);
+    } else {
+      model.append(
+        element('strong', '3D სქემა შემდეგ ეტაპზე'),
+        element('p', 'ამ თემის ერთიანი schematic 3D viewer ჯერ დასამატებელია. ტექსტური და საგამოცდო ნაწილი უკვე ხელმისაწვდომია.')
+      );
+    }
+    pane.append(model);
     if (selectedModule.views.length) field(pane, 'მოდელისთვის საჭირო ხედები', selectedModule.views.join(' · '));
     if (selected.joint) {
       for (const [key, label] of Object.entries({ bones: 'მონაწილე ძვლები', surfaces: 'სასახსრე ზედაპირები', type: 'სახსრის ტიპი', capsule: 'სასახსრე ჩანთა', elements: 'იოგები და დამატებითი ელემენტები', movements: 'მოძრაობები' })) field(pane, label, selected.joint[key]);
@@ -104,7 +118,7 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     const other = byId[$('compare-select').value];
     const host = $('compare-result'); host.replaceChildren(); if (!other) return;
     const table = document.createElement('table');
-    for (const row of [['სტრუქტურა', selected.latin, other.latin], ['ქართული', selected.ka, other.ka], ['ჯგუფი', selected.group, other.group], ['აღწერა', selected.description, other.description], ['წყარო', `AK · ${selected.source.page}`, `AK · ${other.source.page}`], ['3D', 'მოსამზადებელია', 'მოსამზადებელია']]) { const tr = document.createElement('tr'); row.forEach((text, i) => tr.append(element(i ? 'td' : 'th', text))); table.append(tr); }
+    for (const row of [['სტრუქტურა', selected.latin, other.latin], ['ქართული', selected.ka, other.ka], ['ჯგუფი', selected.group, other.group], ['აღწერა', selected.description, other.description], ['წყარო', `AK · ${selected.source.page}`, `AK · ${other.source.page}`], ['3D', labCatalog.some(l => l.modules.includes(selectedModule.id)) ? 'სქემატური მოდული ხელმისაწვდომია' : 'შემდეგ ეტაპზე', labCatalog.some(l => l.modules.includes(selectedModule.id)) ? 'სქემატური მოდული ხელმისაწვდომია' : 'შემდეგ ეტაპზე']]) { const tr = document.createElement('tr'); row.forEach((text, i) => tr.append(element(i ? 'td' : 'th', text))); table.append(tr); }
     host.append(table);
   }
   function nextQuestion() {
@@ -160,11 +174,11 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
   $('close').onclick = () => dialog.close();
   $('export').onclick = () => { const a = document.createElement('a'); const url = URL.createObjectURL(new Blob([JSON.stringify(progress, null, 2)], { type: 'application/json' })); a.href = url; a.download = 'anatomy3d-curriculum-progress.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
   $('import').onchange = async () => { try { const file = $('import').files[0]; if (!file || file.size > 1000000) throw Error(); const value = JSON.parse(await file.text()); if (value.version !== 1 || !value.learned || !value.score) throw Error(); const incoming = normalize(value, ids); progress = { ...progress, learned: { ...progress.learned, ...incoming.learned }, score: { correct: Math.max(progress.score.correct, incoming.score.correct), total: Math.max(progress.score.total, incoming.score.total) } }; persist(); renderProgress(); renderList(); renderDetail(); report('პროგრესი დამატებულია; არსებული ნასწავლი ჩანაწერები შენარჩუნდა.'); } catch { report('ფაილი ვერ აღდგა. არსებული პროგრესი შენარჩუნდა.'); } $('import').value = ''; };
-  const launch = element('button', 'ახალი თემები · v10.2–v10.8', 'curriculum-launch'); launch.id = 'openCurriculum';
+  const launch = element('button', 'თემების ატლასი · v10.2–v10.8', 'curriculum-launch'); launch.id = 'openCurriculum';
   launch.onclick = () => { context = ''; selectModule(selectedModule); dialog.showModal(); };
   document.querySelector('.topline')?.prepend(launch);
   const connections = element('button', 'Connections · შეერთებების სწავლა'); connections.id = 'openConnections';
-  connections.onclick = () => { const module = modules.find(m => m.id === 'vertebral'); if (!module) return; const level = getLevel(); context = `${level} · ${['C1', 'C2'].includes(level) ? 'ატლას–აქსისის შუა/გვერდითი სახსრები და იოგები. C1–C2-ს შორის დისკო არ არის.' : level === 'SAC' || level === 'COC' ? 'გავა–კუდუსუნის კავშირი' : 'ზედა/ქვედა მეზობლებთან დისკოები, სასახსრე მორჩები და იოგები.'} · სტრუქტურების 3D მონიშვნა ჯერ მოსამზადებელია.`; selectModule(module); dialog.showModal(); };
+  connections.onclick = () => { const module = modules.find(m => m.id === 'vertebral'); if (!module) return; const level = getLevel(); context = `${level} · ${['C1', 'C2'].includes(level) ? 'ატლას–აქსისის შუა/გვერდითი სახსრები და იოგები. C1–C2-ს შორის დისკო არ არის.' : level === 'SAC' || level === 'COC' ? 'გავა–კუდუსუნის კავშირი' : 'ზედა/ქვედა მეზობლებთან დისკოები, სასახსრე მორჩები და იოგები.'} · შესაბამისი schematic 3D ლაბორატორია იხილე მოდულში.`; selectModule(module); dialog.showModal(); };
   document.querySelector('#neighbors')?.after(connections);
   selectModule(selectedModule);
 }

@@ -97,7 +97,7 @@ export function createRenderer(state, scene) {
     );
     const fs = createShader(
       gl.FRAGMENT_SHADER,
-      `precision mediump float;uniform vec3 uColor;uniform float uAlpha;uniform bool uPick;varying vec3 vNormal;void main(){if(uPick){gl_FragColor=vec4(uColor,1.);return;}vec3 n=normalize(vNormal);float lighting=.50+.47*abs(dot(n,normalize(vec3(-.48,.85,1.))));gl_FragColor=vec4(uColor*lighting,uAlpha);}`,
+      `precision mediump float;uniform vec3 uColor;uniform float uAlpha;uniform bool uPick;varying vec3 vNormal;void main(){if(uPick){gl_FragColor=vec4(uColor,1.);return;}vec3 n=normalize(vNormal);vec3 key=normalize(vec3(-.55,.82,1.0));vec3 fill=normalize(vec3(.75,.25,-.65));float a=max(dot(n,key),0.0);float b=max(dot(n,fill),0.0);float rim=pow(1.0-abs(n.z),2.0);float lighting=.43+.44*a+.16*b+.08*rim;vec3 c=uColor*lighting+vec3(.025,.035,.05)*rim;gl_FragColor=vec4(c,uAlpha);}`,
     );
     program = gl.createProgram();
     gl.attachShader(program, vs);
@@ -127,15 +127,14 @@ export function createRenderer(state, scene) {
     }
     meshes = [];
     const smooth = new Map();
-    if (scene.realMesh)
-      for (const tris of scene.grouped.values())
-        for (const tri of tris) {
-          const n = cross(sub(tri[1], tri[0]), sub(tri[2], tri[0]));
-          for (const p of tri) {
-            const key = p.join(",");
-            smooth.set(key, add(smooth.get(key) || [0, 0, 0], n));
-          }
+    for (const tris of scene.grouped.values())
+      for (const tri of tris) {
+        const n = cross(sub(tri[1], tri[0]), sub(tri[2], tri[0]));
+        for (const p of tri) {
+          const key = p.join(",");
+          smooth.set(key, add(smooth.get(key) || [0, 0, 0], n));
         }
+      }
     for (const [key, tris] of scene.grouped) {
       if (!tris.length) continue;
       const [owner, part] = key.split("|"),
@@ -145,7 +144,7 @@ export function createRenderer(state, scene) {
         const n = norm(cross(sub(tri[1], tri[0]), sub(tri[2], tri[0])));
         for (const p of tri) {
           pos.push(...p);
-          normal.push(...(scene.realMesh ? norm(smooth.get(p.join(","))) : n));
+          normal.push(...norm(smooth.get(p.join(",")) || n));
         }
       }
       const posBuffer = gl.createBuffer();
@@ -169,7 +168,6 @@ export function createRenderer(state, scene) {
       cy = p?.y || 0;
     let m = translate(0, cy, 0);
     if (
-      !scene.realMesh &&
       p?.id === "C1" &&
       scene.poses.some((x) => x.id === "C2") &&
       state.rotation !== 0
@@ -208,20 +206,22 @@ export function createRenderer(state, scene) {
   }
   const isActive = (m) => activePart(state, m);
   function colorFor(m) {
-    if (isActive(m)) return [1, 0.84, 0.4];
-    if (m.part === "disc") return [0.76, 0.66, 0.96];
+    if (isActive(m)) return [1.0, 0.78, 0.31];
+    if (m.part === "disc") return [0.66, 0.57, 0.9];
     if (m.part === "facetLink" || m.part === "ligament")
-      return [0.51, 0.91, 0.69];
+      return [0.34, 0.79, 0.65];
     if (
       m.part === "interforamen" ||
       m.part === "transForamen" ||
       m.part === "atlasTransForamen" ||
       m.part === "sacForamina" ||
-      m.part === "sacCanal"
+      m.part === "sacCanal" ||
+      m.part === "foramen" ||
+      m.part === "canal"
     )
-      return [0.44, 0.87, 0.96];
-    if (m.owner === "target") return [0.96, 0.79, 0.61];
-    return [0.5, 0.76, 0.9];
+      return [0.31, 0.76, 0.88];
+    if (m.owner === "target") return [0.9, 0.78, 0.6];
+    return [0.42, 0.63, 0.76];
   }
   const isGuide = (m) => guideParts.has(m.part);
   const meshVisible = (m) => visiblePart(state, m);
@@ -292,7 +292,6 @@ export function createRenderer(state, scene) {
     const pose = scene.poses.find((p) => p.owner === owner);
     let [x, y, z] = add(point, separationOffset(state, { owner, part }));
     if (
-      !scene.realMesh &&
       pose?.id === "C1" &&
       scene.poses.some((p) => p.id === "C2") &&
       state.rotation
@@ -348,8 +347,9 @@ export function createRenderer(state, scene) {
       height * 0.5,
       Math.max(width, height) * 0.7,
     );
-    grad.addColorStop(0, "#304b65");
-    grad.addColorStop(1, "#112035");
+    grad.addColorStop(0, "#24435a");
+    grad.addColorStop(0.55, "#132b3d");
+    grad.addColorStop(1, "#091522");
     ctx2d.fillStyle = grad;
     ctx2d.fillRect(0, 0, width, height);
     const all = [];

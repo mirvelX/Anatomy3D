@@ -24,3 +24,15 @@
 .curriculum-lab-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border:1px solid #69beb7;border-radius:10px;color:#c7fff3;background:#174847;text-decoration:none;font-weight:700;white-space:nowrap}
 .curriculum-lab-link:hover{background:#205b58}
 @media(max-width:700px){.curriculum-lab{align-items:stretch;flex-direction:column}.curriculum-lab-link{width:100%}}
+
+.curriculum-labs{border:1px solid #355b68;border-radius:14px;background:#102733;padding:16px 18px;margin:0 0 20px}
+.curriculum-labs-head{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:12px}.curriculum-labs-head h4{margin:2px 0 0;font-size:1.05rem}.curriculum-labs-head>span{font-size:.74rem;color:#9ec6ce}
+.curriculum-lab-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.curriculum-lab-card{display:flex;flex-direction:column;gap:3px;min-width:0;padding:11px 12px;border:1px solid #345867;border-radius:10px;background:#153440;color:#dffbfa;text-decoration:none}
+.curriculum-lab-card:hover{background:#1c4652;border-color:#69beb7}.curriculum-lab-card b{color:#f1c67f;font-size:.76rem}.curriculum-lab-card span{font-weight:700;font-size:.8rem}.curriculum-lab-card small{color:#9fb8c3;font-size:.68rem;overflow-wrap:anywhere}
+.curriculum-lab-disclaimer{margin:12px 0 0;color:#b6c8d1;font-size:.72rem;line-height:1.65}
+.curriculum-lab-current{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-8px 0 18px;padding:10px 12px;border-left:3px solid #69beb7;background:#15303b;border-radius:7px}.curriculum-lab-current strong{font-size:.78rem;margin-right:auto}
+.curriculum-lab-link{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 12px;border:1px solid #69beb7;border-radius:9px;color:#c7fff3;background:#174847;text-decoration:none;font-size:.76rem;font-weight:700}
+.curriculum-lab-link:hover{background:#205b58}
+@media(max-width:950px){.curriculum-lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.curriculum-lab-grid{grid-template-columns:1fr}.curriculum-labs-head{align-items:start;flex-direction:column}}

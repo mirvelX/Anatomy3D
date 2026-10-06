@@ -1,8 +1,8 @@
 {
   "id": "./index.html",
-  "name": "Anatomy 3D — მალების ატლასი",
+  "name": "Anatomy 3D — სასწავლო ატლასი",
   "short_name": "Anatomy 3D",
-  "description": "ქართულ-ლათინური 3D მალის სასწავლო ატლასი",
+  "description": "ქართულ-ლათინური ინტერაქტიული 3D ანატომიის სასწავლო ატლასი",
   "lang": "ka",
   "start_url": "./index.html",
   "scope": "./",

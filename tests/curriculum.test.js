@@ -30,3 +30,19 @@ test('quizzes use available module terms, avoid immediate repeats and score only
   }
   assert.equal(question(entries.slice(0,1)),null);
 });
+test('hand contains two complete carpal rows and correct individual bone inventory', () => {
+  const hand = modules.find(m=>m.id==='hand');
+  assert.equal(hand.entries.filter(e=>e.carpalRow==='proximal').length,4);
+  assert.equal(hand.entries.filter(e=>e.carpalRow==='distal').length,4);
+  assert.equal(hand.entries.filter(e=>e.id.startsWith('hand.metacarpal-')).length,5);
+  assert.equal(hand.entries.filter(e=>e.id.startsWith('hand.phalanx-')).length,14);
+  assert.ok(!hand.entries.some(e=>e.id==='hand.phalanx-1-media'));
+});
+test('joint records in upper limb never cite available bone pages as joint evidence', () => {
+  for(const e of entries.filter(e=>['shoulder','arm','forearm','hand'].includes(e.moduleId)&&e.kind==='joint')) assert.equal(e.book.status,'pages-unavailable');
+});
+test('quiz choices have distinct labels even when several bones share landmark names', () => {
+  const forearm=modules.find(m=>m.id==='forearm');
+  for(let n=0;n<50;n++){const q=question(forearm.entries); assert.equal(new Set(q.choices.map(e=>e.latin)).size,q.choices.length);}
+  assert.equal(question([{id:'a',latin:'X'},{id:'b',latin:'X'}]),null);
+});

@@ -19,8 +19,11 @@ export function question(pool, previous = '', random = Math.random) {
   if (options.length < 2) return null;
   const eligible = options.filter(e => e.id !== previous);
   const target = eligible[Math.floor(random() * eligible.length)];
-  const distractors = options.filter(e => e.id !== target.id && e.latin !== target.latin).sort(() => random() - .5).slice(0, 3);
-  return { target, choices: [target, ...distractors].sort(() => random() - .5), answered: false };
+  const unique = [...new Map(options.filter(e => e.latin !== target.latin).map(e => [e.latin, e])).values()];
+  if (!unique.length) return null;
+  const shuffle = values => { const a = [...values]; for (let i=a.length-1;i>0;i--) { const j=Math.floor(random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+  const distractors = shuffle(unique).slice(0, 3);
+  return { target, choices: shuffle([target, ...distractors]), answered: false };
 }
 export function answer(q, id, state) {
   if (!q || q.answered || !q.choices.some(e => e.id === id)) return null;

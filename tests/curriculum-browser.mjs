@@ -28,6 +28,29 @@ try {
   }
   await page.reload(); await page.locator('#openCurriculum').click();
   for(const m of modules){await page.locator(`[data-module="${m.id}"]`).click();assert.ok((await page.locator('[data-progress]').innerText()).startsWith('1 /'));}
+  await page.locator('[data-module="hand"]').click();
+  await page.locator('[data-row]').click();
+  assert.equal(await page.locator('[data-choices] button').count(),2);
+  await page.locator('[data-choices] button').first().click();
+  assert.ok((await page.locator('[data-feedback]').innerText()).length>0);
+  await page.locator('#curriculum [data-mode]').click();
+  await page.locator('[data-compare]').click();
+  await page.locator('[data-compare-select]').selectOption('hand.lunate');
+  assert.ok((await page.locator('[data-compare-result]').innerText()).includes('Os lunatum'));
+  const beforeImport=await page.locator('[data-progress]').innerText();
+  await page.locator('[data-import]').setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('broken')});
+  await page.waitForFunction(()=>document.querySelector('[data-storage]').textContent.includes('ფაილი ვერ აღდგა'));
+  assert.equal(await page.locator('[data-progress]').innerText(),beforeImport);
+  await page.locator('[data-import]').setInputFiles({name:'progress.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({version:1,learned:{'hand.lunate':true},score:{correct:0,total:0}}))});
+  await page.waitForFunction(()=>document.querySelector('[data-progress]').textContent.startsWith('2 /'));
+  const download=page.waitForEvent('download');await page.locator('[data-export]').click();
+  assert.equal((await download).suggestedFilename(),'anatomy3d-curriculum-progress.json');
+  await page.keyboard.press('Escape');
+  await page.locator('[data-pilot="C2"]').click();
+  await page.locator('#openConnections').click();
+  assert.ok((await page.locator('[data-context]').innerText()).includes('C2'));
+  assert.ok((await page.locator('[data-title]').innerText()).includes('ხერხემლის'));
+  console.log('PASS hand rows, comparison, safe import, export and C2 connections context');
   await page.locator('[data-search]').fill('no-matching-anatomy');
   assert.equal(await page.locator('[data-list] button').count(),0);
   await page.locator('#curriculum [data-mode]').click();assert.equal(await page.locator('[data-choices] button').count(),0);

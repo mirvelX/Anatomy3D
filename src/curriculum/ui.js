@@ -67,8 +67,8 @@ export function initCurriculum({ getLevel = () => 'L3' } = {}) {
     learned.onclick = () => { if (progress.learned[selected.id]) delete progress.learned[selected.id]; else progress.learned[selected.id] = true; persist(); renderDetail(); renderList(); renderProgress(); }; pane.append(learned);
     const sources = element('section', '', 'curriculum-source');
     field(sources, 'წყარო', `${sourceCatalog.ak.title} · გვ. ${selected.source.page}`);
-    field(sources, 'წყაროში მოცემული ლათინური ფორმა', selected.source.originalLatin);
-    field(sources, 'კაციტაძესთან შედარება', selected.book.status === 'pages-unavailable' ? 'შესაბამისი სპეციფიკური ართროლოგიის გვერდები ატვირთულ წიგნში არ არის. შემდგომი PDF-ის დამატებისას გადასამოწმებელია.' : `დაუსრულებელია. საძიებო დიაპაზონი: დაბეჭდილი გვ. ${selected.book.printedPages.join('–')}; ეს კონკრეტული ჩანაწერის დამოწმება არ არის.`);
+    field(sources, 'წყაროს ფორმა / ჩანაწერის საფუძველი', selected.source.originalLatin);
+    field(sources, 'კაციტაძესთან შედარება', selected.book.status === 'pages-unavailable' ? 'შესაბამისი სპეციფიკური ართროლოგიის გვერდები ატვირთულ წიგნში არ არის. შემდგომი PDF-ის დამატებისას გადასამოწმებელია.' : selected.book.printedPages.length ? `დაუსრულებელია. საძიებო დიაპაზონი: დაბეჭდილი გვ. ${selected.book.printedPages.join('–')}; ეს კონკრეტული ჩანაწერის დამოწმება არ არის.` : 'დაუსრულებელია. წიგნის შესაბამისი გვერდები ჯერ დასადგენი და წასაკითხია.');
     if (selected.reviewNotes.length) field(sources, 'განსხვავება / გადამოწმების შენიშვნა', selected.reviewNotes.join('\n'));
     field(sources, 'გამოყენებული ასლი', `${sourceCatalog.ak.copy}. ${sourceCatalog.ak.identity}`);
     pane.append(sources);

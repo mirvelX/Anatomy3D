@@ -15,6 +15,8 @@ Branch: `codex/v10-study-expansion`. PR #5. Production requires explicit user ap
 
 ## What is implemented
 
+Seven user-provided interactive lab pages are integrated and published from `labs/`: v10.2 general arthrology, v10.3 vertebral connections, v10.4 thoracic connections, v10.5 upper-limb girdle connections, v10.6 free upper-limb connections, v10.7 pelvis connections and v10.8 free lower-limb connections. These are teaching visualizations and do not change the reviewed-mesh coverage count. The C1/C2/L3 BodyParts3D pilot is preserved.
+
 Nine navigable draft modules, 278 study records at the initial integration checkpoint. The catalog includes general arthrology, vertebral connections, ribs I-XII, sternum, cavity boundaries, thoracic joints, clavicle/scapula, humerus, ulna/radius, both carpal rows, metacarpals I-V, 14 individual phalanges, and upper-limb joint/ligament records.
 
 Shared UI: Georgian/Latin search, grouping, selectable descriptions, two-record comparison, learned toggle, per-module progress, question cycles, carpal-row quizzes and JSON backup/import. The existing atlas has a contextual Connections entry. The model controls are disabled with a visible reason until assets are approved; views are requirements, not working camera controls for absent meshes. The hand quiz is text-based; a click-on-mesh quiz is still pending.

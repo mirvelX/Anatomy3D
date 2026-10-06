@@ -1,96 +1,65 @@
-# v10.8 interactive curriculum update
+# Anatomy 3D · v10.9 schematic refresh
 
-The main v10.x branch now includes the seven user-provided interactive lab pages
-for v10.2 through v10.8, accessible from the curriculum workspace. They cover
-general arthrology, vertebral connections, thoracic connections, upper-limb
-girdle connections, free upper-limb connections, pelvis connections and free
-lower-limb connections.
+v10.9 keeps the v10.1 study workflow that the project was built around:
+a left structure selector, a large central interactive 3D viewer, and a right
+reference/progress panel. The UI is polished rather than replaced.
 
-The labs are published as user-provided teaching visualizations. Their procedural
-geometry is not counted as anatomically reviewed mesh coverage. The existing
-BodyParts3D C1/C2/L3 pilot remains unchanged.
+## 3D direction
 
-Adds nine draft study modules and 278 records with Georgian/Latin search,
-progress, quizzes and source-review tracking. New mesh coverage is **0/278**:
-missing approved models are explicitly marked and cannot be highlighted or isolated.
-The exact new source PDFs and Kacitadze scan still require review.
+The BodyParts3D C1/C2/L3 pilot has been removed at the owner's request.
+The vertebral atlas now uses one consistent schematic 3D system for every level
+(C1–C7, T1–T12, L1–L5, sacrum and coccyx).
 
-The existing v10.1 C1/C2/L3 mesh implementation is unchanged.
-See [requirements, source limitations and remaining work](docs/v10-curriculum.md).
-Use `npm run audit:curriculum` for per-structure gaps.
-This branch is preview-only; do not merge or deploy production without user approval.
+The schematic renderer supports:
 
-## v10.1 mesh pilot
+- orbit / zoom and standard anatomical camera views
+- structure picking
+- selected-structure highlighting
+- context transparency and isolate mode
+- per-part separation
+- neighboring vertebrae, intervertebral discs and joint guides
+- illustrative C1–C2 rotation
+- WebGL with Canvas fallback
 
-C1, C2 and L3 now have licensed BodyParts3D atlas surfaces, 11 provisional
-study regions, highlight/isolation and native-coordinate neighbors C3/L2/L4.
-Use the C1/C2/L3 shortcuts and the model-source selector. Existing schematic
-study/exam and saved progress remain available. This is an alpha pilot, not
-completed anatomical segmentation or clinical validation.
+The geometry is a teaching schematic, not a CT/photogrammetry mesh. Text-source
+verification and 3D-form accuracy are tracked separately.
 
-See [asset research, book references and limitations](docs/v10.1-pilot.md) and
-[asset-level license/attribution](assets/bodyparts3d/NOTICE.txt).
+## Curriculum expansion
 
-## v10.0 alpha — ისტორია
+The v10.2–v10.8 curriculum workspace remains integrated and uses the same visual
+language as the v10.1 vertebra atlas. It contains 9 study modules / 278 records,
+Georgian/Latin search, learned progress, quizzes, comparison and JSON
+backup/import.
 
-პირველი განვითარების Preview: წიგნის მითითებები, C6-ის საძილე ბორცვი, კბილის სასახსრე ზედაპირები და წელის დამატებითი მორჩი; იზოლირება, რეგულირებადი გამჭვირვალობა და ნაწილის გამოყოფა; უსწავლელი ნაწილების სავარჯიშო. მოდელები ჯერ სქემატურია.
+Seven user-provided schematic 3D labs remain available for:
 
-[სრული v10.0 გეგმა და v9 კოდის აუდიტი](docs/v10-plan.md). რეალისტური მოდელების იმპორტი, ყველა დონის ინდივიდუალური გეომეტრია და სახსრების ზუსტი კონტაქტები შემდეგი ეტაპებია.
+- v10.2 General Arthrology
+- v10.3 Vertebral Connections
+- v10.4 Thoracic Connections
+- v10.5 Upper-limb Girdle Connections
+- v10.6 Free Upper-limb Connections
+- v10.7 Pelvis Connections
+- v10.8 Free Lower-limb Connections
 
-v10 წერს `anatomy3d_workspace_v10`-ში და კითხულობს v9/v8 სარეზერვო ასლებს; v9-ის ძველი გასაღები ხელუხლებლად რჩება. ახალი სტრუქტურების შემცველი v10 ასლები v9-თან უკუთავსებადი არ არის.
+These procedural labs are learning visualizations and are not described as
+anatomically reviewed scan meshes.
 
-## v9 საფუძველი და ისტორია
+## Sources
 
-ქართული/ლათინური მალების სასწავლო ატლასი. v9.0 გამოყოფს კოდს მოდულებად, ინარჩუნებს v7/v8 პროგრესს და ამატებს შემოწმებად offline განახლებებს. მოდელები კვლავ სქემატურია; ახალი ანატომიური მოდელები ამ ცვლილებაში არ შედის.
+Primary anatomy source where available:
+**კაციტაძე — „ადამიანის ანატომია“, I ტომი (2017)**.
 
-## გაშვება და შემოწმება
+The uploaded AK notes are the second required course source. Source-review
+status is shown separately from 3D visualization status.
 
-Node.js 24 და pnpm 11.19.0:
+## Development
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm test
 pnpm exec playwright install chromium
 pnpm test:browser
-pnpm dev
+pnpm build
 ```
 
-გახსენით `http://127.0.0.1:4173`. Windows-ზე უკვე დაყენებული Edge-ით ტესტისთვის გამოიყენეთ `BROWSER_CHANNEL=msedge` გარემოს ცვლადი. `?canvas=1` იძულებით რთავს Canvas სარეზერვო ხედს. `file://`-ით გახსნის ნაცვლად გამოიყენეთ ლოკალური სერვერი.
-
-## ფაილები
-
-- `index.html`, `styles/app.css` — გვერდი და ვიზუალური სტილი.
-- `src/main.js` — კონტროლები, პანელები და აპის დაწყება.
-- `src/data/` — ქართული/ლათინური მონაცემები და ხილვადობის წესები.
-- `src/geometry/` — სქემატური გეომეტრია და მეზობლების პოზიციები.
-- `src/rendering/` — WebGL, Canvas, კამერა და მონიშვნა.
-- `src/quiz/` — კითხვების შერჩევა და შეფასება.
-- `src/storage/` — ვალიდაცია, მიგრაცია და სარეზერვო ასლები.
-- `src/pwa/`, `sw.js` — ინსტალაცია და განახლებები.
-- `scripts/build.mjs` — დამოკიდებულებების გარეშე ქმნის `dist/`-ს და ჰეშით ვერსირებულ რესურსებს.
-- `tests/` — ლოგიკის, გეომეტრიისა და ბრაუზერის რეგრესიული შემოწმებები. `fixtures/v8` არის ძველი ZIP-ის ასლი მხოლოდ განახლების ტესტისთვის.
-
-## პროგრესი
-
-v9 მონაცემები ინახება `anatomy3d_workspace_v9` გასაღებით. პირველი ჩატვირთვა კითხულობს v8 სამუშაო მდგომარეობას ან v7 ანგარიშს; ძველი გასაღებები ხელუხლებლად რჩება. დაზიანებული v9 ჩანაწერი გადატანამდე ინახება recovery გასაღებით. შეუძლებელი ანგარიშები და არარსებული სტრუქტურები იმპორტში უარყოფილია. იმპორტი მიმდინარე მდგომარეობას მხოლოდ სრული შემოწმებისა და მომხმარებლის დადასტურების შემდეგ ცვლის. შენახვის შეცდომისას ჩანს შეტყობინება და ექსპორტი ისევ შესაძლებელია.
-
-მონაცემები რჩება იმავე origin-ის ბრაუზერში. Deploy Preview-ს განსხვავებული მისამართი production-ის localStorage-ს ვერ წაიკითხავს; შედარებისთვის გამოიყენეთ JSON ექსპორტი/იმპორტი.
-
-## განახლებები და Netlify
-
-`netlify.toml` ადგენს build-სა და `dist` publish საქაღალდეს. არ განათავსოთ წყაროს root პირდაპირ: `sw.js` build-ის შაბლონია. რესურსის შიგთავსის შეცვლა ავტომატურად ცვლის release ID-ს; worker მთელ გამოშვებას წინასწარ ინახავს და წარუმატებელი ჩამოტვირთვისას მოქმედ ვერსიას ტოვებს.
-
-v8-ის ერთფაილიანი გვერდი ახალი worker-ის მიღების შემდეგ მომდევნო გადატვირთვაზე გადადის v9-ზე; პროგრესი მიგრირდება. v9-ის მომდევნო გამოშვებები ღილაკით დასტურდება, შენახვა მოწმდება და გვერდი ახლდება. წინა გამოშვების ქეში დროებით რჩება გახსნილი გვერდების დასაცავად. სამუშაო მდგომარეობის შენახვა ერთ ბრაუზერშია გათვლილი; რამდენიმე ჩანართიდან ერთდროული რედაქტირებისას ბოლო შენახვა მოქმედებს.
-
-Service worker-ის აქტივაცია ეყრდნობა [MDN-ის აღწერილ lifecycle-ს](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/skipWaiting); კონფიგურაცია — [Netlify-ის ფაილურ პარამეტრებს](https://docs.netlify.com/build/configure-builds/file-based-configuration/).
-
-## გამოშვების პროცედურა
-
-1. ცალკე branch → draft PR → CI და Deploy Preview.
-2. Preview-ზე შეამოწმეთ desktop/mobile, 3D მონიშვნა, პროგრესი და სარეზერვო ასლი.
-3. განიხილეთ შედეგები; მხოლოდ შეთანხმების შემდეგ merge `main`-ში (ეს production deploy-ს გამოიწვევს).
-4. განთავსების შემდეგ გადაამოწმეთ იგივე origin-ზე განახლება და პროგრესი.
-
-უკან დასაბრუნებლად გამოიყენეთ Netlify-ის წინა წარმატებული deploy ან შეთანხმებული revert. v8 ძველ გასაღებებს წაიკითხავს და v9-ში მოგვიანებით მიღებული პროგრესი ავტომატურად არ გადაიტანება უკან; rollback-მდე ჩამოტვირთეთ v9 JSON ასლი და შეინარჩუნეთ v9 გასაღები. ეს მონაცემები ხელმისაწვდომი იქნება v9-ზე დაბრუნებისას.
-
-შემდგომი ეტაპებია ლიცენზირებული, ანატომიურად გადამოწმებული მოდელები, შეერთებების სიზუსტე, ტერმინების რეცენზია და სრულფასოვანი საგამოცდო სესიები.
+The v10.9 work should be preview-tested before merging to production.

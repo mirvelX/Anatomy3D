@@ -7,7 +7,7 @@ Branch: `codex/v10-study-expansion`. PR #5. Production requires explicit user ap
 
 - Every named anatomical structure must ultimately have a licensed, anatomically reviewed mesh or an individually identifiable region of a mesh. Spaces need an appropriate boundary representation; movements need approved joint animations.
 - A text entry is not a completed model. Track missing geometry explicitly. Never fill gaps with primitive or schematic 3D.
-- Preserve the existing C1/C2/L3 pilot geometry, masks, renderer and behavior. Do not restore the cancelled v11 2D branch.
+- Use the unified schematic 3D renderer for the vertebral atlas. The former BodyParts3D C1/C2/L3 pilot was removed at the owner's request. Do not restore the cancelled v11 2D branch.
 - Kacitadze, Human Anatomy, volume I (2017) is the primary source wherever its available pages address a topic. AK notes are required as a second source. Expose differences and normalization instead of silently replacing source wording.
 - The uploaded book ends at printed page 149. Vertebral joints from 150, thoracic joints from 155 and upper-limb joints from 162 need future book pages.
 - Stages: 10.2 general arthrology; 10.3 vertebral connections; 10.4 thorax; 10.5 shoulder girdle; 10.6 humerus/forearm; 10.7 hand; 10.8 integration. These are planned module stages, not a declaration that the anatomical releases are complete.
@@ -15,7 +15,7 @@ Branch: `codex/v10-study-expansion`. PR #5. Production requires explicit user ap
 
 ## What is implemented
 
-Seven user-provided interactive lab pages are integrated and published from `labs/`: v10.2 general arthrology, v10.3 vertebral connections, v10.4 thoracic connections, v10.5 upper-limb girdle connections, v10.6 free upper-limb connections, v10.7 pelvis connections and v10.8 free lower-limb connections. These are teaching visualizations and do not change the reviewed-mesh coverage count. The C1/C2/L3 BodyParts3D pilot is preserved.
+Seven user-provided interactive lab pages are integrated and published from `labs/`: v10.2 general arthrology, v10.3 vertebral connections, v10.4 thoracic connections, v10.5 upper-limb girdle connections, v10.6 free upper-limb connections, v10.7 pelvis connections and v10.8 free lower-limb connections. These are schematic teaching visualizations and do not count as anatomically reviewed scan meshes.
 
 Nine navigable draft modules, 278 study records at the initial integration checkpoint. The catalog includes general arthrology, vertebral connections, ribs I-XII, sternum, cavity boundaries, thoracic joints, clavicle/scapula, humerus, ulna/radius, both carpal rows, metacarpals I-V, 14 individual phalanges, and upper-limb joint/ligament records.
 
@@ -35,13 +35,13 @@ Examples of unresolved source issues are exposed in entries: intracapsularia/int
 
 1. Read the exact new PDFs, verify the old/new notes identity, visually inspect Kacitadze printed pp.40-59 and 130-149, determine exact per-entry citations, and add book-only landmarks missing from the current notes-based draft.
 2. Add subsequent Kacitadze specific arthrology pages and resolve source conflicts with recorded evidence.
-3. Acquire and inspect licensed meshes for every structure; record origin, license, attribution, scale/orientation, left/right identity, anatomical review, region mapping and segmentation evidence. Current new-model coverage is 0/278. Existing pilot meshes remain unchanged.
+3. Acquire and inspect licensed meshes for every structure; record origin, license, attribution, scale/orientation, left/right identity, anatomical review, region mapping and segmentation evidence. Current curriculum-level standalone 3D coverage is provided through the seven schematic labs; exact per-structure region mapping remains incomplete.
 4. Complete capsule attachments, joint exceptions, full boundary sets, movements and accurately registered superior/inferior contacts. Several joint fields deliberately say that more source detail is needed.
 5. Implement mesh highlight/isolate/camera views and click-on-model quizzes only after approved region mappings exist.
 6. Finish anatomical review and user acceptance; only then consider a non-draft release and production approval.
 
 ## Validation
 
-Each module checkpoint ran the existing Node suite plus curriculum tests and the new browser suite locally. PR CI additionally runs the original browser/PWA suite and pilot WebGL/canvas tests against the full repository assets, followed by the production build. Local checkout could not retrieve binary PNGs through the connector, so the new local browser test serves source directly. CI's checkout contains those unchanged PNGs and runs the complete build.
+Each module checkpoint ran the existing Node suite plus curriculum tests and the new browser suite locally. PR CI runs the browser/PWA suite, the schematic 3D regression suite, curriculum browser tests and the production build. Local checkout could not retrieve binary PNGs through the connector, so the new local browser test serves source directly. CI's checkout contains those unchanged PNGs and runs the complete build.
 
 Test status and Netlify Preview must be checked against the final branch SHA, not an earlier checkpoint. Never merge automatically.

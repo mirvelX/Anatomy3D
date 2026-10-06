@@ -19,7 +19,7 @@ export function joint(entry, bones, surfaces, type, elements, movements, notes =
   return { ...entry, kind: 'joint', joint: { bones, surfaces, type, capsule: 'დეტალური მიმაგრება წყაროს მიხედვით შესავსებია.', elements, movements }, reviewNotes: [...entry.reviewNotes, ...notes] };
 }
 export function moduleRecord(id, version, ka, latin, entries, bookPages, views = []) {
-  return { id, version, ka, latin, entries: entries.map(e => ({ ...e, book: { status: bookPages[0] > 149 ? 'pages-unavailable' : 'comparison-pending', printedPages: bookPages } })), views, status: 'draft', modelsComplete: false };
+  return { id, version, ka, latin, entries: entries.map(e => { const pages = e.book?.printedPages || bookPages; return { ...e, book: { status: pages[0] > 149 ? 'pages-unavailable' : 'comparison-pending', printedPages: pages } }; }), views, status: 'draft', modelsComplete: false };
 }
 export function validateModules(modules) {
   const seen = new Set();

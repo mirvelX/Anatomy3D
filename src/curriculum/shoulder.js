@@ -44,4 +44,4 @@ coracoacromial|ნისკარტ-აკრომიონის იოგი
 superior-transverse|ბეჭის ზედა განივი იოგი|Lig. transversum scapulae superius|ბეჭის საკუთარი იოგების ჯგუფი.|Ligamenta transversum scapulae superius
 inferior-transverse|ბეჭის ქვედა განივი იოგი|Lig. transversum scapulae inferius|ბეჭის საკუთარი იოგების ჯგუფი.|Ligamenta transversum scapulae inferius
 `),
-], [48,50], ['წინიდან','უკნიდან','გვერდიდან','ლავიწის ქვედა ზედაპირი']);
+].map(e=>e.source.page>=16?{...e,book:{printedPages:[162]}}:e), [48,50], ['წინიდან','უკნიდან','გვერდიდან','ლავიწის ქვედა ზედაპირი']);

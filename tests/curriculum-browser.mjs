@@ -61,7 +61,7 @@ try {
   const download=page.waitForEvent('download');await page.locator('[data-export]').click();
   assert.equal((await download).suggestedFilename(),'anatomy3d-curriculum-progress.json');
   await page.keyboard.press('Escape');
-  await page.locator('[data-pilot="C2"]').click();
+  await page.locator('#vertebra').selectOption('C2');
   await page.locator('#openConnections').click();
   assert.ok((await page.locator('[data-context]').innerText()).includes('C2'));
   assert.ok((await page.locator('[data-title]').innerText()).includes('ხერხემლის'));
@@ -70,15 +70,15 @@ try {
   assert.equal(await page.locator('[data-list] button').count(),0);
   await page.locator('#curriculum [data-mode]').click();assert.equal(await page.locator('[data-choices] button').count(),0);
   await page.keyboard.press('Escape');assert.equal(await page.locator('#curriculum').isVisible(),false);
-  await page.locator('[data-pilot="C1"]').click();
-  await page.waitForFunction(()=>document.querySelector('#meshStatus').dataset.mode==='atlas');
-  assert.equal(await page.locator('#parts button').count(),5);
+  await page.locator('#vertebra').selectOption('C1');
+  assert.ok(await page.locator('#parts button').count()>5);
+  assert.match(await page.locator('#sceneSource').innerText(),/სქემატური 3D/);
   await page.locator('#openCurriculum').click();await page.locator('[data-module]').first().click();
   await mkdir('test-results',{recursive:true});await page.screenshot({path:'test-results/curriculum-desktop.png'});
   await page.setViewportSize({width:390,height:844});
   await page.screenshot({path:'test-results/curriculum-mobile.png'});
   assert.ok(await page.locator('#curriculum').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
   assert.deepEqual(errors,[]);
-  console.log('PASS reload persistence, empty search, Escape, unchanged C1 mesh and mobile width');
+  console.log('PASS reload persistence, empty search, Escape, schematic C1 atlas and mobile width');
 } finally {await browser.close();await new Promise(r=>server.close(r));}
 

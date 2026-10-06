@@ -41,7 +41,7 @@
           <div class="brand-mark" aria-hidden="true">◈</div>
           <div>
             <h1>Anatomy 3D</h1>
-            <p>Anatomy Atlas · v10.8 alpha</p>
+            <p>Anatomy Atlas · v10.9 alpha</p>
           </div>
         </div>
         <section class="section">
@@ -54,6 +54,17 @@
           <p class="sub" id="regionHint" style="font-size: 0.78rem; margin: 0">
             მონიშნე კონკრეტული მალა, მაგალითად L5.
           </p>
+          <div class="level-shortcuts" role="group" aria-label="სწრაფი მალის არჩევა">
+            <button data-level="C1">C1</button>
+            <button data-level="C2">C2</button>
+            <button data-level="C7">C7</button>
+            <button data-level="T6">T6</button>
+            <button data-level="T12">T12</button>
+            <button data-level="L3">L3</button>
+            <button data-level="L5">L5</button>
+            <button data-level="SAC">გავა</button>
+            <button data-level="COC">კუდუსუნი</button>
+          </div>
         </section>
         <section class="section">
           <p class="kicker">02 · მალების შეერთება</p>
@@ -75,50 +86,6 @@
             L5 + Os sacrum
           </div>
         </section>
-        <section class="section pilot-panel">
-          <p class="kicker">ახალი · 3D მოდელების პილოტი</p>
-          <div
-            class="pilot-shortcuts"
-            role="group"
-            aria-label="BodyParts3D პილოტები"
-          >
-            <button data-pilot="C1">C1 · Atlas</button>
-            <button data-pilot="C2">C2 · Axis</button>
-            <button data-pilot="L3">L3</button>
-          </div>
-          <label for="meshMode">მოდელის წყარო</label>
-          <select id="meshMode">
-            <option value="schematic">სქემატური · ყველა ნაწილი</option>
-            <option value="atlas">BodyParts3D · C1 / C2 / L3</option>
-          </select>
-          <p id="meshStatus" role="status"></p>
-          <button id="meshRetry" class="hidden">ხელახლა ჩატვირთვა</button>
-          <p id="meshRegionNote" class="sub"></p>
-          <details id="pilotCredits" class="hidden">
-            <summary>მოდელის წყარო და ლიცენზია</summary>
-            <p>
-              BodyParts3D, © The Database Center for Life Science ·
-              <a
-                href="https://creativecommons.org/licenses/by-sa/2.1/jp/"
-                target="_blank"
-                rel="noopener noreferrer"
-                >CC BY-SA 2.1 Japan</a
-              >.
-            </p>
-            <p>
-              შემცირებული ატლასის ზედაპირი; ფოტოსკანი არ არის. კლინიკური და
-              სეგმენტაციის დამოუკიდებელი შემოწმება არ დასრულებულა.
-            </p>
-            <a id="pilotAsset" download>OBJ</a> ·
-            <a id="pilotManifest" target="_blank" rel="noopener"
-              >ფაილის მონაცემები</a
-            >
-            ·
-            <a id="pilotNotice" target="_blank" rel="noopener"
-              >ლიცენზიის ცნობები</a
-            >
-          </details>
-        </section>
         <section class="section" id="studyList">
           <div class="section-title">
             <p class="kicker">03 · ანატომიური ნაწილები</p>
@@ -139,14 +106,14 @@
           ></div>
         </section>
         <div class="note">
-          სასწავლო პროტოტიპი: მოდელის წარმომავლობა და მისი ანატომიური დამოწმება
-          განსხვავდება. წიგნის მითითება გეომეტრიის დამოწმებას არ ნიშნავს.
+          სქემატური 3D ატლასი: სტრუქტურები განკუთვნილია სწავლისა და გამოცდისთვის.
+          ტექსტური წყარო და 3D ფორმა ცალ-ცალკე ფასდება.
         </div>
       </aside>
       <main class="main">
         <div class="topline">
           <div>
-            <span class="pill">ინტერაქტიული 3D · WebGL · offline</span>
+            <span class="pill">ინტერაქტიული 3D · schematic · offline</span>
             <h2 id="pageTitle">L5 + გავა</h2>
             <p class="sub" id="subtitle">
               აარჩიე მალა და ნახე მისი ზედა და ქვედა შეერთებები.
@@ -174,7 +141,7 @@
             <strong id="modelLabel">L5 + გავა</strong><br /><span
               id="sceneSource"
             ></span
-            ><br />360° თავისუფალი დათვალიერება<br /><span
+            ><br />360° სასწავლო დათვალიერება<br /><span
               style="color: #b1c9d8"
               >დააწკაპუნე სტრუქტურას</span
             >

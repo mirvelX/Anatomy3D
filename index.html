@@ -72,6 +72,11 @@ input[type="range"]{accent-color:#6edee2;width:100%;cursor:pointer}
 .source-card{margin:12px 0;padding:10px 11px;border:1px solid #36536b;border-left:3px solid #62c8ce;border-radius:9px;background:#10263a}.source-card b{font-size:.72rem;color:#8fe4e4;letter-spacing:.06em}.source-card p{margin:5px 0 0;color:#b7ccda;font-size:.73rem;line-height:1.55}.source-card #sourceNote{color:#8ea9ba;font-size:.69rem}.bone-progress{height:7px;width:100%;margin-top:8px;accent-color:#65d2d6}.structure-source-badge{display:inline-flex;margin-top:7px;border:1px solid #3c6672;border-radius:999px;padding:3px 7px;color:#8edade;background:#14303c;font-size:.66rem}
 @media(max-width:1250px){.layout{grid-template-columns:minmax(250px,300px) minmax(0,1fr)}.rightbar{grid-column:2;border-left:0;border-top:1px solid #284157;padding:17px 24px}.main{grid-row:span 2}.sidebar{grid-row:span 2}}
 @media(max-width:780px){.layout{display:flex;flex-direction:column}.sidebar,.rightbar{border:0;border-bottom:1px solid #284157;padding:17px}.main{padding:17px}.sidebar .parts{max-height:210px;grid-template-columns:1fr 1fr}.sidebar .section{margin-bottom:13px}.brand{margin-bottom:14px}#gl{height:45vh;min-height:310px}.controls{grid-template-columns:1fr}.rightbar{border-top:1px solid #284157}}
+.sketchfab-frame{width:100%;height:min(57vh,520px);min-height:345px;border:0;display:block;background:#0a1524}
+.stage.external-model #gl{display:none}
+.stage.external-model .stage-head,.stage.external-model .stage-help,.stage.external-model .stage-bottom{display:none}
+#sketchfabToggle.active{background:#21647a;border-color:#77dae8;color:#fff}
+@media(max-width:780px){.sketchfab-frame{height:45vh;min-height:310px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 
 /* v11.2 final upper-girdle polish */
@@ -114,14 +119,15 @@ input[type="range"]{accent-color:#6edee2;width:100%;cursor:pointer}
     <input id="search" type="search" placeholder="მაგ. arcus, დისკო…" autocomplete="off">
     <div class="parts" id="parts" role="group" aria-label="ანატომიური ნაწილები"></div>
   </section>
-  <div class="note">სასწავლო პროტოტიპი: ტერმინოლოგია და ზოგადი აღწერები მოყვანილია კაციტაძის წიგნისა და AK კონსპექტის მიხედვით. 3D მოდელები სქემატური სასწავლო ვიზუალებია; ტერმინოლოგია წყაროებითაა გადამოწმებული, ხოლო გეომეტრია არ წარმოადგენს სამედიცინო სკანს.</div>
+  <div class="note">სასწავლო პროტოტიპი: ტერმინოლოგია და ზოგადი აღწერები მოყვანილია კაციტაძის წიგნისა და AK კონსპექტის მიხედვით. 3D მოდელები ძირითადად სქემატური სასწავლო ვიზუალებია; Scapula-სთვის ხელმისაწვდომია დამატებითი Sketchfab 3D ხედი, რომელიც ინტერნეტს მოითხოვს და საკუთარ წყაროს/ატრიბუციას ინარჩუნებს. ტერმინოლოგია წყაროებითაა გადამოწმებული, ხოლო სქემატური გეომეტრია არ წარმოადგენს სამედიცინო სკანს.</div>
 </aside>
 <main class="main">
   <div class="topline"><div><span class="pill">ინტერაქტიული 3D · ქართულ-ლათინური ატლასი · offline</span><h2 id="pageTitle">ხერხემალი</h2><p class="sub" id="subtitle">აირჩიე კატეგორია, შემდეგ ძვალი და ისწავლე მისი სტრუქტურები 3D-ში.</p></div>
-    <div class="tabs" role="group" aria-label="სასწავლო რეჟიმი"><button id="tabStudy" class="active">შესწავლა</button><button id="tabQuiz">გამოცდა</button><button id="installBtn" class="hidden primary" title="აპის მთავარ ეკრანზე დაყენება">＋ აპის დაყენება</button><button id="shareApp" class="primary" title="საჯარო ვებ-მისამართის გაზიარება">↗ გაზიარება</button><span id="shareFeedback" role="status" style="font-size:.74rem;color:#9ad9e5;align-self:center"></span></div>
+    <div class="tabs" role="group" aria-label="სასწავლო რეჟიმი"><button id="tabStudy" class="active">შესწავლა</button><button id="tabQuiz">გამოცდა</button><button id="sketchfabToggle" class="hidden" title="გახსენი ლიცენზირებული გარე 3D მოდელი Sketchfab-ზე">Sketchfab 3D</button><button id="installBtn" class="hidden primary" title="აპის მთავარ ეკრანზე დაყენება">＋ აპის დაყენება</button><button id="shareApp" class="primary" title="საჯარო ვებ-მისამართის გაზიარება">↗ გაზიარება</button><span id="shareFeedback" role="status" style="font-size:.74rem;color:#9ad9e5;align-self:center"></span></div>
   </div>
   <div class="stage" id="stage">
     <canvas id="gl" aria-label="ინტერაქტიული WebGL მალის მოდელი. ბრუნვა გადათრევით და მასშტაბი მაუსის ბორბლით." tabindex="0"></canvas>
+    <iframe id="sketchfabFrame" class="sketchfab-frame hidden" title="Scapula R — Sketchfab 3D model" loading="lazy" allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
     <div class="stage-head"><strong id="modelLabel">ხერხემალი</strong><br>360° თავისუფალი დათვალიერება<br><span style="color:#b1c9d8">დააწკაპუნე სტრუქტურას</span></div>
     <div class="stage-help">მაუსი: ბრუნვა<br>ბორბალი: გადიდება<br>R: საწყისი ხედი</div>
     <div id="tooltip" class="hidden" aria-live="polite"></div>
@@ -174,6 +180,34 @@ const categories=[
   {id:'upperfree',ka:'ზედა კიდურის თავისუფალი ნაწილი',latin:'Skeleton membri superioris liberi'}
 ];
 const categoryBones={spine:spineIds,shoulder:['CLAV','SCAP'],upperfree:['HUM','ULNA','RADIUS']};
+const sketchfabModels={
+  SCAP:{
+    embed:'https://sketchfab.com/models/8047731b0ae740678e09a8af45a7f515/embed',
+    source:'https://sketchfab.com/3d-models/scapula-r-met-annotaties-spec-structuren-8047731b0ae740678e09a8af45a7f515'
+  }
+};
+let sketchfabActive=false;
+function setSketchfabView(active){
+  const model=sketchfabModels[state.vertebra];
+  const available=!!model&&state.vertebra==='SCAP'&&state.side==='right'&&state.mode==='study';
+  sketchfabActive=!!active&&available;
+  const frame=$('sketchfabFrame'),stage=$('stage'),button=$('sketchfabToggle');
+  if(sketchfabActive&&frame.dataset.model!==state.vertebra){
+    frame.src=model.embed;
+    frame.dataset.model=state.vertebra;
+  }
+  frame.classList.toggle('hidden',!sketchfabActive);
+  stage.classList.toggle('external-model',sketchfabActive);
+  button.textContent=sketchfabActive?'სქემატური 3D':'Sketchfab 3D';
+  button.classList.toggle('active',sketchfabActive);
+  if(sketchfabActive)tooltip('');
+}
+function syncSketchfabView(){
+  const available=!!sketchfabModels[state.vertebra]&&state.vertebra==='SCAP'&&state.side==='right'&&state.mode==='study';
+  $('sketchfabToggle').classList.toggle('hidden',!available);
+  if(!available&&sketchfabActive)setSketchfabView(false);
+  else if(available)setSketchfabView(sketchfabActive);
+}
 const name=id=>({OCC:'კეფის ძვალი',SAC:'გავა',COC:'კუდუსუნი',C1:'ატლასი C1',C2:'აქსისი C2',CLAV:'ლავიწი',SCAP:'ბეჭი',HUM:'მხრის ძვალი',ULNA:'იდაყვის ძვალი',RADIUS:'სხივის ძვალი'})[id]||(id.startsWith('C')?id:id);
 const latinName=id=>({OCC:'Os occipitale',SAC:'Os sacrum',COC:'Os coccygis',C1:'Atlas',C2:'Axis',CLAV:'Clavicula',SCAP:'Scapula',HUM:'Humerus',ULNA:'Ulna',RADIUS:'Radius'})[id]||(id.startsWith('C')?'Vertebra cervicalis':id.startsWith('T')?'Vertebra thoracica':'Vertebra lumbalis');
 const categoryName=id=>categories.find(x=>x.id===id)?.ka||id;
@@ -403,7 +437,7 @@ function renderProgress(){
 function updatePanel(){displayNeighbors();renderPartList();renderDetails();renderConnection();renderProgress();for(const b of document.querySelectorAll('[data-assembly]')){b.classList.toggle('active',b.dataset.assembly===state.assembly);b.disabled=state.category!=='spine'||(b.dataset.assembly==='above'&&!above(state.vertebra))||(['below','both'].includes(b.dataset.assembly)&&!below(state.vertebra));}
  $('explodeVal').textContent=state.explode+'%';$('rotateVal').textContent=state.rotation+'°';$('zoomVal').textContent=Math.round(state.zoom*100)+'%';$('isolate').checked=state.dim;$('labels').checked=state.labels;$('zoom').value=state.zoom*100;
  $('tabStudy').classList.toggle('active',state.mode==='study');$('tabQuiz').classList.toggle('active',state.mode==='quiz');$('studyList').classList.toggle('hidden',state.mode==='quiz');$('studyControls').classList.toggle('hidden',state.mode==='quiz');$('quizPanel').classList.toggle('hidden',state.mode!=='quiz');
- saveWorkspace();}
+ syncSketchfabView();saveWorkspace();}
 function selectPart(id){if(!byId[id])return;if(state.mode==='quiz'&&state.question){grade(id);return;}state.selected=id;renderPartList();renderDetails();draw();if(state.labels&&id!=='all'){const d=byId[id];tooltip(d.latin+' — '+d.ka);}saveWorkspace();}
 function tooltip(msg){if(!state.labels||!msg){$('tooltip').classList.add('hidden');return;}$('tooltip').textContent=msg;$('tooltip').classList.remove('hidden');}
 function changeVertebra(id){state.vertebra=id;state.selected='all';state.rotation=0;state.explode=0;$('explode').value=0;$('rotate').value=0;$('search').value='';if(id==='COC'&&['below','both'].includes(state.assembly))state.assembly='above';build();updatePanel();if(state.mode==='quiz')makeQuestion();tooltip('');}
@@ -653,6 +687,7 @@ $('isolate').addEventListener('change',e=>{state.dim=e.target.checked;draw();sav
 $('labels').addEventListener('change',e=>{state.labels=e.target.checked;if(!state.labels)tooltip('');saveWorkspace();});
 function makeQuestion(){const avail=visibleDefs().filter(d=>d.id!=='all'&&!['normal-space','typical-space','atlas-space','sacrum-space','ordinary-link','disc-link','canal'].includes(d.kind));if(avail.length<2){$('quizQuestion').textContent='აირჩიე სხვა ძვალი ტესტისთვის';$('quizChoices').replaceChildren();return;}const target=avail[Math.floor(Math.random()*avail.length)];let choices=[target,...avail.filter(d=>d.id!==target).sort(()=>Math.random()-.5).slice(0,3)];choices=choices.sort(()=>Math.random()-.5);state.question=target;state.answered=false;state.selected='all';$('quizQuestion').textContent='მოძებნე: '+target.latin;$('quizChoices').replaceChildren();for(const d of choices){const b=document.createElement('button');b.textContent=d.ka;b.onclick=()=>grade(d.id);$('quizChoices').appendChild(b);}$('quizFeedback').textContent='მოდელზე დააწკაპუნე ან ქვემოთ მოცემულ ვარიანტს უპასუხე.';draw();}
 function grade(id){if(!state.question||state.answered)return;state.answered=true;const good=id===state.question.id;state.progress.total++;if(good)state.progress.correct++;try{localStorage.setItem('vertebraAtlasV7',JSON.stringify(state.progress));}catch(e){}saveWorkspace();$('quizFeedback').textContent=(good?'✓ სწორია! ':'✗ სწორი პასუხია: '+state.question.ka+'. ')+state.question.info;renderProgress();}
+$('sketchfabToggle').onclick=()=>setSketchfabView(!sketchfabActive);
 $('tabStudy').onclick=()=>{state.mode='study';state.selected='all';updatePanel();draw();};
 $('tabQuiz').onclick=()=>{state.mode='quiz';updatePanel();makeQuestion();};
 $('next').onclick=makeQuestion;
@@ -664,7 +699,7 @@ $('learnedBtn').onclick=()=>{
  renderDetails();renderProgress();renderPartList();saveWorkspace();
 };
 $('exportProgress').onclick=()=>{
- const data={app:'Anatomy 3D',version:'11.3.0-alpha.1',exported_at:new Date().toISOString(),workspace:{category:state.category,vertebra:state.vertebra,side:state.side,assembly:state.assembly,selected:state.selected,dim:state.dim,labels:state.labels},learned:state.learned,progress:state.progress};
+ const data={app:'Anatomy 3D',version:'11.3.0-alpha.2',exported_at:new Date().toISOString(),workspace:{category:state.category,vertebra:state.vertebra,side:state.side,assembly:state.assembly,selected:state.selected,dim:state.dim,labels:state.labels},learned:state.learned,progress:state.progress};
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='anatomy3d_backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
@@ -718,7 +753,7 @@ window.addEventListener('appinstalled',()=>{$('installBtn').classList.add('hidde
 populateCategories();populateSelector();initGL();build();updatePanel();
 if(state.selected!=='all'&&!visibleDefs().some(x=>x.id===state.selected)){state.selected='all';updatePanel();}
 
-window.__anatomyDebug={state,ids,defs,connected,visibleDefs,meshes:()=>meshes,poses:()=>poses,categories,categoryBones,version:'11.3.0-alpha.1'};
+window.__anatomyDebug={state,ids,defs,connected,visibleDefs,meshes:()=>meshes,poses:()=>poses,categories,categoryBones,version:'11.3.0-alpha.2'};
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 </script>
 </body>

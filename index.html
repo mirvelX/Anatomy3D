@@ -1,384 +1,725 @@
 <!doctype html>
-<!-- production-v10.8-deploy-trigger -->
 <html lang="ka">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#0e192b" />
-    <meta name="application-name" content="Anatomy 3D" />
-    <meta
-      name="description"
-      content="ქართული და ლათინური ინტერაქტიული 3D ანატომიის სასწავლო ატლასი"
-    />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="./icons/icon-192.png"
-    />
-    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <title>Anatomy 3D — მალების ინტერაქტიული ატლასი</title>
-    <link rel="stylesheet" href="./styles/app.css" />
-  </head>
-  <body>
-    <div id="storageStatus" class="status-banner hidden" role="status"></div>
-    <div id="updateNotice" class="status-banner hidden" role="status">
-      ახალი ვერსია მზადაა.<button id="applyUpdate" type="button">
-        განახლება
-      </button>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0e192b">
+<meta name="application-name" content="Anatomy 3D">
+<meta name="description" content="Anatomy 3D: ინტერაქტიული ქართულ-ლათინური ჩონჩხის ატლასი — ხერხემალი, ზედა კიდურის სარტყელი, 3D მოდელები და ტესტები.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Anatomy 3D | ინტერაქტიული ჩონჩხის ატლასი">
+<meta property="og:description" content="ისწავლე ძვლების აგებულება 3D-ში: ქართული და ლათინური სახელები, სტრუქტურები და ტესტები.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+
+<title>Anatomy 3D — ინტერაქტიული ჩონჩხის ატლასი</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#ebf3ff;background:#091321;font-size:15px}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}button,input,select{font:inherit}button,select{cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #70dded;outline-offset:2px}
+button{background:#1c3048;border:1px solid #36526e;color:#e9f6ff;border-radius:10px;padding:9px 12px}
+button:hover{background:#28435f}button:disabled{opacity:.42;cursor:not-allowed}
+button.active,.tabs button.active{background:#21647a;border-color:#77dae8;color:white}
+button.primary{background:#1b8a94;border-color:#62d7dd;font-weight:700;color:white}
+select,input[type="search"]{width:100%;color:#ebf5ff;background:#15293e;border:1px solid #36526b;border-radius:10px;padding:11px;min-width:0}
+label{font-size:.85rem;color:#c0d3e3;font-weight:650}
+.layout{display:grid;grid-template-columns:minmax(260px,316px) minmax(0,1fr) minmax(270px,314px);max-width:1760px;min-height:100vh;margin:auto}
+.sidebar,.rightbar{background:#101e2e;padding:22px 17px;min-width:0}.sidebar{border-right:1px solid #284157}.rightbar{border-left:1px solid #284157}
+.brand{display:flex;align-items:center;gap:11px;margin-bottom:24px}.brand-mark{background:linear-gradient(140deg,#59d9e2,#2f7493);padding:11px;border-radius:13px;font-size:23px;box-shadow:0 6px 30px #56d3eb30}.brand h1{font-size:1.13rem;margin:0}.brand p{margin:4px 0 0;color:#91b4c8;font-size:.77rem}
+.kicker{text-transform:uppercase;font-size:.68rem;letter-spacing:.14em;color:#81d5db;font-weight:800;margin:0 0 9px}
+.section{display:grid;gap:10px;margin-bottom:24px}.section-title{display:flex;justify-content:space-between;align-items:center}
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mini{padding:8px 7px;font-size:.78rem}
+.parts{display:grid;gap:6px;max-height:330px;overflow:auto;padding-right:3px}.part-btn{text-align:left;display:flex;justify-content:space-between;align-items:center;gap:7px;border-radius:9px;padding:9px 10px}
+.part-btn b{display:block;font-size:.82rem;font-weight:650}.part-btn small{display:block;color:#a5bccf;font-size:.70rem;margin-top:3px}.part-btn.active small{color:#d9f9fb}
+.part-btn .dot{width:7px;height:7px;background:#f6cb71;border-radius:50%;flex-shrink:0}
+.main{padding:26px 26px 38px;min-width:0;background:radial-gradient(ellipse at 48% 15%,#1a3248 0%,#0a1524 65%)}
+.topline{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;flex-wrap:wrap}.topline h2{font-size:1.7rem;margin:6px 0 7px;line-height:1.25}.sub{font-size:.89rem;color:#acc4d8;margin:0 0 15px;line-height:1.6}
+.pill{display:inline-flex;border:1px solid #427986;color:#94eff0;background:#143740;border-radius:999px;padding:4px 9px;font-size:.72rem;font-weight:700}
+.tabs{display:flex;gap:7px;flex-wrap:wrap}.tabs button{font-size:.84rem}
+.stage{position:relative;border:1px solid #34516a;border-radius:18px;overflow:hidden;background:#152a40;box-shadow:0 12px 45px #0003}
+#gl{width:100%;height:min(57vh,520px);min-height:345px;display:block;touch-action:none;cursor:grab}
+#gl:active{cursor:grabbing}
+.stage-head{position:absolute;top:15px;left:15px;background:#0e1d30da;border:1px solid #39566a;border-radius:10px;padding:9px 12px;font-size:.76rem;pointer-events:none;line-height:1.65}
+.stage-head strong{font-size:.89rem}
+.stage-help{position:absolute;right:14px;top:14px;background:#12263ac7;border:1px solid #38586d;border-radius:9px;padding:8px 10px;font-size:.73rem;color:#afccdc;pointer-events:none;line-height:1.55}
+.stage-bottom{display:flex;justify-content:space-between;gap:7px;flex-wrap:wrap;padding:11px 13px;border-top:1px solid #34536b;background:#14273b}
+.legend{display:flex;align-items:center;gap:13px;flex-wrap:wrap;font-size:.75rem;color:#c5d7e5}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.legend .sel{background:#ffce75}.legend .targ{background:#eac99d}.legend .neighbor{background:#82bddc}.legend .disc{background:#c4a7ed}
+.camera{display:flex;gap:5px;flex-wrap:wrap}.camera button{font-size:.73rem;padding:6px 9px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:14px}.controlbox{border:1px solid #304c65;background:#10243b;border-radius:14px;padding:14px}
+.controlbox h3{font-size:.86rem;margin:0 0 12px}.range-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}.range-row output{font-variant-numeric:tabular-nums;color:#80dce6;font-size:.8rem}
+input[type="range"]{accent-color:#6edee2;width:100%;cursor:pointer}
+.checkrow{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.82rem;color:#cadde9}.checkrow input{accent-color:#62d8e4;width:17px;height:17px}
+.rightbar h3{margin:0 0 10px;font-size:1.05rem}.rightbar .latin{font-style:italic;font-size:1.12rem;color:#f4d28a;margin-top:7px;font-weight:650}.rightbar .georgian{font-size:.99rem;margin-top:7px}.rightbar p{color:#bed0df;font-size:.84rem;line-height:1.65}
+.rule{border-top:1px solid #304b62;margin:20px 0}.details{border:1px solid #395168;background:#182d42;border-radius:13px;padding:14px;margin:13px 0}
+.note{font-size:.79rem;color:#bdd0de;background:#233546;border-left:3px solid #e2b76a;border-radius:6px;padding:10px 12px;line-height:1.55;margin-top:12px}
+.connection{border-radius:11px;border:1px solid #395569;padding:11px;margin:10px 0;background:#182b3e}.connection strong{font-size:.86rem}.connection p{margin:7px 0 0;font-size:.79rem}
+.quiz{border:1px solid #375669;border-radius:14px;background:#14283a;padding:19px;margin-top:15px}.quiz h3{margin:7px 0}.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:11px 0}
+.choices button{min-height:49px;text-align:left}#learnedBtn.learned{background:#204f46;border-color:#70dbb0;color:#c3ffdf}.import-label{display:block}.feedback{color:#a9e6ca;min-height:24px;font-size:.84rem;margin-top:12px}
+.stat{font-size:.78rem;color:#a8d5de;background:#1b3649;border-radius:8px;padding:5px 9px;white-space:nowrap}
+.footer{font-size:.75rem;line-height:1.65;color:#91aabd;margin-top:25px}
+.hidden{display:none!important}.chip{font-size:.72rem;color:#d5eff6;border:1px solid #3c6779;background:#1b3d4c;border-radius:20px;padding:3px 8px}
+#tooltip{position:absolute;left:50%;bottom:66px;transform:translateX(-50%);background:#0a2538df;border:1px solid #62a5b7;color:white;padding:7px 11px;border-radius:9px;max-width:90%;font-size:.83rem;pointer-events:none}
+
+.source-card{margin:12px 0;padding:10px 11px;border:1px solid #36536b;border-left:3px solid #62c8ce;border-radius:9px;background:#10263a}.source-card b{font-size:.72rem;color:#8fe4e4;letter-spacing:.06em}.source-card p{margin:5px 0 0;color:#b7ccda;font-size:.73rem;line-height:1.55}.source-card #sourceNote{color:#8ea9ba;font-size:.69rem}.bone-progress{height:7px;width:100%;margin-top:8px;accent-color:#65d2d6}.structure-source-badge{display:inline-flex;margin-top:7px;border:1px solid #3c6672;border-radius:999px;padding:3px 7px;color:#8edade;background:#14303c;font-size:.66rem}
+@media(max-width:1250px){.layout{grid-template-columns:minmax(250px,300px) minmax(0,1fr)}.rightbar{grid-column:2;border-left:0;border-top:1px solid #284157;padding:17px 24px}.main{grid-row:span 2}.sidebar{grid-row:span 2}}
+@media(max-width:780px){.layout{display:flex;flex-direction:column}.sidebar,.rightbar{border:0;border-bottom:1px solid #284157;padding:17px}.main{padding:17px}.sidebar .parts{max-height:210px;grid-template-columns:1fr 1fr}.sidebar .section{margin-bottom:13px}.brand{margin-bottom:14px}#gl{height:45vh;min-height:310px}.controls{grid-template-columns:1fr}.rightbar{border-top:1px solid #284157}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* v11.2 final upper-girdle polish */
+.laterality{display:grid;gap:7px;margin-top:3px;padding-top:10px;border-top:1px solid #284157}.laterality>span{font-size:.72rem;color:#90aec2;font-weight:750;letter-spacing:.04em}.laterality-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.laterality-buttons button{padding:8px 9px;font-size:.76rem}.laterality-buttons button.active{background:#21647a;border-color:#77dae8;color:#fff}.stage-head strong{letter-spacing:.01em}.details .source-info{border-left:2px solid #5fc4ca;padding-left:9px}.part-btn{transition:background .14s ease,border-color .14s ease,transform .14s ease}.part-btn:hover{transform:translateX(2px)}
+@media(max-width:620px){.laterality-buttons button{min-height:42px}.camera button{min-height:40px}.stage-head{max-width:62%}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark" aria-hidden="true">◈</div><div><h1>Anatomy 3D</h1><p>Skeletal Atlas · v11.3 alpha · Free Upper Limb</p></div></div>
+  <section class="section">
+    <div class="section-title"><p class="kicker">01 · კატეგორია</p><span class="chip" id="categoryCount">3 კატეგორია</span></div>
+    <label for="category">რეგიონი / კატეგორია</label><select id="category"></select>
+    <p class="sub" id="categoryHint" style="font-size:.78rem;margin:0">აირჩიე ხერხემალი, ზედა კიდურის სარტყელი ან ზედა კიდურის თავისუფალი ნაწილი.</p>
+  </section>
+  <section class="section">
+    <div class="section-title"><p class="kicker" id="boneKicker">02 · ძვლის შერჩევა</p><span class="chip" id="boneCount">26 ძვალი</span></div>
+    <label for="vertebra" id="boneLabel">ძვალი</label><select id="vertebra"></select>
+    <p class="sub" id="regionHint" style="font-size:.78rem;margin:0">მონიშნე კონკრეტული მალა, მაგალითად L5.</p>
+    <div id="lateralitySection" class="laterality hidden" aria-label="ძვლის მხარე">
+      <span>მხარე</span>
+      <div class="laterality-buttons" role="group" aria-label="მარჯვენა ან მარცხენა ძვალი">
+        <button type="button" data-side="right" class="active">მარჯვენა</button>
+        <button type="button" data-side="left">მარცხენა</button>
+      </div>
     </div>
-    <div id="offlineStatus" class="status-banner hidden" role="status"></div>
-    <div class="layout">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true">◈</div>
-          <div>
-            <h1>Anatomy 3D</h1>
-            <p>Anatomy Atlas · v10.8 alpha</p>
-          </div>
-        </div>
-        <section class="section">
-          <div class="section-title">
-            <p class="kicker">01 · მალის შერჩევა</p>
-            <span class="chip">26 დონე</span>
-          </div>
-          <label for="vertebra">მალა / ძვალი</label
-          ><select id="vertebra"></select>
-          <p class="sub" id="regionHint" style="font-size: 0.78rem; margin: 0">
-            მონიშნე კონკრეტული მალა, მაგალითად L5.
-          </p>
-        </section>
-        <section class="section">
-          <p class="kicker">02 · მალების შეერთება</p>
-          <div
-            class="btn-grid"
-            role="group"
-            aria-label="მეზობელი მალების ჩვენება"
-          >
-            <button data-assembly="solo">ცალკე</button
-            ><button data-assembly="above">ზედა მეზობელი</button>
-            <button data-assembly="below" class="active">ქვედა მეზობელი</button
-            ><button data-assembly="both">ორივე მეზობელი</button>
-          </div>
-          <div
-            class="chip"
-            id="neighbors"
-            style="border-radius: 9px; line-height: 1.55"
-          >
-            L5 + Os sacrum
-          </div>
-        </section>
-        <section class="section pilot-panel">
-          <p class="kicker">ახალი · 3D მოდელების პილოტი</p>
-          <div
-            class="pilot-shortcuts"
-            role="group"
-            aria-label="BodyParts3D პილოტები"
-          >
-            <button data-pilot="C1">C1 · Atlas</button>
-            <button data-pilot="C2">C2 · Axis</button>
-            <button data-pilot="L3">L3</button>
-          </div>
-          <label for="meshMode">მოდელის წყარო</label>
-          <select id="meshMode">
-            <option value="schematic">სქემატური · ყველა ნაწილი</option>
-            <option value="atlas">BodyParts3D · C1 / C2 / L3</option>
-          </select>
-          <p id="meshStatus" role="status"></p>
-          <button id="meshRetry" class="hidden">ხელახლა ჩატვირთვა</button>
-          <p id="meshRegionNote" class="sub"></p>
-          <details id="pilotCredits" class="hidden">
-            <summary>მოდელის წყარო და ლიცენზია</summary>
-            <p>
-              BodyParts3D, © The Database Center for Life Science ·
-              <a
-                href="https://creativecommons.org/licenses/by-sa/2.1/jp/"
-                target="_blank"
-                rel="noopener noreferrer"
-                >CC BY-SA 2.1 Japan</a
-              >.
-            </p>
-            <p>
-              შემცირებული ატლასის ზედაპირი; ფოტოსკანი არ არის. კლინიკური და
-              სეგმენტაციის დამოუკიდებელი შემოწმება არ დასრულებულა.
-            </p>
-            <a id="pilotAsset" download>OBJ</a> ·
-            <a id="pilotManifest" target="_blank" rel="noopener"
-              >ფაილის მონაცემები</a
-            >
-            ·
-            <a id="pilotNotice" target="_blank" rel="noopener"
-              >ლიცენზიის ცნობები</a
-            >
-          </details>
-        </section>
-        <section class="section" id="studyList">
-          <div class="section-title">
-            <p class="kicker">03 · ანატომიური ნაწილები</p>
-            <span class="stat" id="partCount">0</span>
-          </div>
-          <label for="search">მოძებნე ქართულად ან ლათინურად</label>
-          <input
-            id="search"
-            type="search"
-            placeholder="მაგ. arcus, დისკო…"
-            autocomplete="off"
-          />
-          <div
-            class="parts"
-            id="parts"
-            role="group"
-            aria-label="ანატომიური ნაწილები"
-          ></div>
-        </section>
-        <div class="note">
-          სასწავლო პროტოტიპი: მოდელის წარმომავლობა და მისი ანატომიური დამოწმება
-          განსხვავდება. წიგნის მითითება გეომეტრიის დამოწმებას არ ნიშნავს.
-        </div>
-      </aside>
-      <main class="main">
-        <div class="topline">
-          <div>
-            <span class="pill">ინტერაქტიული 3D · WebGL · offline</span>
-            <h2 id="pageTitle">L5 + გავა</h2>
-            <p class="sub" id="subtitle">
-              აარჩიე მალა და ნახე მისი ზედა და ქვედა შეერთებები.
-            </p>
-          </div>
-          <div class="tabs" role="group" aria-label="სასწავლო რეჟიმი">
-            <button id="tabStudy" class="active">შესწავლა</button
-            ><button id="tabQuiz">გამოცდა</button
-            ><button
-              id="installBtn"
-              class="hidden primary"
-              title="აპის მთავარ ეკრანზე დაყენება"
-            >
-              ＋ აპის დაყენება
-            </button>
-          </div>
-        </div>
-        <div class="stage" id="stage">
-          <canvas
-            id="gl"
-            aria-label="ინტერაქტიული WebGL მალის მოდელი. ბრუნვა გადათრევით და მასშტაბი მაუსის ბორბლით."
-            tabindex="0"
-          ></canvas>
-          <div class="stage-head">
-            <strong id="modelLabel">L5 + გავა</strong><br /><span
-              id="sceneSource"
-            ></span
-            ><br />360° თავისუფალი დათვალიერება<br /><span
-              style="color: #b1c9d8"
-              >დააწკაპუნე სტრუქტურას</span
-            >
-          </div>
-          <div class="stage-help">
-            მაუსი: ბრუნვა<br />ბორბალი: გადიდება<br />R: საწყისი ხედი
-          </div>
-          <div id="tooltip" class="hidden" aria-live="polite"></div>
-          <div class="stage-bottom">
-            <div class="legend">
-              <span><i class="targ"></i>მთავარი</span
-              ><span><i class="neighbor"></i>მეზობელი</span
-              ><span><i class="sel"></i>არჩეული</span
-              ><span><i class="disc"></i>დისკო</span>
-            </div>
-            <div class="camera">
-              <button data-view="top">ზემოდან</button
-              ><button data-view="bottom">ქვემოდან</button
-              ><button data-view="front">წინიდან</button
-              ><button data-view="back">უკნიდან</button
-              ><button data-view="side">გვერდიდან</button
-              ><button data-view="reset">↺ Reset</button>
-            </div>
-          </div>
-        </div>
-        <div class="controls" id="studyControls">
-          <div class="controlbox">
-            <h3>შეერთების დათვალიერება</h3>
-            <div class="range-row">
-              <label for="explode">მალების დაშორება</label
-              ><output id="explodeVal">0%</output>
-            </div>
-            <input
-              id="explode"
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value="0"
-            />
-            <div class="range-row" style="margin-top: 12px">
-              <label for="rotate">C1–C2 ბრუნვა</label
-              ><output id="rotateVal">0°</output>
-            </div>
-            <input
-              id="rotate"
-              type="range"
-              min="-25"
-              max="25"
-              step="5"
-              value="0"
-              disabled
-            />
-          </div>
-          <div class="controlbox">
-            <h3>გამოსახულება</h3>
-            <div class="range-row">
-              <label for="zoom">მასშტაბი</label
-              ><output id="zoomVal">100%</output>
-            </div>
-            <input
-              id="zoom"
-              type="range"
-              min="60"
-              max="190"
-              step="10"
-              value="100"
-            />
-            <label class="checkrow"
-              ><input id="isolate" type="checkbox" checked /> დანარჩენი
-              ნაწილების გამჭვირვალობა</label
-            >
-            <label class="checkrow"
-              ><input id="labels" type="checkbox" checked /> მონიშნული ნაწილის
-              სახელი</label
-            >
-            <div class="range-row">
-              <label for="contextOpacity">დანარჩენის ხილვადობა</label
-              ><output id="contextOpacityVal">12%</output>
-            </div>
-            <input
-              id="contextOpacity"
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value="12"
-            />
-            <label class="checkrow"
-              ><input id="soloPart" type="checkbox" /> მხოლოდ არჩეული
-              ნაწილი</label
-            >
-            <div class="range-row">
-              <label for="partSeparation">ნაწილის გამოყოფა</label
-              ><output id="partSeparationVal">0%</output>
-            </div>
-            <input
-              id="partSeparation"
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value="0"
-              disabled
-            />
-            <p class="control-note">
-              გამოყოფა სასწავლო სქემაა. ხვრელი ან არხი ძვლოვანი ნაწილი არ არის.
-            </p>
-          </div>
-        </div>
-        <section id="quizPanel" class="quiz hidden" aria-live="polite">
-          <div class="section-title">
-            <span class="kicker">გამოცდის რეჟიმი</span
-            ><span id="score" class="stat">სწორი: 0 / 0</span>
-          </div>
-          <h3 id="quizQuestion">აირჩიე სტრუქტურა</h3>
-          <label for="quizScope">სავარჯიშო მასალა</label>
-          <select id="quizScope">
-            <option value="all">ამ მალის ყველა ნაწილი</option>
-            <option value="unlearned">ჯერ უსწავლელი ნაწილები</option>
-          </select>
-          <p id="quizCycle" class="control-note"></p>
-          <p class="sub" style="margin-bottom: 10px">
-            დააწკაპუნე 3D მოდელს ან აირჩიე ერთ-ერთი პასუხი.
-          </p>
-          <div id="quizChoices" class="choices"></div>
-          <div class="feedback" id="quizFeedback"></div>
-          <div style="display: flex; gap: 9px; flex-wrap: wrap">
-            <button id="reveal">პასუხის ნახვა</button
-            ><button id="next" class="primary">შემდეგი კითხვა →</button>
-          </div>
-        </section>
-        <p class="footer">
-          Anatomy 3D · ლოკალურად გასაშვები სასწავლო აპი. ბოლო არჩეული მალა,
-          ნასწავლი სტრუქტურები და გამოცდის შედეგები ინახება ამ ბრაუზერში, სანამ
-          მის მონაცემებს არ წაშლი. საჭიროების შემთხვევაში გამოიყენე სარეზერვო
-          ასლის ექსპორტი. 3D მოდელები სქემატურია და არ არის ანატომიურად
-          დამოწმებული.
-        </p>
-      </main>
-      <aside class="rightbar">
-        <p class="kicker">ანატომიური ცნობარი</p>
-        <h3 id="detailTitle">მალის აგებულება</h3>
-        <div class="details">
-          <div class="latin" id="detailLatin">Corpus vertebrae</div>
-          <div class="georgian" id="detailKa">მალის სხეული</div>
-          <p id="detailText"></p>
-          <p id="regionReview" class="note"></p>
-          <p id="bookAlias" class="control-note"></p>
-          <p id="sourceInfo" class="source-info"></p>
-          <span class="chip" id="detailKind">ძვლოვანი სტრუქტურა</span>
-          <div style="margin-top: 13px">
-            <button
-              id="learnedBtn"
-              aria-pressed="false"
-              title="აღნიშნე, რომ ეს სტრუქტურა უკვე ისწავლე"
-            >
-              ✓ ვისწავლე
-            </button>
-          </div>
-        </div>
-        <div class="rule"></div>
-        <p class="kicker">არჩეული მალის თავისებურება</p>
-        <p id="levelNote"></p>
-        <a id="levelSource" target="_blank" rel="noopener noreferrer"></a>
-        <p class="control-note">
-          ტექსტის წყარო და 3D მოდელის სიზუსტე ცალ-ცალკე მოწმდება. ეს მოდელი ჯერ
-          სქემატურია.
-        </p>
-        <div class="rule"></div>
-        <p class="kicker">მეზობელ მალებთან კავშირი</p>
-        <div id="linkInformation"></div>
-        <div class="rule"></div>
-        <p class="kicker">სასწავლო პროგრესი</p>
-        <p id="progressText">კითხვის შედეგები შენახულია მხოლოდ ამ ბრაუზერში.</p>
-        <label for="levelProgress" id="levelProgressText"></label>
-        <progress id="levelProgress" max="1" value="0"></progress>
-        <button id="exportProgress">სარეზერვო ასლის შენახვა (.json)</button>
-        <div style="margin-top: 9px">
-          <label for="importProgress" class="import-label"
-            >სარეზერვო ასლის აღდგენა</label
-          ><input
-            type="file"
-            id="importProgress"
-            accept=".json,application/json"
-            aria-label="მონაცემების JSON ფაილით აღდგენა"
-            style="
-              display: block;
-              margin-top: 6px;
-              width: 100%;
-              font-size: 0.8rem;
-            "
-          />
-        </div>
-        <button id="clearProgress" style="margin-top: 10px">
-          სასწავლო პროგრესის განულება
-        </button>
-        <div class="note">
-          <b>მოდელების სიზუსტე:</b> მცირე ნაჭდევებისა და სახსრების ფორმები
-          სქემატურადაა ნაჩვენები. ზუსტი ფორმების შესასწავლად გამოიყენე
-          ანატომიურად გადამოწმებული წყარო.
-        </div>
-      </aside>
+  </section>
+  <section class="section" id="assemblySection">
+    <p class="kicker" id="assemblyKicker">03 · მალების შეერთება</p>
+    <div class="btn-grid" role="group" aria-label="მეზობელი მალების ჩვენება">
+      <button data-assembly="solo">ცალკე</button><button data-assembly="above">ზედა მეზობელი</button>
+      <button data-assembly="below" class="active">ქვედა მეზობელი</button><button data-assembly="both">ორივე მეზობელი</button>
     </div>
-    <script type="module" src="./src/main.js"></script>
-  </body>
+    <div class="chip" id="neighbors" style="border-radius:9px;line-height:1.55">L5 + Os sacrum</div>
+  </section>
+  <section class="section" id="studyList">
+    <div class="section-title"><p class="kicker" id="partKicker">04 · ანატომიური ნაწილები</p><span class="stat" id="partCount">0</span></div>
+    <label for="search">მოძებნე ქართულად ან ლათინურად</label>
+    <input id="search" type="search" placeholder="მაგ. arcus, დისკო…" autocomplete="off">
+    <div class="parts" id="parts" role="group" aria-label="ანატომიური ნაწილები"></div>
+  </section>
+  <div class="note">სასწავლო პროტოტიპი: ტერმინოლოგია და ზოგადი აღწერები მოყვანილია კაციტაძის წიგნისა და AK კონსპექტის მიხედვით. 3D მოდელები სქემატური სასწავლო ვიზუალებია; ტერმინოლოგია წყაროებითაა გადამოწმებული, ხოლო გეომეტრია არ წარმოადგენს სამედიცინო სკანს.</div>
+</aside>
+<main class="main">
+  <div class="topline"><div><span class="pill">ინტერაქტიული 3D · ქართულ-ლათინური ატლასი · offline</span><h2 id="pageTitle">ხერხემალი</h2><p class="sub" id="subtitle">აირჩიე კატეგორია, შემდეგ ძვალი და ისწავლე მისი სტრუქტურები 3D-ში.</p></div>
+    <div class="tabs" role="group" aria-label="სასწავლო რეჟიმი"><button id="tabStudy" class="active">შესწავლა</button><button id="tabQuiz">გამოცდა</button><button id="installBtn" class="hidden primary" title="აპის მთავარ ეკრანზე დაყენება">＋ აპის დაყენება</button><button id="shareApp" class="primary" title="საჯარო ვებ-მისამართის გაზიარება">↗ გაზიარება</button><span id="shareFeedback" role="status" style="font-size:.74rem;color:#9ad9e5;align-self:center"></span></div>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="ინტერაქტიული WebGL მალის მოდელი. ბრუნვა გადათრევით და მასშტაბი მაუსის ბორბლით." tabindex="0"></canvas>
+    <div class="stage-head"><strong id="modelLabel">ხერხემალი</strong><br>360° თავისუფალი დათვალიერება<br><span style="color:#b1c9d8">დააწკაპუნე სტრუქტურას</span></div>
+    <div class="stage-help">მაუსი: ბრუნვა<br>ბორბალი: გადიდება<br>R: საწყისი ხედი</div>
+    <div id="tooltip" class="hidden" aria-live="polite"></div>
+    <div class="stage-bottom"><div class="legend"><span><i class="targ"></i>მთავარი</span><span><i class="neighbor"></i>მეზობელი</span><span><i class="sel"></i>არჩეული</span><span><i class="disc"></i>დისკო</span></div>
+      <div class="camera"><button data-view="top">ზემოდან</button><button data-view="bottom">ქვემოდან</button><button data-view="front">წინიდან</button><button data-view="back">უკნიდან</button><button data-view="side">გვერდიდან</button><button data-view="reset">↺ Reset</button></div>
+    </div>
+  </div>
+  <div class="controls" id="studyControls">
+    <div class="controlbox"><h3>შეერთების დათვალიერება</h3>
+      <div class="range-row"><label for="explode">მალების დაშორება</label><output id="explodeVal">0%</output></div><input id="explode" type="range" min="0" max="100" step="5" value="0">
+      <div class="range-row" style="margin-top:12px"><label for="rotate">C1–C2 ბრუნვა</label><output id="rotateVal">0°</output></div><input id="rotate" type="range" min="-25" max="25" step="5" value="0" disabled>
+    </div>
+    <div class="controlbox"><h3>გამოსახულება</h3>
+      <div class="range-row"><label for="zoom">მასშტაბი</label><output id="zoomVal">100%</output></div><input id="zoom" type="range" min="60" max="190" step="10" value="100">
+      <label class="checkrow"><input id="isolate" type="checkbox" checked> დანარჩენი ნაწილების გამჭვირვალობა</label>
+      <label class="checkrow"><input id="labels" type="checkbox" checked> მონიშნული ნაწილის სახელი</label>
+    </div>
+  </div>
+  <section id="quizPanel" class="quiz hidden" aria-live="polite">
+    <div class="section-title"><span class="kicker">გამოცდის რეჟიმი</span><span id="score" class="stat">სწორი: 0 / 0</span></div>
+    <h3 id="quizQuestion">აირჩიე სტრუქტურა</h3>
+    <p class="sub" style="margin-bottom:10px">დააწკაპუნე 3D მოდელს ან აირჩიე ერთ-ერთი პასუხი.</p>
+    <div id="quizChoices" class="choices"></div>
+    <div class="feedback" id="quizFeedback"></div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap"><button id="reveal">პასუხის ნახვა</button><button id="next" class="primary">შემდეგი კითხვა →</button></div>
+  </section>
+  <p class="footer">Anatomy 3D · ლოკალურად გასაშვები სასწავლო აპი. ბოლო არჩეული კატეგორია/ძვალი, ნასწავლი სტრუქტურები და გამოცდის შედეგები ინახება ამ ბრაუზერში, სანამ მის მონაცემებს არ წაშლი. საჭიროების შემთხვევაში გამოიყენე სარეზერვო ასლის ექსპორტი. 3D მოდელები სქემატურია და არ არის ანატომიურად დამოწმებული.</p>
+</main>
+<aside class="rightbar">
+  <p class="kicker">ანატომიური ცნობარი</p><h3 id="detailTitle">მალის აგებულება</h3>
+  <div class="details"><div class="latin" id="detailLatin">Corpus vertebrae</div><div class="georgian" id="detailKa">მალის სხეული</div><p id="detailText"></p><div class="source-card"><b>წყარო</b><p id="sourceInfo"></p><p id="sourceNote"></p></div><span class="chip" id="detailKind">ძვლოვანი სტრუქტურა</span><div style="margin-top:13px"><button id="learnedBtn" aria-pressed="false" title="აღნიშნე, რომ ეს სტრუქტურა უკვე ისწავლე">✓ ვისწავლე</button></div></div>
+  <div class="rule"></div>
+  <p class="kicker" id="linkKicker">კავშირები / შეერთებები</p><div id="linkInformation"></div>
+  <div class="rule"></div><p class="kicker">სასწავლო პროგრესი</p><p id="progressText">კითხვის შედეგები შენახულია მხოლოდ ამ ბრაუზერში.</p>
+  <button id="exportProgress">სარეზერვო ასლის შენახვა (.json)</button>
+  <div style="margin-top:9px"><label for="importProgress" class="import-label">სარეზერვო ასლის აღდგენა</label><input type="file" id="importProgress" accept=".json,application/json" aria-label="მონაცემების JSON ფაილით აღდგენა" style="display:block;margin-top:6px;width:100%;font-size:.8rem"></div>
+  <button id="clearProgress" style="margin-top:10px">სასწავლო პროგრესის განულება</button>
+  <div class="note"><b>საჭირო გაუმჯობესება Work-ში:</b> ყველა გეომეტრიული შაბლონის ჩანაცვლება ლიცენზირებული, ანატომიურად გადამოწმებული GLB/GLTF მოდელებით. ამის გარეშე მცირე ნაჭდევებისა და სახსრების ზუსტი ფორმების დაზეპირება არ არის რეკომენდებული.</div>
+</aside>
+</div>
+<script>
+'use strict';
+// Offline, dependency-free teaching prototype. Mesh shapes are deliberately schematic.
+const $=id=>document.getElementById(id);
+const spineIds=[...Array.from({length:7},(_,i)=>'C'+(i+1)),...Array.from({length:12},(_,i)=>'T'+(i+1)),...Array.from({length:5},(_,i)=>'L'+(i+1)),'SAC','COC'];
+const ids=[...spineIds,'CLAV','SCAP','HUM','ULNA','RADIUS'];
+const categories=[
+  {id:'spine',ka:'ხერხემალი',latin:'Columna vertebralis'},
+  {id:'shoulder',ka:'ზედა კიდურის სარტყელი',latin:'Cingulum membri superioris'},
+  {id:'upperfree',ka:'ზედა კიდურის თავისუფალი ნაწილი',latin:'Skeleton membri superioris liberi'}
+];
+const categoryBones={spine:spineIds,shoulder:['CLAV','SCAP'],upperfree:['HUM','ULNA','RADIUS']};
+const name=id=>({OCC:'კეფის ძვალი',SAC:'გავა',COC:'კუდუსუნი',C1:'ატლასი C1',C2:'აქსისი C2',CLAV:'ლავიწი',SCAP:'ბეჭი',HUM:'მხრის ძვალი',ULNA:'იდაყვის ძვალი',RADIUS:'სხივის ძვალი'})[id]||(id.startsWith('C')?id:id);
+const latinName=id=>({OCC:'Os occipitale',SAC:'Os sacrum',COC:'Os coccygis',C1:'Atlas',C2:'Axis',CLAV:'Clavicula',SCAP:'Scapula',HUM:'Humerus',ULNA:'Ulna',RADIUS:'Radius'})[id]||(id.startsWith('C')?'Vertebra cervicalis':id.startsWith('T')?'Vertebra thoracica':'Vertebra lumbalis');
+const categoryName=id=>categories.find(x=>x.id===id)?.ka||id;
+const above=id=>!spineIds.includes(id)?null:(id==='C1'?'OCC':spineIds[spineIds.indexOf(id)-1]||null);
+const below=id=>!spineIds.includes(id)?null:(spineIds[spineIds.indexOf(id)+1]||null);
+const jointType=(a,b)=>!spineIds.includes(a)||!spineIds.includes(b)?'none':a==='OCC'&&b==='C1'?'occipital':a==='C1'&&b==='C2'?'atlantoaxial':a==='SAC'&&b==='COC'?'sacrococcygeal':'ordinary';
+const boneSummary=id=>{
+  if(id==='CLAV')return{latin:'Clavicula',ka:'ლავიწი',info:'წყვილი, S-ებურად მოდრეკილი ლულოვანი ძვალი. მასში გამოიყოფა სამკერდე ბოლო, აკრომიული ბოლო და სხეული.',source:'კაციტაძე · გვ. 91–92; AK კონსპექტი · გვ. 13'};
+  if(id==='SCAP')return{latin:'Scapula',ka:'ბეჭი',info:'რტყელი, სამკუთხა ფორმის ძვალი. აქვს სანეკნე და დორსალური ზედაპირები, სამი კიდე და სამი კუთხე; ლატერალურ კუთხეზე მდებარეობს სასახსრე ფოსო.',source:'კაციტაძე · გვ. 92–94; AK კონსპექტი · გვ. 13'};
+  if(id==='HUM')return{latin:'Humerus',ka:'მხრის ძვალი',info:'ზედა კიდურის თავისუფალი ნაწილის გრძელი ლულოვანი ძვალი. პროქსიმალურად აქვს თავი და ბორცვები; დიაფიზზე — დელტისებრი ხორკლი და სხივის ნერვის ღარი; დისტალურად — condylus humeri, trochlea, capitulum და სამი ფოსო.',source:'კაციტაძე · გვ. 94–96; AK კონსპექტი · გვ. 14'};
+  if(id==='ULNA')return{latin:'Ulna',ka:'იდაყვის ძვალი',info:'წინამხრის ერთ-ერთი გრძელი ძვალი. პროქსიმალურად გამოხატულია olecranon, processus coronoideus და incisura trochlearis; დისტალურად — caput ulnae და processus styloideus.',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 14–15'};
+  if(id==='RADIUS')return{latin:'Radius',ka:'სხივის ძვალი',info:'წინამხრის გრძელი ძვალი. პროქსიმალურად აქვს caput radii, circumferentia articularis, collum radii და tuberositas radii; დისტალურად — processus styloideus, incisura ulnaris და facies articularis carpea.',source:'კაციტაძე · გვ. 97–98; AK კონსპექტი · გვ. 15'};
+  return{latin:latinName(id),ka:name(id),info:byId.all.info,source:'კაციტაძე · ხერხემლის თავი'};
+};
+const defs=[
+ ['all','Vertebra','მთლიანი მალა','ყველა სტრუქტურა ერთად','any'],
+ ['body','Corpus vertebrae','მალის სხეული','მალის წინა, დატვირთვის მატარებელი ნაწილი.','typical'],
+ ['arch','Arcus vertebrae','მალის რკალი','შედგება წყვილი ფეხისა და წყვილი ფირფიტისგან.','typical'],
+ ['pedicle','Pediculus arcus vertebrae','მალის რკალის ფეხი','აკავშირებს მალის სხეულს რკალის უკანა ნაწილთან.','typical'],
+ ['lamina','Lamina arcus vertebrae','მალის რკალის ფირფიტა','რკალის წყვილი უკანა, გაბრტყელებული ნაწილი.','typical'],
+ ['foramen','Foramen vertebrale','მალის ხვრელი','სივრცე, რომელსაც სხეული და რკალი შემოსაზღვრავს.','normal-space'],
+ ['spinous','Processus spinosus','წვეტიანი მორჩი','მალის რკალის უკან მიმართული მორჩი.','typical'],
+ ['transverse','Processus transversus','განივი მორჩი','მალის გვერდითი მორჩი.','typical'],
+ ['supProcess','Processus articularis superior','ზედა სასახსრე მორჩი','ზედა მომიჯნავე მალასთან სახსრის წარმოქმნაში მონაწილეობს.','typical'],
+ ['infProcess','Processus articularis inferior','ქვედა სასახსრე მორჩი','ქვედა მომიჯნავე მალასთან სახსრის წარმოქმნაში მონაწილეობს.','typical'],
+ ['supSurface','Facies articularis superior','ზედა სასახსრე ზედაპირი','ზედა სასახსრე მორჩზე არსებული სასახსრე ზედაპირი.','typical'],
+ ['infSurface','Facies articularis inferior','ქვედა სასახსრე ზედაპირი','ქვედა სასახსრე მორჩზე არსებული სასახსრე ზედაპირი.','typical'],
+ ['incSup','Incisura vertebralis superior','ზედა ნაჭდევი','მალის რკალის ფეხის ზედა კიდის ნაჭდევი; გეომეტრიულ მოდელში ნიშნულია.','typical-space'],
+ ['incInf','Incisura vertebralis inferior','ქვედა ნაჭდევი','მალის რკალის ფეხის ქვედა კიდის ნაჭდევი; გეომეტრიულ მოდელში ნიშნულია.','typical-space'],
+ ['interforamen','Foramen intervertebrale','მალთაშუა ხვრელი','მომიჯნავე მალების ნაჭდევებით შემოსაზღვრული ხვრელი.','ordinary-link'],
+ ['disc','Discus intervertebralis','მალთაშუა დისკო','მალების სხეულებს შორის ბოჭკოვან-ხრტილოვანი წარმონაქმნი.','disc-link'],
+ ['canal','Canalis vertebralis','ხერხემლის არხი','ერთმანეთზე განლაგებული მალების ხვრელებით შექმნილი არხი.','canal'],
+ ['transForamen','Foramen transversarium','განივი ხვრელი','კისრის მალის განივი მორჩის მიდამოში არსებული წყვილი ხვრელი.','cervical'],
+ ['costSup','Fovea costalis superior','ზედა სანეკნე ფოსო','ტიპური გულმკერდის მალის სხეულზე არსებული სანეკნე სასახსრე ფოსო.','thoracic-typical'],
+ ['costInf','Fovea costalis inferior','ქვედა სანეკნე ფოსო','ტიპური გულმკერდის მალის სხეულზე არსებული სანეკნე სასახსრე ფოსო.','thoracic-typical'],
+ ['costSingle','Fovea costalis','სანეკნე ფოსო','გარდამავალ გულმკერდის მალებზე სანეკნე სასახსრე ადგილი.','thoracic-last'],
+ ['costTrans','Fovea costalis processus transversi','განივი მორჩის სანეკნე ფოსო','ნეკნის ბორცვთან შეერთებისთვის განკუთვნილი სასახსრე ზედაპირი.','thoracic-trans'],
+ ['mammillary','Processus mamillaris','დვრილისებრი მორჩი','წელის მალის ზედა სასახსრე მორჩის უკანა ნაწილზე მდებარეობს.','lumbar'],
+ ['antArch','Arcus anterior atlantis','ატლასის წინა რკალი','წინიდან აკავშირებს ატლასის ლატერალურ მასებს.','atlas'],
+ ['postArch','Arcus posterior atlantis','ატლასის უკანა რკალი','უკნიდან აკავშირებს ატლასის ლატერალურ მასებს.','atlas'],
+ ['mass','Massa lateralis atlantis','ატლასის ლატერალური მასა','ატლასის წყვილი მასიური გვერდითი ნაწილი.','atlas'],
+ ['atlasSup','Facies articularis superior atlantis','ატლასის ზედა სასახსრე ზედაპირი','უკავშირდება კეფის ძვლის შესაბამის როკს.','atlas'],
+ ['atlasInf','Facies articularis inferior atlantis','ატლასის ქვედა სასახსრე ზედაპირი','უკავშირდება აქსისის ზედა სასახსრე ზედაპირს.','atlas'],
+ ['atlasTrans','Processus transversus atlantis','ატლასის განივი მორჩი','ატლასის ლატერალური მასებიდან გვერდით მიმართული წყვილი მორჩი.','atlas'],
+ ['foveaDentis','Fovea dentis','კბილის ფოსო','ატლასის წინა რკალის უკანა ზედაპირზე მდებარე სასახსრე ფოსო.','atlas'],
+ ['atlasTubAnt','Tuberculum anterius','ატლასის წინა ბორცვი','ატლასის წინა რკალის შუა ნაწილის მცირე შემაღლება.','atlas'],
+ ['atlasTubPost','Tuberculum posterius','ატლასის უკანა ბორცვი','ატლასის უკანა რკალის შუა ნაწილის მცირე შემაღლება.','atlas'],
+ ['atlasForamen','Foramen vertebrale atlantis','ატლასის მალის ხვრელი','ატლასის რგოლით შემოსაზღვრული სივრცე.','atlas-space'],
+ ['atlasTransForamen','Foramen transversarium atlantis','ატლასის განივი ხვრელი','ატლასის განივ მორჩებში არსებული ხვრელები.','atlas-space'],
+ ['dens','Dens axis','აქსისის კბილისებრი მორჩი','ატლასის ბრუნვის მთავარი ძვლოვანი ღერძი.','axis'],
+ ['axisSup','Facies articularis superior axis','აქსისის ზედა სასახსრე ზედაპირი','უერთდება ატლასის ქვედა სასახსრე ზედაპირს.','axis'],
+ ['sacBase','Basis ossis sacri','გავის ფუძე','გავის ზედა გაფართოებული ნაწილი.','sacrum'],
+ ['sacAla','Ala ossis sacri','გავის ფრთა','გავის ფუძის გვერდითი გაფართოება.','sacrum'],
+ ['sacApex','Apex ossis sacri','გავის მწვერვალი','გავის შევიწროებული ქვედა დაბოლოება.','sacrum'],
+ ['sacForamina','Foramina sacralia','გავის ხვრელები','წინა ან უკანა გავის ხვრელები; ამ პროტოტიპში ნიშნულებით ჩანს.','sacrum-space'],
+ ['sacCrest','Crista sacralis mediana','გავის შუამდებარე ქედი','შეზრდილი წვეტიანი მორჩებისგან წარმოქმნილი ქედი.','sacrum'],
+ ['sacCanal','Canalis sacralis','გავის არხი','ხერხემლის არხის გაგრძელება გავის ძვალში; აქ აღნიშნულია სქემატურად.','sacrum-space'],
+ ['cocBase','Basis ossis coccygis','კუდუსუნის ფუძე','კუდუსუნის ზედა ნაწილი.','coccyx'],
+ ['cocCornu','Cornu coccygeum','კუდუსუნის რქა','პირველი კუდუსუნის სეგმენტის ზედა მორჩი.','coccyx'],
+ ['cocApex','Apex ossis coccygis','კუდუსუნის მწვერვალი','კუდუსუნის ქვედა შევიწროებული დაბოლოება.','coccyx'],
+ ['facetLink','Articulationes zygapophysiales','რკალთაშუა სახსრები','მეზობელი მალების სასახსრე მორჩების წყვილი სინოვიალური სახსარი.','ordinary-link'],
+ ['ligament','Ligamentum transversum atlantis','ატლასის განივი იოგი','კბილისებრი მორჩის უკან მდებარე იოგი, რომელიც მის შეკავებაში მონაწილეობს.','axial-link']
+].map(([id,latin,ka,info,kind])=>({id,latin,ka,info,kind}));
+const byId=Object.fromEntries(defs.map(x=>[x.id,x]));
+defs.push(
+  {id:'clav_body',latin:'Corpus claviculae',ka:'ლავიწის სხეული',info:'ლავიწის შუა ნაწილი. ლავიწი არის წყვილი, S-ებურად მოდრეკილი ლულოვანი ძვალი.',kind:'clavicle',source:'კაციტაძე · გვ. 91–92; AK კონსპექტი · გვ. 13'},
+  {id:'clav_sternal_end',latin:'Extremitas sternalis',ka:'სამკერდე ბოლო',info:'ლავიწის მედიალური დაბოლოება, რომელიც მკერდის ძვალთან შეერთებაში მონაწილეობს.',kind:'clavicle',source:'კაციტაძე · გვ. 91; AK კონსპექტი · გვ. 13'},
+  {id:'clav_sternal_art',latin:'Facies articularis sternalis',ka:'სამკერდე სასახსრე ზედაპირი',info:'Extremitas sternalis-ზე მდებარე სასახსრე ზედაპირი.',kind:'clavicle',source:'კაციტაძე · გვ. 91; AK კონსპექტი · გვ. 13'},
+  {id:'clav_acromial_end',latin:'Extremitas acromialis',ka:'სამხრე / აკრომიული ბოლო',info:'ლავიწის ლატერალური დაბოლოება; უკავშირდება ბეჭის აკრომიონს.',kind:'clavicle',source:'კაციტაძე · გვ. 92; AK კონსპექტი · გვ. 13'},
+  {id:'clav_acromial_art',latin:'Facies articularis acromialis',ka:'აკრომიული სასახსრე ზედაპირი',info:'აკრომიულ ბოლოზე მდებარე სასახსრე ზედაპირი, რომლითაც ლავიწი ბეჭის აკრომიონს უერთდება.',kind:'clavicle',source:'AK კონსპექტი · გვ. 13; კაციტაძე · სურ. 118',sourceNote:'AK კონსპექტი აღწერს სასახსრე ზედაპირს, ხოლო კაციტაძის სურ. 118 მას ცალკე ნიშნავს; ლათინური ფორმა აქ სტანდარტიზებულია.'},
+  {id:'clav_conoid_tub',latin:'Tuberculum conoideum',ka:'კონუსისებრი ბორცვი',info:'ქვედა ზედაპირზე, აკრომიულ ბოლოსთან ახლოს მდებარე ბორცვი; იოგის მისამაგრებელი უბანია.',kind:'clavicle',source:'კაციტაძე · გვ. 92; AK კონსპექტი · გვ. 13'},
+  {id:'clav_costal_impression',latin:'Impressio ligamenti costoclavicularis',ka:'ნეკნ-ლავიწის იოგის ჩანაჭედი',info:'სამკერდე ბოლოს ქვედა ზედაპირზე არსებული ჩანაჭედი. სტრუქტურა ნაჩვენებია კაციტაძის სურ. 118-ში.',kind:'clavicle',source:'კაციტაძე · სურ. 118',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'clav_trapezoid_line',latin:'Linea trapezoidea',ka:'ტრაპეციული ხაზი',info:'ლავიწის ქვედა ზედაპირზე მდებარე ხაზი აკრომიული ბოლოს მიდამოში. ნაჩვენებია კაციტაძის სურ. 118-ში.',kind:'clavicle',source:'კაციტაძე · სურ. 118',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+
+  {id:'scap_costal',latin:'Facies costalis',ka:'სანეკნე ზედაპირი',info:'ბეჭის წინა, გულმკერდისკენ მიმართული ზედაპირი.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_dorsal',latin:'Facies dorsalis',ka:'დორსალური ზედაპირი',info:'ბეჭის უკანა ზედაპირი.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_supra',latin:'Fossa supraspinata',ka:'ქედზედა ფოსო',info:'Spina scapulae-ს ზემოთ მდებარე ფოსო. კაციტაძის სურ. 120-ში ცალკე სტრუქტურადაა მონიშნული.',kind:'scapula',source:'კაციტაძე · სურ. 120',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'scap_infra',latin:'Fossa infraspinata',ka:'ქედქვედა ფოსო',info:'Spina scapulae-ს ქვემოთ მდებარე ფართო ფოსო. კაციტაძის სურ. 120-ში ცალკე სტრუქტურადაა მონიშნული.',kind:'scapula',source:'კაციტაძე · სურ. 120',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'scap_spine',latin:'Spina scapulae',ka:'ბეჭის ქედი',info:'დორსალურ ზედაპირზე მდებარე ძლიერი ქედი, რომელიც ლატერალურად ფართოვდება და აკრომიონით მთავრდება.',kind:'scapula',source:'კაციტაძე · გვ. 92–94; AK კონსპექტი · გვ. 13'},
+  {id:'scap_acromion',latin:'Acromion',ka:'აკრომიონი / სამხრე მორჩი',info:'Spina scapulae-ს ლატერალური გაგრძელება; მისი საშუალებით ბეჭი ლავიწს უერთდება.',kind:'scapula',source:'კაციტაძე · გვ. 94; AK კონსპექტი · გვ. 13'},
+  {id:'scap_coracoid',latin:'Processus coracoideus',ka:'ნისკარტისებრი მორჩი',info:'ლატერალურ კუთხესთან ახლოს წინ და ზემოთ მიმართული მორჩი.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_glenoid',latin:'Cavitas glenoidalis',ka:'სასახსრე ფოსო',info:'ლატერალურ კუთხეზე მდებარე სასახსრე ფოსო, რომელიც მხრის ძვლის თავს უკავშირდება.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_neck',latin:'Collum scapulae',ka:'ბეჭის ყელი',info:'სასახსრე ფოსოს ირგვლივ შედარებით შევიწროებული ნაწილი. კაციტაძის სურ. 120-ში მონიშნულია.',kind:'scapula',source:'კაციტაძე · სურ. 120',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'scap_notch',latin:'Incisura scapulae',ka:'ბეჭის ნაჭდევი',info:'ზედა კიდეზე, ნისკარტისებრი მორჩის ფუძესთან მდებარე ნაჭდევი. კაციტაძის სურ. 120-ში მონიშნულია.',kind:'scapula',source:'კაციტაძე · სურ. 120',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'scap_acromial_facet',latin:'Facies articularis acromii',ka:'აკრომიონის სასახსრე ზედაპირი',info:'აკრომიონზე მდებარე სასახსრე ზედაპირი ლავიწთან შესაერთებლად. კაციტაძის სურ. 120-ში ცალკე სტრუქტურადაა მონიშნული.',kind:'scapula',source:'კაციტაძე · სურ. 120',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'scap_infraglenoid',latin:'Tuberculum infraglenoidale',ka:'ქვედა სასახსრე ბორცვი',info:'სასახსრე ფოსოს ქვემოთ მდებარე ბორცვი. კაციტაძის სურ. 120-ში ცალკე სტრუქტურადაა მონიშნული.',kind:'scapula',source:'კაციტაძე · სურ. 120',sourceNote:'ლათინური ფორმა აქ სტანდარტიზებულია; წიგნის სურათის წარწერაში სტრუქტურა ქართულადაა მოცემული.'},
+  {id:'scap_sup_border',latin:'Margo superior',ka:'ზედა კიდე',info:'ბეჭის სამი კიდიდან ყველაზე მოკლე ზედა კიდე.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_med_border',latin:'Margo medialis',ka:'მედიალური კიდე',info:'ხერხემლისკენ მიმართული ბეჭის კიდე.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_lat_border',latin:'Margo lateralis',ka:'ლატერალური კიდე',info:'ლატერალურად მიმართული, შედარებით სქელი კიდე.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_sup_angle',latin:'Angulus superior',ka:'ზედა კუთხე',info:'ზედა და მედიალური კიდეების შეერთების კუთხე.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_inf_angle',latin:'Angulus inferior',ka:'ქვედა კუთხე',info:'მედიალური და ლატერალური კიდეების შეერთების ქვედა კუთხე.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'},
+  {id:'scap_lat_angle',latin:'Angulus lateralis',ka:'ლატერალური კუთხე',info:'ბეჭის ლატერალური კუთხე; მასთანაა დაკავშირებული სასახსრე ფოსოს მიდამო.',kind:'scapula',source:'კაციტაძე · გვ. 92–93; AK კონსპექტი · გვ. 13'}
+
+);
+defs.push(
+  // Humerus — AK p.14; Katsitadze pp.94–96
+  {id:'hum_head',latin:'Caput humeri',ka:'მხრის თავი',info:'სფერული ფორმის პროქსიმალური დაბოლოება, რომელიც ბეჭის cavitas glenoidalis-ს უკავშირდება.',kind:'humerus',source:'კაციტაძე · გვ. 94–95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_anat_neck',latin:'Collum anatomicum',ka:'ანატომიური ყელი',info:'მხრის თავს დანარჩენი პროქსიმალური ნაწილისგან გამოყოფს.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_greater_tub',latin:'Tuberculum majus',ka:'დიდი ბორცვი',info:'პროქსიმალურ ეპიფიზზე მდებარე დიდი ბორცვი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_lesser_tub',latin:'Tuberculum minus',ka:'მცირე ბორცვი',info:'პროქსიმალურ ეპიფიზზე მდებარე მცირე ბორცვი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_greater_crest',latin:'Crista tuberculi majoris',ka:'დიდი ბორცვის ქედი',info:'დიდი ბორცვის ქვემოთ გაგრძელებული ქედი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_lesser_crest',latin:'Crista tuberculi minoris',ka:'მცირე ბორცვის ქედი',info:'მცირე ბორცვის ქვემოთ გაგრძელებული ქედი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_intertubercular_groove',latin:'Sulcus intertubercularis',ka:'ბორცვთაშუა ღარი',info:'დიდ და მცირე ბორცვებსა და მათ ქედებს შორის არსებული ღარი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_surgical_neck',latin:'Collum chirurgicum',ka:'ქირურგიული ყელი',info:'პროქსიმალურ ეპიფიზსა და დიაფიზს შორის მდებარე შევიწროებული უბანი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_deltoid_tub',latin:'Tuberositas deltoidea',ka:'დელტისებრი ხორკლი',info:'დიაფიზზე კარგად გამოხატული ხორკლი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_radial_groove',latin:'Sulcus nervi radialis',ka:'სხივის ნერვის ღარი',info:'დიაფიზის უკანა მხარეს გამავალი ღარი.',kind:'humerus',source:'კაციტაძე · გვ. 95; AK კონსპექტი · გვ. 14'},
+  {id:'hum_condyle',latin:'Condylus humeri',ka:'მხრის ძვლის როკი',info:'დისტალური ეპიფიზის სასახსრე კომპლექსი, რომელშიც გამოიყოფა trochlea და capitulum.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_med_epicondyle',latin:'Epicondylus medialis',ka:'მედიალური ზედა როკი',info:'დისტალური ეპიფიზის მედიალური შემაღლება.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_lat_epicondyle',latin:'Epicondylus lateralis',ka:'ლატერალური ზედა როკი',info:'დისტალური ეპიფიზის ლატერალური შემაღლება.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_trochlea',latin:'Trochlea humeri',ka:'მხრის ძვლის ჭაღი',info:'დისტალური სასახსრე ნაწილი, რომელიც იდაყვის ძვლის incisura trochlearis-ს უკავშირდება.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_capitulum',latin:'Capitulum humeri',ka:'მხრის ძვლის მცირე თავი',info:'დისტალური სფერული სასახსრე ნაწილი, რომელიც radius-ის თავს უკავშირდება.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_olecranon_fossa',latin:'Fossa olecrani',ka:'იდაყვის ფოსო',info:'დისტალური ეპიფიზის უკანა ზედაპირზე მდებარე ღრმა ფოსო.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_coronoid_fossa',latin:'Fossa coronoidea',ka:'გვირგვინოვანი ფოსო',info:'დისტალური ეპიფიზის წინა ზედაპირზე მდებარე ფოსო.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+  {id:'hum_radial_fossa',latin:'Fossa radialis',ka:'სხივის ფოსო',info:'დისტალურ ეპიფიზზე, გვირგვინოვანი ფოსოს ლატერალურად მდებარე ფოსო.',kind:'humerus',source:'კაციტაძე · გვ. 96; AK კონსპექტი · გვ. 14'},
+
+  // Ulna — AK pp.14–15; Katsitadze pp.96–97
+  {id:'ulna_olecranon',latin:'Olecranon',ka:'იდაყვის მორჩი',info:'იდაყვის ძვლის ძლიერი პროქსიმალური მორჩი.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 14'},
+  {id:'ulna_coronoid',latin:'Processus coronoideus',ka:'გვირგვინოვანი მორჩი',info:'Olecranon-ის მოპირდაპირე პროქსიმალური მორჩი.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 14'},
+  {id:'ulna_trochlear_notch',latin:'Incisura trochlearis',ka:'ჭაღისებრი ნაჭდევი',info:'Olecranon-სა და processus coronoideus-ს შორის მდებარე დიდი ნაჭდევი; უკავშირდება trochlea humeri-ს.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 14'},
+  {id:'ulna_radial_notch',latin:'Incisura radialis',ka:'სხივისეული ნაჭდევი',info:'პროქსიმალურ ნაწილში მდებარე ნაჭდევი radius-ის თავთან შესასახსრებლად.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 14'},
+  {id:'ulna_ant_surface',latin:'Facies anterior',ka:'წინა ზედაპირი',info:'იდაყვის ძვლის დიაფიზის წინა ზედაპირი.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_post_surface',latin:'Facies posterior',ka:'უკანა ზედაპირი',info:'იდაყვის ძვლის დიაფიზის უკანა ზედაპირი.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_med_surface',latin:'Facies medialis',ka:'მედიალური ზედაპირი',info:'იდაყვის ძვლის დიაფიზის მედიალური ზედაპირი.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_ant_border',latin:'Margo anterior',ka:'წინა კიდე',info:'დიაფიზის წინა კიდე.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_post_border',latin:'Margo posterior',ka:'უკანა კიდე',info:'დიაფიზის უკანა კიდე.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_interosseous_border',latin:'Margo interosseus',ka:'ძვალთაშუა კიდე',info:'Radius-ისკენ მიმართული შემაღლებული კიდე.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 14–15'},
+  {id:'ulna_tuberosity',latin:'Tuberositas ulnae',ka:'იდაყვის ხორკლი',info:'წინა ზედაპირზე, პროქსიმალურ ნაწილში მდებარე ხორკლი.',kind:'ulna',source:'კაციტაძე · გვ. 96–97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_head',latin:'Caput ulnae',ka:'იდაყვის ძვლის თავი',info:'დისტალური მომრგვალებული დაბოლოება.',kind:'ulna',source:'კაციტაძე · გვ. 97; AK კონსპექტი · გვ. 15'},
+  {id:'ulna_styloid',latin:'Processus styloideus',ka:'სადგისებური მორჩი',info:'იდაყვის ძვლის დისტალური სადგისებური მორჩი.',kind:'ulna',source:'კაციტაძე · გვ. 97; AK კონსპექტი · გვ. 15'},
+
+  // Radius — AK p.15; Katsitadze pp.97–98
+  {id:'rad_head',latin:'Caput radii',ka:'სხივის ძვლის თავი',info:'Radius-ის პროქსიმალური შემსხვილებული დაბოლოება.',kind:'radius',source:'კაციტაძე · გვ. 97–98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_articular_circ',latin:'Circumferentia articularis',ka:'საბრუნებელი სასახსრე ზედაპირი',info:'Caput radii-ს გარშემო მდებარე სასახსრე ზედაპირი.',kind:'radius',source:'კაციტაძე · გვ. 97–98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_neck',latin:'Collum radii',ka:'სხივის ყელი',info:'თავის ქვემოთ მდებარე შევიწროებული ნაწილი.',kind:'radius',source:'კაციტაძე · გვ. 97–98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_tuberosity',latin:'Tuberositas radii',ka:'სხივის ხორკლი',info:'Collum radii-ს ქვემოთ მდებარე ხორკლი.',kind:'radius',source:'კაციტაძე · გვ. 97–98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_interosseous_border',latin:'Margo interosseus',ka:'ძვალთაშუა კიდე',info:'Ulna-სკენ მიმართული დიაფიზური კიდე.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_ant_border',latin:'Margo anterior',ka:'წინა კიდე',info:'Radius-ის დიაფიზის წინა კიდე.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_post_border',latin:'Margo posterior',ka:'უკანა კიდე',info:'Radius-ის დიაფიზის უკანა კიდე.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_ant_surface',latin:'Facies anterior',ka:'წინა ზედაპირი',info:'Radius-ის დიაფიზის წინა ზედაპირი.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_post_surface',latin:'Facies posterior',ka:'უკანა ზედაპირი',info:'Radius-ის დიაფიზის უკანა ზედაპირი.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_lat_surface',latin:'Facies lateralis',ka:'ლატერალური ზედაპირი',info:'Radius-ის დიაფიზის ლატერალური ზედაპირი.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_styloid',latin:'Processus styloideus',ka:'სადგისებური მორჩი',info:'Radius-ის დისტალური სადგისებური მორჩი.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_ulnar_notch',latin:'Incisura ulnaris',ka:'იდაყვის ნაჭდევი',info:'Radius-ის დისტალურ ნაწილში არსებული ნაჭდევი ulna-სთან შესასახსრებლად.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'},
+  {id:'rad_carpal_surface',latin:'Facies articularis carpea',ka:'მაჯის სასახსრე ზედაპირი',info:'Radius-ის დისტალური, გაბრტყელებული სასახსრე ზედაპირი მაჯასთან.',kind:'radius',source:'კაციტაძე · გვ. 98; AK კონსპექტი · გვ. 15'}
+
+);
+for(const d of defs)byId[d.id]=d;
+const state={category:'spine',vertebra:'L5',side:'right',assembly:'below',selected:'all',dim:true,explode:0,rotation:0,zoom:1,labels:true,mode:'study',question:null,answered:false,progress:{correct:0,total:0},learned:{}};
+try{const saved=JSON.parse(localStorage.getItem('vertebraAtlasV7')||'{}');if(typeof saved.correct==='number'&&typeof saved.total==='number')state.progress={correct:saved.correct,total:saved.total};}catch(e){}
+const WORKSPACE_KEY='anatomy3d_workspace_v11';
+try{
+  const saved=JSON.parse(localStorage.getItem(WORKSPACE_KEY)||'null');
+  if(saved&&typeof saved==='object'){
+    if(categories.some(x=>x.id===saved.category))state.category=saved.category;
+    if(ids.includes(saved.vertebra))state.vertebra=saved.vertebra;
+    if(['right','left'].includes(saved.side))state.side=saved.side;
+    if(['solo','above','below','both'].includes(saved.assembly))state.assembly=saved.assembly;
+    if(typeof saved.selected==='string'&&byId[saved.selected])state.selected=saved.selected;
+    if(typeof saved.dim==='boolean')state.dim=saved.dim;
+    if(typeof saved.labels==='boolean')state.labels=saved.labels;
+    if(saved.learned&&typeof saved.learned==='object'&&!Array.isArray(saved.learned))state.learned=Object.fromEntries(Object.entries(saved.learned).filter(([k,v])=>typeof k==='string'&&v===true).slice(0,1000));
+    if(saved.progress&&Number.isFinite(saved.progress.correct)&&Number.isFinite(saved.progress.total))state.progress={correct:saved.progress.correct,total:saved.progress.total};
+  }
+}catch(e){}
+if(state.category==='shoulder'&&!categoryBones.shoulder.includes(state.vertebra))state.vertebra='SCAP';
+if(state.category==='upperfree'&&!categoryBones.upperfree.includes(state.vertebra))state.vertebra='HUM';
+if(state.category==='spine'&&!categoryBones.spine.includes(state.vertebra))state.vertebra='L5';
+if(state.vertebra==='COC'&&['below','both'].includes(state.assembly))state.assembly='above';
+function saveWorkspace(){
+  const safe={category:state.category,vertebra:state.vertebra,side:state.side,assembly:state.assembly,selected:state.selected,dim:state.dim,labels:state.labels,learned:state.learned,progress:state.progress};
+  try{localStorage.setItem(WORKSPACE_KEY,JSON.stringify(safe));}catch(e){}
+}
+
+const isOrdinary=(a,b)=>jointType(a,b)==='ordinary';
+function connected(){const a=above(state.vertebra),b=below(state.vertebra),out=[];if((state.assembly==='above'||state.assembly==='both')&&a)out.push([a,state.vertebra]);if((state.assembly==='below'||state.assembly==='both')&&b)out.push([state.vertebra,b]);return out;}
+function visibleDefs(){const id=state.vertebra;if(state.category==='shoulder'){return defs.filter(d=>d.id==='all'||(id==='CLAV'&&d.kind==='clavicle')||(id==='SCAP'&&d.kind==='scapula'));}if(state.category==='upperfree'){return defs.filter(d=>d.id==='all'||(id==='HUM'&&d.kind==='humerus')||(id==='ULNA'&&d.kind==='ulna')||(id==='RADIUS'&&d.kind==='radius'));}const con=connected(),atlas=id==='C1',axis=id==='C2',sac=id==='SAC',coc=id==='COC',ordinary=con.some(([a,b])=>isOrdinary(a,b));return defs.filter(d=>{
+ switch(d.kind){case'any':return true;case'typical':case'normal-space':case'typical-space':case'canal':return !atlas&&!sac&&!coc;case'ordinary-link':return ordinary;case'disc-link':return con.some(([a,b])=>isOrdinary(a,b)||jointType(a,b)==='sacrococcygeal');case'cervical':return id.startsWith('C')&&!atlas;case'thoracic-typical':return id.startsWith('T')&&+id.slice(1)<=9;case'thoracic-last':return id==='T11'||id==='T12';case'thoracic-trans':return id.startsWith('T')&&+id.slice(1)<=10;case'lumbar':return id.startsWith('L');case'atlas':case'atlas-space':return atlas;case'axis':return axis;case'sacrum':case'sacrum-space':return sac;case'coccyx':return coc;case'axial-link':return con.some(([a,b])=>jointType(a,b)==='atlantoaxial');default:return false;
+ }});}
+function populateCategories(){const sel=$('category');sel.replaceChildren();for(const c of categories){const o=document.createElement('option');o.value=c.id;o.textContent=c.ka+' — '+c.latin;sel.appendChild(o);}sel.value=state.category;$('categoryCount').textContent=categories.length+' კატეგორია';}
+function populateSelector(){
+ const sel=$('vertebra');sel.replaceChildren();let groups;
+ if(state.category==='spine')groups=[['კისრის მალები · C1–C7',spineIds.filter(x=>/^C[1-7]$/.test(x))],['გულმკერდის მალები · T1–T12',spineIds.filter(x=>x.startsWith('T'))],['წელის მალები · L1–L5',spineIds.filter(x=>x.startsWith('L'))],['შეზრდილი მალები',['SAC','COC']]];
+ else if(state.category==='shoulder')groups=[['ზედა კიდურის სარტყელი',['CLAV','SCAP']]];
+ else groups=[['ზედა კიდურის თავისუფალი ნაწილი',['HUM','ULNA','RADIUS']]];
+ for(const [heading,values]of groups){const opt=document.createElement('optgroup');opt.label=heading;for(const value of values){const el=document.createElement('option');el.value=value;el.textContent=name(value)+' — '+latinName(value);opt.appendChild(el);}sel.appendChild(opt);}
+ if(!categoryBones[state.category].includes(state.vertebra))state.vertebra=categoryBones[state.category][0];sel.value=state.vertebra;
+ $('boneCount').textContent=categoryBones[state.category].length+' ძვალი';$('boneLabel').textContent=state.category==='spine'?'მალა / ძვალი':'ძვალი';
+ $('regionHint').textContent=state.category==='spine'?'მონიშნე კონკრეტული მალა, მაგალითად L5.':state.category==='shoulder'?'აირჩიე ლავიწი ან ბეჭი და მონიშნე მისი სტრუქტურები.':'აირჩიე მხრის, იდაყვის ან სხივის ძვალი და მონიშნე მისი სტრუქტურები.';
+}
+function displayNeighbors(){
+ const paired=state.category==='shoulder'||state.category==='upperfree';
+ $('lateralitySection').classList.toggle('hidden',!paired);
+ for(const b of document.querySelectorAll('[data-side]'))b.classList.toggle('active',b.dataset.side===state.side);
+ if(paired){
+   $('assemblySection').classList.add('hidden');$('neighbors').textContent=name(state.vertebra)+' (ცალკე)';$('explode').disabled=true;$('rotate').disabled=true;
+   const sideKa=state.side==='right'?'მარჯვენა':'მარცხენა';
+   $('pageTitle').textContent=sideKa+' '+name(state.vertebra);
+   $('modelLabel').textContent=sideKa+' '+name(state.vertebra)+' · '+latinName(state.vertebra);
+   $('subtitle').textContent=latinName(state.vertebra)+' · '+categoryName(state.category)+' · '+sideKa+' მხარე · აირჩიე ნაწილი ან დააწკაპუნე 3D მოდელში.';
+   $('linkKicker').textContent='ძვლის კავშირები';return;
+ }
+ $('lateralitySection').classList.add('hidden');$('assemblySection').classList.remove('hidden');const links=connected();$('neighbors').textContent=links.length?links.map(([a,b])=>name(a)+' ↔ '+name(b)).join('   ·   '):name(state.vertebra)+' (ცალკე)';$('explode').disabled=links.length===0;$('rotate').disabled=!links.some(([a,b])=>jointType(a,b)==='atlantoaxial');$('pageTitle').textContent=links.length?name(state.vertebra)+' · მეზობელი მალები':name(state.vertebra);$('modelLabel').textContent=latinName(state.vertebra)+' · '+name(state.vertebra);$('subtitle').textContent=latinName(state.vertebra)+' · აირჩიე ნაწილი ან დააწკაპუნე 3D მოდელში.';$('linkKicker').textContent='მეზობელ ძვლებთან კავშირი';
+}
+function renderPartList(){const needle=$('search').value.toLocaleLowerCase();const defsNow=visibleDefs();const matches=defsNow.filter(d=>{const x=d.id==='all'?boneSummary(state.vertebra):d;return(x.latin+' '+x.ka).toLocaleLowerCase().includes(needle);});$('parts').replaceChildren();for(const d of matches){const x=d.id==='all'?boneSummary(state.vertebra):d;const btn=document.createElement('button');btn.className='part-btn'+(state.selected===d.id?' active':'');btn.innerHTML='<span><b></b><small></small></span><span class="dot"></span>';btn.querySelector('b').textContent=x.latin;btn.querySelector('small').textContent=d.id==='all'?'მთლიანი ძვალი · '+x.ka:x.ka;btn.type='button';btn.onclick=()=>selectPart(d.id);$('parts').appendChild(btn);}$('partCount').textContent=defsNow.filter(d=>d.id!=='all').length+' სტრუქტურა';}
+function renderDetails(){
+ const d=state.selected==='all'?boneSummary(state.vertebra):(byId[state.selected]||boneSummary(state.vertebra));
+ $('detailLatin').textContent=d.latin;$('detailKa').textContent=d.ka;$('detailText').textContent=d.info;
+ $('sourceInfo').textContent=d.source||(state.category!=='spine'?'კაციტაძე + AK კონსპექტი':'კაციტაძე · ხერხემლის თავი');
+ $('sourceNote').textContent=d.sourceNote||'';
+ $('detailKind').textContent=state.selected==='all'?'მთლიანი ძვალი':['normal-space','typical-space','atlas-space','sacrum-space','ordinary-link'].includes(d.kind)&&d.id!=='facetLink'?'ხვრელი / სივრცე / შეერთება':'ანატომიური სტრუქტურა';
+ $('detailTitle').textContent=name(state.vertebra)+' · არჩეული სტრუქტურა';
+ const learned=!!state.learned[state.vertebra+':'+state.selected];
+ $('learnedBtn').disabled=state.selected==='all';
+ $('learnedBtn').textContent=learned?'✓ ნასწავლია — გაუქმება':'✓ ვისწავლე';
+ $('learnedBtn').setAttribute('aria-pressed',String(learned));
+ $('learnedBtn').classList.toggle('learned',learned);
+}
+function explainConnection(a,b){switch(jointType(a,b)){case'occipital':return 'კეფის ძვლის როკები ატლასის ზედა სასახსრე ზედაპირებს უკავშირდება. მალთაშუა დისკო არ არის.';case'atlantoaxial':return 'C1–C2: შუა სახსარში აქსისის კბილისებრი მორჩი ატლასის წინა რკალს უერთდება; ასევე არსებობს ორი გვერდითი სახსარი. ჩვეულებრივი დისკო არ არის.';case'sacrococcygeal':return 'გავის მწვერვალსა და კუდუსუნის ფუძეს შორის კავშირი ხშირად ბოჭკოვან-ხრტილოვანია; შეზრდა შეიძლება განსხვავდებოდეს.';default:return 'მალების სხეულებს შორის მდებარეობს მალთაშუა დისკო; უკანაა წყვილი რკალთაშუა სასახსრე შეერთება. მალთაშუა ხვრელი მომიჯნავე ნაჭდევებს შორის ყალიბდება.';}}
+function renderConnection(){const el=$('linkInformation');el.replaceChildren();if(state.category==='shoulder'){const box=document.createElement('div');box.className='connection';const title=document.createElement('strong');title.textContent=name(state.vertebra);const p=document.createElement('p');p.textContent=state.vertebra==='CLAV'?'ლავიწის სამკერდე ბოლო მკერდის ჩონჩხთან კავშირს ქმნის, ხოლო აკრომიული ბოლო ბეჭის აკრომიონს უერთდება. ეს ორი დაბოლოება მოდელში ცალკე მონიშვნადია.':'ბეჭის Acromion ლავიწთან კავშირში მონაწილეობს, ხოლო Cavitas glenoidalis მხრის ძვლის თავთან შესასახსრებელი ფოსოა. მოდელში ორივე უბანი ცალკე მონიშვნადია.';box.append(title,p);el.appendChild(box);return;}if(state.category==='upperfree'){const box=document.createElement('div');box.className='connection';const title=document.createElement('strong');title.textContent=name(state.vertebra);const p=document.createElement('p');p.textContent=state.vertebra==='HUM'?'Caput humeri ბეჭის cavitas glenoidalis-ს უკავშირდება; დისტალურად trochlea humeri — ulna-ს incisura trochlearis-ს, ხოლო capitulum humeri — caput radii-ს.':state.vertebra==='ULNA'?'Incisura trochlearis უკავშირდება trochlea humeri-ს; incisura radialis — caput radii-ს.':'Caput radii უკავშირდება capitulum humeri-ს და ulna-ს incisura radialis-ს; დისტალურად facies articularis carpea მაჯასთან ქმნის სასახსრე ზედაპირს.';box.append(title,p);el.appendChild(box);return;}const con=connected();if(!con.length){const p=document.createElement('p');p.textContent='ჩართე ზედა ან ქვედა მეზობელი, რათა შეერთების აღწერა გამოჩნდეს.';el.appendChild(p);}for(const [a,b]of con){const box=document.createElement('div');box.className='connection';const title=document.createElement('strong');title.textContent=name(a)+' + '+name(b);const p=document.createElement('p');p.textContent=explainConnection(a,b);box.append(title,p);el.appendChild(box);}}
+function renderProgress(){
+ const totalGlobal=Object.values(state.learned).filter(Boolean).length;
+ const current=visibleDefs().filter(d=>d.id!=='all');
+ const done=current.filter(d=>state.learned[state.vertebra+':'+d.id]).length;
+ $('progressText').textContent=`${name(state.vertebra)}: ${done} / ${current.length} სტრუქტურა ნასწავლია · სულ ნასწავლი: ${totalGlobal} · სწორი პასუხები: ${state.progress.correct} / ${state.progress.total}.`;
+ $('score').textContent=`სწორი: ${state.progress.correct} / ${state.progress.total}`;
+}
+function updatePanel(){displayNeighbors();renderPartList();renderDetails();renderConnection();renderProgress();for(const b of document.querySelectorAll('[data-assembly]')){b.classList.toggle('active',b.dataset.assembly===state.assembly);b.disabled=state.category!=='spine'||(b.dataset.assembly==='above'&&!above(state.vertebra))||(['below','both'].includes(b.dataset.assembly)&&!below(state.vertebra));}
+ $('explodeVal').textContent=state.explode+'%';$('rotateVal').textContent=state.rotation+'°';$('zoomVal').textContent=Math.round(state.zoom*100)+'%';$('isolate').checked=state.dim;$('labels').checked=state.labels;$('zoom').value=state.zoom*100;
+ $('tabStudy').classList.toggle('active',state.mode==='study');$('tabQuiz').classList.toggle('active',state.mode==='quiz');$('studyList').classList.toggle('hidden',state.mode==='quiz');$('studyControls').classList.toggle('hidden',state.mode==='quiz');$('quizPanel').classList.toggle('hidden',state.mode!=='quiz');
+ saveWorkspace();}
+function selectPart(id){if(!byId[id])return;if(state.mode==='quiz'&&state.question){grade(id);return;}state.selected=id;renderPartList();renderDetails();draw();if(state.labels&&id!=='all'){const d=byId[id];tooltip(d.latin+' — '+d.ka);}saveWorkspace();}
+function tooltip(msg){if(!state.labels||!msg){$('tooltip').classList.add('hidden');return;}$('tooltip').textContent=msg;$('tooltip').classList.remove('hidden');}
+function changeVertebra(id){state.vertebra=id;state.selected='all';state.rotation=0;state.explode=0;$('explode').value=0;$('rotate').value=0;$('search').value='';if(id==='COC'&&['below','both'].includes(state.assembly))state.assembly='above';build();updatePanel();if(state.mode==='quiz')makeQuestion();tooltip('');}
+function changeCategory(id){state.category=id;populateSelector();state.selected='all';state.explode=0;$('explode').value=0;$('rotate').value=0;$('search').value='';build();updatePanel();if(state.mode==='quiz')makeQuestion();tooltip('');}
+// ------------------ Geometry / vector operations ------------------
+const V=(x,y,z)=>[x,y,z];const add=(a,b)=>a.map((x,i)=>x+b[i]);const sub=(a,b)=>a.map((x,i)=>x-b[i]);const mul=(a,k)=>a.map(x=>x*k);const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];const norm=a=>mul(a,1/(Math.hypot(...a)||1));
+function ellipsoid(c,r,lat=10,lon=18){const out=[];const at=(a,t)=>[c[0]+r[0]*Math.sin(a)*Math.cos(t),c[1]+r[1]*Math.cos(a),c[2]+r[2]*Math.sin(a)*Math.sin(t)];for(let i=0;i<lat;i++)for(let j=0;j<lon;j++){const a=i*Math.PI/lat,b=(i+1)*Math.PI/lat,s=j*2*Math.PI/lon,t=(j+1)*2*Math.PI/lon,p=at(a,s),q=at(b,s),r0=at(b,t),r1=at(a,t);out.push([p,q,r0],[p,r0,r1]);}return out;}
+function tube(a,b,r0,r1=r0,N=12){let u=norm(cross(norm(sub(b,a)),[0,1,0]));if(Math.hypot(...u)<.1)u=norm(cross(norm(sub(b,a)),[0,0,1]));const v=norm(cross(norm(sub(b,a)),u)),out=[];const at=(p,r,t)=>add(p,add(mul(u,r*Math.cos(t)),mul(v,r*Math.sin(t))));for(let i=0;i<N;i++){const t=i*2*Math.PI/N,q=(i+1)*2*Math.PI/N,p=at(a,r0,t),p1=at(a,r0,q),p2=at(b,r1,q),p3=at(b,r1,t);out.push([p,p1,p2],[p,p2,p3]);}return out;}
+function plate(a,b,width,thick){const d=norm(sub(b,a)),side=norm([-d[2],0,d[0]]),v=mul(side,width/2),h=[0,thick/2,0],p=[add(a,v),sub(a,v),add(b,mul(v,.8)),sub(b,mul(v,.8))],c=p.map(x=>add(x,h)).concat(p.map(x=>sub(x,h)));return[[c[0],c[1],c[3]],[c[0],c[3],c[2]],[c[4],c[7],c[5]],[c[4],c[6],c[7]],[c[0],c[2],c[6]],[c[0],c[6],c[4]],[c[1],c[5],c[7]],[c[1],c[7],c[3]],[c[2],c[3],c[7]],[c[2],c[7],c[6]]];}
+function polyFace(points,z,flip=false){const tris=[];for(let i=1;i<points.length-1;i++){const a=[points[0][0],points[0][1],z],b=[points[i][0],points[i][1],z],c=[points[i+1][0],points[i+1][1],z];tris.push(flip?[a,c,b]:[a,b,c]);}return tris;}
+function polySide(a,b,z0,z1){const p0=[a[0],a[1],z0],p1=[b[0],b[1],z0],p2=[b[0],b[1],z1],p3=[a[0],a[1],z1];return[[p0,p1,p2],[p0,p2,p3]];}
+function quad3(a,b,c,d){return[[a,b,c],[a,c,d]];}
+let grouped=new Map(),poses=[],bounds={center:[0,0,0],height:3.5,width:4};
+const emit=(owner,part,tri)=>{const key=owner+'|'+part;if(!grouped.has(key))grouped.set(key,[]);const out=((state.category==='shoulder'||state.category==='upperfree')&&state.side==='left')?tri.map(t=>{const p=t.map(v=>[-v[0],v[1],v[2]]);return[p[0],p[2],p[1]];}):tri;grouped.get(key).push(...out);};
+const path=(owner,part,pts,r)=>{for(let i=0;i<pts.length-1;i++){emit(owner,part,tube(pts[i],pts[i+1],r,r*.96));if(i)emit(owner,part,ellipsoid(pts[i],[r,r,r],6,10));}};
+function ring(owner,part,c,rx,rz,r=.073){const pts=[];for(let i=0;i<=25;i++){let a=i*2*Math.PI/25;pts.push([c[0]+rx*Math.cos(a),c[1],c[2]+rz*Math.sin(a)]);}path(owner,part,pts,r);}
+function typical(id,owner){const c=id.startsWith('C'),t=id.startsWith('T'),l=id.startsWith('L'),n=+id.slice(1),axis=id==='C2';const bx=l?(id==='L5'?1.21:1.11):t?.86:(id==='C7'?.77:.69),by=l?.48:t?.39:.33,bz=l?.68:t?.57:.49,px=bx*.84,back=l?1.40:t?1.32:1.20;
+ emit(owner,'body',ellipsoid([0,0,-.62],[bx,by,bz],13,26));
+ for(const s of [-1,1]){
+  emit(owner,'pedicle',tube([s*bx*.78,0,-.18],[s*px,0,.46],l?.23:.18));emit(owner,'lamina',plate([s*px,0,.46],[s*.08,0,back],l?.35:.25,l?.28:.21));
+  if(c){const tip=px+.85;path(owner,'transverse',[[s*px,0,.14],[s*(px+.48),0,.13],[s*tip,0,.44]],.105);path(owner,'transverse',[[s*px,0,.72],[s*(px+.48),0,.73],[s*tip,0,.44]],.10);ring(owner,'transForamen',[s*(px+.47),0,.43],.16,.21,.045);}
+  else emit(owner,'transverse',tube([s*px,0,.57],[s*(px+(t?.95:1.05)),t?.08:0,.69],t?.16:.20,.11));
+  let fx=px*.96;emit(owner,'supProcess',tube([s*fx,.04,.61],[s*fx,by+.14,.71],.17,.155));emit(owner,'infProcess',tube([s*fx,-.05,.65],[s*fx,-by-.14,.74],.16,.145));
+  emit(owner,'supSurface',ellipsoid([s*fx,by+.15,.71],[.195,.045,.16]));emit(owner,'infSurface',ellipsoid([s*fx,-by-.15,.74],[.19,.045,.17]));
+  if(t){if(n<=9){emit(owner,'costSup',ellipsoid([s*bx*.95,by*.74,-.62],[.057,.13,.16]));emit(owner,'costInf',ellipsoid([s*bx*.95,-by*.74,-.62],[.057,.12,.16]));}else emit(owner,'costSingle',ellipsoid([s*bx*.94,by*.43,-.62],[.061,.14,.18]));if(n<=10)emit(owner,'costTrans',ellipsoid([s*(px+.86),.08,.69],[.07,.11,.12]));}
+  if(l)emit(owner,'mammillary',tube([s*fx,by*.82,.80],[s*fx,by+.25,.97],.09,.065));
+ }
+ if(c&&n<7){emit(owner,'spinous',plate([0,0,back],[0,0,back+.38],.23,.18));for(const s of [-1,1])emit(owner,'spinous',tube([0,0,back+.35],[s*.19,0,back+.61],.105,.07));}
+ else if(c)emit(owner,'spinous',tube([0,0,back],[0,0,back+.84],.175,.085));
+ else if(t)emit(owner,'spinous',tube([0,0,back],[0,-.31,back+(n>=11?.59:.86)],.18,.08));
+ else emit(owner,'spinous',plate([0,0,back],[0,0,back+.54],.46,.34));
+ if(axis){for(const s of [-1,1])emit(owner,'axisSup',ellipsoid([s*px*.96,by+.19,.71],[.20,.052,.18]));emit(owner,'dens',tube([0,by*.73,-.63],[0,.99,-.63],.21,.14,16));emit(owner,'dens',ellipsoid([0,1.005,-.63],[.14,.14,.14]));}
+}
+function atlas(owner){path(owner,'antArch',[[-.87,0,-.05],[-.76,0,-.53],[-.42,0,-1.0],[0,0,-1.12],[.42,0,-1.0],[.76,0,-.53],[.87,0,-.05]],.14);path(owner,'postArch',[[-.87,0,.14],[-.74,0,.63],[-.40,0,1.14],[0,0,1.33],[.40,0,1.14],[.74,0,.63],[.87,0,.14]],.12);emit(owner,'atlasTubAnt',ellipsoid([0,0,-1.19],[.13,.14,.11]));emit(owner,'atlasTubPost',ellipsoid([0,0,1.38],[.10,.12,.11]));emit(owner,'foveaDentis',ellipsoid([0,.02,-.99],[.16,.16,.05]));for(const s of [-1,1]){emit(owner,'mass',ellipsoid([s*.85,0,.04],[.27,.30,.33]));emit(owner,'atlasSup',ellipsoid([s*.85,.29,.04],[.22,.047,.30]));emit(owner,'atlasInf',ellipsoid([s*.85,-.29,.04],[.22,.048,.28]));path(owner,'atlasTrans',[[s*.88,0,-.24],[s*1.18,0,-.28],[s*1.55,0,-.27],[s*1.78,0,-.01]],.09);path(owner,'atlasTrans',[[s*.89,0,.25],[s*1.19,0,.29],[s*1.55,0,.26],[s*1.78,0,-.01]],.088);ring(owner,'atlasTransForamen',[s*1.41,0,0],.18,.18,.047);}}
+function sacrum(owner){for(const [y,r,d]of [[.85,.92,.42],[.42,.89,.41],[-.01,.78,.38],[-.45,.63,.32],[-.86,.43,.25]]){emit(owner,'sacBase',ellipsoid([0,y,-.12],[r*.62,.235,d]));for(const s of [-1,1])emit(owner,'sacAla',ellipsoid([s*r*.72,y,-.08],[r*.33,.225,d*.79]));}emit(owner,'sacBase',ellipsoid([0,1.08,-.12],[1.05,.15,.44]));for(const s of [-1,1]){emit(owner,'sacAla',ellipsoid([s*1.12,.81,-.13],[.39,.18,.37]));}emit(owner,'sacApex',ellipsoid([0,-1.20,-.08],[.31,.17,.19]));path(owner,'sacCrest',[[0,.64,.35],[0,.15,.39],[0,-.25,.32],[0,-.73,.23]],.105);for(const s of [-1,1])for(const [i,y]of [.53,.12,-.30,-.71].entries())ring(owner,'sacForamina',[s*(1.06-i*.10),y,-.44],.065,.075,.027);ring(owner,'sacCanal',[0,1.12,.30],.28,.20,.036);}
+function coccyx(owner){for(const [y,r]of [[.53,.46],[.10,.35],[-.28,.24],[-.64,.15]])emit(owner,'cocBase',ellipsoid([0,y,.02],[r,.23,r*.60]));for(const s of [-1,1])emit(owner,'cocCornu',tube([s*.33,.58,.11],[s*.40,.96,.16],.10,.065));emit(owner,'cocApex',ellipsoid([0,-.84,.02],[.13,.14,.14]));}
+function occiput(owner){emit(owner,'occBase',ellipsoid([0,0,-.08],[1.12,.20,.73]));for(const s of [-1,1])emit(owner,'occCondyle',ellipsoid([s*.83,-.20,-.02],[.22,.13,.29]));}
+function clavicle(owner){
+  // Right clavicle base model; left side is mirrored centrally in emit().
+  const pts=[[-1.72,.00,.16],[-1.50,.03,.27],[-1.18,.06,.34],[-.84,.07,.29],[-.50,.06,.16],[-.16,.04,-.02],[.18,.02,-.16],[.50,.00,-.20],[.80,-.01,-.15],[1.08,-.02,-.16],[1.34,-.02,-.24],[1.52,-.02,-.28]];
+  for(let i=0;i<pts.length-1;i++){const medial=i<3,lateral=i>7;const r0=medial?.205:lateral?.14:.165,r1=medial?.195:lateral?.125:.158;emit(owner,'clav_body',tube(pts[i],pts[i+1],r0,r1,22));if(i>0&&i<pts.length-2)emit(owner,'clav_body',ellipsoid(pts[i],[r0*.92,r0*.82,r0*.92],9,16));}
+  emit(owner,'clav_sternal_end',ellipsoid([-1.82,.00,.18],[.31,.245,.255],18,30));
+  emit(owner,'clav_sternal_art',ellipsoid([-2.055,.00,.18],[.038,.19,.175],16,28));
+  emit(owner,'clav_acromial_end',ellipsoid([1.58,-.02,-.29],[.205,.145,.17],16,28));
+  emit(owner,'clav_acromial_art',ellipsoid([1.755,-.02,-.29],[.032,.12,.13],14,24));
+  emit(owner,'clav_conoid_tub',ellipsoid([.98,-.165,-.15],[.11,.09,.088],12,20));
+  emit(owner,'clav_trapezoid_line',tube([1.03,-.14,-.14],[1.36,-.115,-.225],.048,.024,18));
+  emit(owner,'clav_costal_impression',ellipsoid([-1.31,-.16,.215],[.13,.06,.09],12,20));
+}
+function scapula(owner){
+  // Right scapula base model in posterior-oriented study pose; left side is mirrored in emit().
+  const outline=[[-1.08,.96],[-.66,1.055],[-.23,1.10],[.10,1.045],[.39,.90],[.68,.68],[.91,.45],[1.03,.26],[.86,-.10],[.63,-.47],[.35,-.92],[.20,-1.25],[-.10,-1.12],[-.46,-.82],[-.76,-.44],[-.98,.10]];
+  emit(owner,'scap_costal',polyFace(outline,-.082,true));
+  emit(owner,'scap_dorsal',polyFace(outline,.082,false));
+  for(let i=0;i<outline.length;i++)emit(owner,'scap_costal',polySide(outline[i],outline[(i+1)%outline.length],-.082,.082));
+  // Dorsal fossae: shallow overlay regions for clean highlighting.
+  emit(owner,'scap_supra',ellipsoid([-.26,.70,.103],[.47,.20,.026],14,28));
+  emit(owner,'scap_infra',ellipsoid([-.10,-.26,.103],[.65,.55,.030],16,30));
+  // Scapular spine broadens laterally toward the acromion.
+  const spinePts=[[-.98,.30,.11],[-.72,.35,.13],[-.42,.41,.15],[-.10,.47,.17],[.22,.51,.19],[.52,.54,.22],[.80,.56,.245]];
+  for(let i=0;i<spinePts.length-1;i++){const r=.065+i*.006;emit(owner,'scap_spine',tube(spinePts[i],spinePts[i+1],r,r*1.03,18));}
+  emit(owner,'scap_spine',ellipsoid([.48,.54,.205],[.28,.09,.075],12,22));
+  // Acromion: wider, flattened terminal expansion.
+  const acromionPts=[[.77,.56,.23],[1.00,.65,.225],[1.22,.67,.15],[1.37,.60,.02],[1.28,.50,-.13]];
+  for(let i=0;i<acromionPts.length-1;i++)emit(owner,'scap_acromion',tube(acromionPts[i],acromionPts[i+1],.11,.095,18));
+  emit(owner,'scap_acromion',ellipsoid([1.23,.60,.04],[.24,.14,.105],14,26));
+  // Coracoid: anteriorly curving hook.
+  const coracoidPts=[[.34,.79,-.03],[.46,.94,-.10],[.62,1.04,-.20],[.80,1.02,-.29],[.96,.91,-.30],[1.04,.80,-.22]];
+  for(let i=0;i<coracoidPts.length-1;i++)emit(owner,'scap_coracoid',tube(coracoidPts[i],coracoidPts[i+1],.108,.082,18));
+  emit(owner,'scap_glenoid',ellipsoid([1.095,.285,0],[.175,.305,.112],18,30));
+  emit(owner,'scap_neck',ellipsoid([.89,.29,0],[.135,.235,.09],14,24));
+  emit(owner,'scap_notch',ellipsoid([.15,1.015,-.012],[.077,.047,.047],12,20));
+  emit(owner,'scap_acromial_facet',ellipsoid([1.34,.565,-.105],[.085,.115,.034],12,20));
+  emit(owner,'scap_infraglenoid',ellipsoid([1.005,.005,-.015],[.085,.105,.072],12,20));
+  // Borders and angles are separate pickable landmarks, matching the study list.
+  emit(owner,'scap_sup_border',tube([-.98,.965,0],[.14,1.025,0],.032,.026,18));
+  emit(owner,'scap_med_border',tube([-.99,.91,0],[-.96,.10,0],.033,.033,20));
+  emit(owner,'scap_med_border',tube([-.96,.10,0],[.18,-1.22,0],.033,.028,24));
+  emit(owner,'scap_lat_border',tube([.99,.29,0],[.80,-.13,0],.040,.036,18));
+  emit(owner,'scap_lat_border',tube([.80,-.13,0],[.20,-1.23,0],.036,.029,24));
+  emit(owner,'scap_sup_angle',ellipsoid([-1.02,.98,0],[.078,.088,.067],12,20));
+  emit(owner,'scap_inf_angle',ellipsoid([.20,-1.25,0],[.088,.108,.067],12,20));
+  emit(owner,'scap_lat_angle',ellipsoid([1.01,.29,0],[.105,.135,.088],12,20));
+}
+
+function humerus(owner){
+  // Smooth schematic long-bone silhouette; named landmarks remain independently selectable.
+  emit(owner,'hum_core',tube([.015,-1.53,.01],[-.02,.55,.00],.205,.225,28));
+  emit(owner,'hum_core',tube([-.02,.55,.00],[.01,1.25,.00],.225,.285,26));
+  emit(owner,'hum_prox_core',ellipsoid([-.01,1.34,.00],[.34,.31,.29],18,30));
+  emit(owner,'hum_head',ellipsoid([-.27,1.61,.025],[.37,.36,.35],20,34));
+  ring(owner,'hum_anat_neck',[-.13,1.48,.015],.31,.265,.038);
+  emit(owner,'hum_greater_tub',ellipsoid([.27,1.50,.035],[.19,.26,.22],16,26));
+  emit(owner,'hum_lesser_tub',ellipsoid([.055,1.43,-.215],[.145,.19,.115],14,24));
+  emit(owner,'hum_greater_crest',tube([.25,1.32,-.015],[.20,.90,-.055],.070,.050,16));
+  emit(owner,'hum_lesser_crest',tube([.03,1.29,-.205],[-.01,.91,-.165],.060,.045,16));
+  emit(owner,'hum_intertubercular_groove',tube([.14,1.31,-.215],[.105,.91,-.155],.029,.022,14));
+  ring(owner,'hum_surgical_neck',[0,1.17,0],.265,.225,.032);
+  emit(owner,'hum_deltoid_tub',ellipsoid([.225,.05,-.025],[.09,.26,.105],14,22));
+  const rg=[[.18,.35,.19],[.10,.12,.25],[-.02,-.13,.285],[-.16,-.40,.22]];
+  for(let i=0;i<rg.length-1;i++)emit(owner,'hum_radial_groove',tube(rg[i],rg[i+1],.030,.024,12));
+  emit(owner,'hum_distal_core',ellipsoid([0,-1.65,0],[.49,.32,.29],16,28));
+  emit(owner,'hum_condyle',ellipsoid([0,-1.74,0],[.48,.27,.28],16,28));
+  emit(owner,'hum_med_epicondyle',ellipsoid([-.53,-1.67,.02],[.18,.23,.18],14,22));
+  emit(owner,'hum_lat_epicondyle',ellipsoid([.47,-1.69,.00],[.14,.18,.14],14,22));
+  emit(owner,'hum_trochlea',ellipsoid([-.17,-1.91,.018],[.25,.18,.235],16,26));
+  emit(owner,'hum_capitulum',ellipsoid([.25,-1.88,-.020],[.205,.195,.205],16,26));
+  emit(owner,'hum_olecranon_fossa',ellipsoid([-.07,-1.55,.278],[.20,.18,.030],12,20));
+  emit(owner,'hum_coronoid_fossa',ellipsoid([-.16,-1.57,-.276],[.16,.125,.030],12,20));
+  emit(owner,'hum_radial_fossa',ellipsoid([.24,-1.57,-.263],[.125,.10,.028],12,20));
+}
+function ulna(owner){
+  // Triangular shaft surfaces (AK: anterior/posterior/medial) and their borders.
+  const A1=[0,.88,-.16],P1=[.155,.88,.095],M1=[-.155,.88,.095];
+  const A0=[.02,-1.43,-.10],P0=[.10,-1.43,.065],M0=[-.10,-1.43,.065];
+  emit(owner,'ulna_ant_surface',quad3(A1,P1,P0,A0));
+  emit(owner,'ulna_post_surface',quad3(P1,M1,M0,P0));
+  emit(owner,'ulna_med_surface',quad3(M1,A1,A0,M0));
+  emit(owner,'ulna_ant_border',tube(A0,A1,.027,.032,14));
+  emit(owner,'ulna_post_border',tube(M0,M1,.027,.034,14));
+  emit(owner,'ulna_interosseous_border',tube(P0,P1,.029,.036,14));
+  emit(owner,'ulna_prox_core',ellipsoid([0,1.02,-.01],[.24,.30,.205],16,26));
+  emit(owner,'ulna_olecranon',tube([-.01,1.05,.08],[-.025,1.42,.13],.19,.17,18));
+  emit(owner,'ulna_olecranon',ellipsoid([-.025,1.52,.13],[.205,.22,.21],16,26));
+  emit(owner,'ulna_coronoid',tube([.015,1.02,-.06],[.035,1.20,-.245],.145,.095,16));
+  emit(owner,'ulna_coronoid',ellipsoid([.04,1.22,-.25],[.12,.12,.105],14,22));
+  const notch=[[-.14,1.48,-.03],[-.13,1.36,-.19],[-.08,1.24,-.30],[.01,1.13,-.32],[.10,1.06,-.24]];
+  for(let i=0;i<notch.length-1;i++)emit(owner,'ulna_trochlear_notch',tube(notch[i],notch[i+1],.040,.036,14));
+  emit(owner,'ulna_radial_notch',ellipsoid([.225,1.02,-.015],[.043,.145,.105],12,20));
+  emit(owner,'ulna_tuberosity',ellipsoid([.015,.78,-.175],[.105,.145,.085],12,20));
+  emit(owner,'ulna_distal_core',tube([.01,-1.43,.00],[.00,-1.58,.00],.11,.15,14));
+  emit(owner,'ulna_head',ellipsoid([0,-1.65,.01],[.175,.18,.17],14,24));
+  emit(owner,'ulna_styloid',tube([-.12,-1.69,.02],[-.19,-1.98,.02],.070,.038,14));
+}
+function radius(owner){
+  emit(owner,'rad_head',ellipsoid([0,1.52,0],[.28,.145,.28],16,28));
+  ring(owner,'rad_articular_circ',[0,1.52,0],.285,.285,.032);
+  emit(owner,'rad_neck',tube([0,1.38,0],[0,1.08,0],.145,.13,18));
+  emit(owner,'rad_prox_core',tube([0,1.10,0],[0,.90,0],.13,.145,16));
+  emit(owner,'rad_tuberosity',ellipsoid([-.16,1.00,-.075],[.095,.145,.095],12,20));
+  // Triangular shaft surfaces (AK: anterior/posterior/lateral) with distal widening.
+  const A1=[0,.91,-.13],L1=[.13,.91,.075],M1=[-.13,.91,.075];
+  const A0=[.02,-1.27,-.18],L0=[.235,-1.27,.105],M0=[-.185,-1.27,.10];
+  emit(owner,'rad_ant_surface',quad3(A1,L1,L0,A0));
+  emit(owner,'rad_post_surface',quad3(L1,M1,M0,L0));
+  emit(owner,'rad_lat_surface',quad3(M1,A1,A0,M0));
+  emit(owner,'rad_ant_border',tube(A0,A1,.028,.025,14));
+  emit(owner,'rad_post_border',tube(L0,L1,.030,.026,14));
+  emit(owner,'rad_interosseous_border',tube(M0,M1,.032,.027,14));
+  emit(owner,'rad_distal_core',ellipsoid([.015,-1.46,0],[.33,.27,.26],16,26));
+  emit(owner,'rad_styloid',tube([.285,-1.48,.02],[.385,-1.88,.02],.078,.038,14));
+  emit(owner,'rad_ulnar_notch',ellipsoid([-.295,-1.47,.02],[.042,.145,.11],12,20));
+  emit(owner,'rad_carpal_surface',ellipsoid([.015,-1.69,-.01],[.27,.038,.215],12,22));
+}
+const half=id=>id.startsWith('L')?.48:id.startsWith('T')?.39:id.startsWith('C')?.33:.42;
+function distance(a,b){const t=jointType(a,b);if(t==='occipital')return .63;if(t==='atlantoaxial')return .77;if(t==='sacrococcygeal')return 2.04;if(b==='SAC')return half(a)+1.16+.17;return half(a)+half(b)+.18;}
+function makePoses(){const id=state.vertebra,items=[{id,owner:'target',y:0}],a=above(id),b=below(id),e=state.explode/100*.72;if(a&&['above','both'].includes(state.assembly))items.push({id:a,owner:'above',y:distance(a,id)+e});if(b&&['below','both'].includes(state.assembly))items.push({id:b,owner:'below',y:-distance(id,b)-e});return items;}
+function drawConnections(){const get=owner=>poses.find(p=>p.owner===owner),pairs=[];if(get('above'))pairs.push([get('above'),get('target')]);if(get('below'))pairs.push([get('target'),get('below')]);for(const [a,b]of pairs){const kind=jointType(a.id,b.id),mid=(a.y+b.y)/2;if(kind==='occipital'){for(const s of [-1,1])emit('link','facetLink',ellipsoid([s*.84,(a.y-.30+b.y+.29)/2,.03],[.20,.055,.24]));continue;}if(kind==='atlantoaxial'){for(const s of [-1,1])emit('link','facetLink',ellipsoid([s*.84,(a.y-.29+b.y+.35)/2,.08],[.19,.05,.23]));path('link','ligament',[[-.65,a.y-.02,-.22],[-.32,a.y-.02,-.36],[0,a.y-.02,-.37],[.32,a.y-.02,-.36],[.65,a.y-.02,-.22]],.048);continue;}if(kind==='sacrococcygeal'){emit('link','disc',ellipsoid([0,(a.y-1.2+b.y+.76)/2,-.08],[.27,.055,.18]));continue;}
+ const upperBottom=half(a.id),lowerTop=b.id==='SAC'?1.16:half(b.id),y=(a.y-upperBottom+b.y+lowerTop)/2,rx=Math.min(a.id.startsWith('L')?1.13:a.id.startsWith('T')?.84:.69,b.id==='SAC'?.92:b.id.startsWith('L')?1.13:b.id.startsWith('T')?.84:.69)*.83;
+ emit('link','disc',ellipsoid([0,y,-.62],[rx,.087,rx*.63],9,23));for(const s of [-1,1]){emit('link','facetLink',ellipsoid([s*rx*.94,y+.035,.70],[.17,.058,.18]));ring('link','interforamen',[s*(rx+ .13),y,.25],.15,.22,.034);}}
+}
+function build(){grouped.clear();poses=makePoses();for(const p of poses){if(p.id==='OCC')occiput(p.owner);else if(p.id==='C1')atlas(p.owner);else if(p.id==='SAC')sacrum(p.owner);else if(p.id==='COC')coccyx(p.owner);else typical(p.id,p.owner);}drawConnections();compileMeshes();updateScale();draw();}
+// ------------------ Small native WebGL renderer ------------------
+const gl=window.__force2D?null:$('gl').getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
+const ctx2d=gl?null:$('gl').getContext('2d');let fallbackFaces=[];
+let program=null,u={},pickBuffer=null,pickTexture=null,pickDepth=null,meshes=[],yaw=.62,pitch=.37;
+function matMul(a,b){const out=new Float32Array(16);for(let col=0;col<4;col++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)out[col*4+row]+=a[k*4+row]*b[col*4+k];return out;}
+const ident=()=>new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+function translate(x,y,z){const m=ident();m[12]=x;m[13]=y;m[14]=z;return m;}
+function rotateY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]);}
+function perspective(fov,aspect,near,far){const f=1/Math.tan(fov/2),m=new Float32Array(16);m[0]=f/aspect;m[5]=f;m[10]=(far+near)/(near-far);m[11]=-1;m[14]=2*far*near/(near-far);return m;}
+function lookAt(eye,target,up){const z=norm(sub(eye,target)),x=norm(cross(up,z)),y=cross(z,x);const m=ident();m[0]=x[0];m[1]=y[0];m[2]=z[0];m[4]=x[1];m[5]=y[1];m[6]=z[1];m[8]=x[2];m[9]=y[2];m[10]=z[2];m[12]=-dot(x,eye);m[13]=-dot(y,eye);m[14]=-dot(z,eye);return m;}
+function createShader(type,src){const shader=gl.createShader(type);gl.shaderSource(shader,src);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;}
+function initGL(){if(!gl){document.querySelector('.stage-help').innerHTML='სარეზერვო 3D ხედი (Canvas)<br>↔ დატრიალება · R: საწყისი ხედი';return;}const vs=createShader(gl.VERTEX_SHADER,`attribute vec3 aPos;attribute vec3 aNormal;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNormal;void main(){gl_Position=uMVP*vec4(aPos,1.);vNormal=mat3(uModel)*aNormal;}`);const fs=createShader(gl.FRAGMENT_SHADER,`precision mediump float;uniform vec3 uColor;uniform float uAlpha;uniform bool uPick;varying vec3 vNormal;void main(){if(uPick){gl_FragColor=vec4(uColor,1.);return;}vec3 n=normalize(vNormal);float lighting=.50+.47*abs(dot(n,normalize(vec3(-.48,.85,1.))));gl_FragColor=vec4(uColor*lighting,uAlpha);}`);program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program);u={pos:gl.getAttribLocation(program,'aPos'),normal:gl.getAttribLocation(program,'aNormal'),mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),alpha:gl.getUniformLocation(program,'uAlpha'),pick:gl.getUniformLocation(program,'uPick')};gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.clearColor(.06,.11,.18,1);}
+function compileMeshes(){if(!gl)return;for(const m of meshes){gl.deleteBuffer(m.posBuffer);gl.deleteBuffer(m.normBuffer);}meshes=[];for(const [key,tris]of grouped){if(!tris.length)continue;const [owner,part]=key.split('|'),pos=[],normal=[];for(const tri of tris){const n=norm(cross(sub(tri[1],tri[0]),sub(tri[2],tri[0])));for(const p of tri){pos.push(...p);normal.push(...n);}}const posBuffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,posBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);const normBuffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,normBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normal),gl.STATIC_DRAW);meshes.push({owner,part,posBuffer,normBuffer,count:pos.length/3,pick:meshes.length+1});}}
+function updateScale(){if(state.category==='shoulder'){bounds.center=[0,0,0];bounds.height=state.vertebra==='SCAP'?3.15:2.2;bounds.width=state.vertebra==='CLAV'?4.5:3.3;return;}const worldY=poses.map(p=>p.y),min=Math.min(...worldY),max=Math.max(...worldY);bounds.center=[0,(min+max)/2,0];let spread=max-min;const sac=poses.some(p=>p.id==='SAC');let size=Math.max(spread+(sac?3.3:1.9),3.3);bounds.height=size;bounds.width=sac?4.7:4.4;}
+function modelFor(owner){const p=poses.find(x=>x.owner===owner),cy=p?.y||0;let m=translate(0,cy,0);if(p?.id==='C1'&&poses.some(x=>x.id==='C2')&&state.rotation!==0){const turn=matMul(translate(0,0,-.63),matMul(rotateY(state.rotation*Math.PI/180),translate(0,0,.63)));m=matMul(m,turn);}return m;}
+function cameraMats(){const width=$('gl').width,height=$('gl').height,base=Math.max(bounds.height*1.5,bounds.width*1.33,6.1),dist=base/state.zoom,eye=[Math.sin(yaw)*Math.cos(pitch)*dist,bounds.center[1]+Math.sin(pitch)*dist,Math.cos(yaw)*Math.cos(pitch)*dist];return{vp:matMul(perspective(Math.PI/4,width/height,.05,150),lookAt(eye,bounds.center,[0,1,0]))};}
+function isActive(m){if(state.selected==='all'||state.mode==='quiz')return false;const f=state.selected;if(f==='disc'||f==='facetLink'||f==='interforamen'||f==='ligament')return m.owner==='link'&&m.part===f;if(m.owner!=='target')return false;if(f==='arch')return['pedicle','lamina'].includes(m.part);if(f==='foramen'||f==='canal')return false;return f===m.part;}
+function colorFor(m){if(isActive(m))return[1,.84,.40];if(m.part==='disc')return[.76,.66,.96];if(m.part==='facetLink'||m.part==='ligament')return[.51,.91,.69];if(m.part==='interforamen'||m.part==='transForamen'||m.part==='atlasTransForamen'||m.part==='sacForamina'||m.part==='sacCanal')return[.44,.87,.96];if(m.owner==='target')return[.96,.79,.61];return[.50,.76,.90];}
+function isGuide(m){return ['foramen','canal','incSup','incInf','atlasForamen','transForamen','atlasTransForamen','sacForamina','sacCanal','interforamen'].includes(m.part);}
+function meshVisible(m){const f=state.selected;if(m.part==='interforamen'&&state.mode==='quiz')return false;if(m.part==='interforamen'&&f!=='interforamen')return false;if(['incSup','incInf','foramen','canal','atlasForamen'].includes(m.part)&&f!==m.part)return false;return true;}
+function drawMesh(m,vp,picking=false,alpha=1){const model=modelFor(m.owner),mvp=matMul(vp,model);gl.uniformMatrix4fv(u.mvp,false,mvp);gl.uniformMatrix4fv(u.model,false,model);gl.uniform3fv(u.color,picking?[(m.pick&255)/255,((m.pick>>8)&255)/255,((m.pick>>16)&255)/255]:colorFor(m));gl.uniform1f(u.alpha,alpha);gl.bindBuffer(gl.ARRAY_BUFFER,m.posBuffer);gl.enableVertexAttribArray(u.pos);gl.vertexAttribPointer(u.pos,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,m.normBuffer);gl.enableVertexAttribArray(u.normal);gl.vertexAttribPointer(u.normal,3,gl.FLOAT,false,0,0);gl.drawArrays(gl.TRIANGLES,0,m.count);}
+function draw(){if(!gl){drawFallback();return;}const dpr=Math.min(2,window.devicePixelRatio||1),r=cvsRect(),width=Math.max(1,Math.round(r.width*dpr)),height=Math.max(1,Math.round(r.height*dpr));if($('gl').width!==width||$('gl').height!==height){$('gl').width=width;$('gl').height=height;gl.viewport(0,0,width,height);rebuildPickBuffer();}gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,width,height);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.uniform1i(u.pick,false);const {vp}=cameraMats();
+ const active=meshes.filter(m=>meshVisible(m)&&isActive(m)),others=meshes.filter(m=>meshVisible(m)&&!isActive(m));
+ // Render transparent inactive parts without depth writes, then active parts in front.
+ const faded=state.selected!=='all'&&state.mode!=='quiz'&&state.dim;
+ if(faded){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);for(const m of others)drawMesh(m,vp,false,.12);gl.depthMask(true);gl.disable(gl.BLEND);gl.clear(gl.DEPTH_BUFFER_BIT);for(const m of active)drawMesh(m,vp,false,1);}
+ else for(const m of [...others,...active])drawMesh(m,vp,false,1);
+}
+
+// Offline Canvas software renderer: preserves orbit, highlights and geometry picking when WebGL is disabled.
+function softwareTransform(point,owner){
+ const pose=poses.find(p=>p.owner===owner);let[x,y,z]=point;
+ if(pose?.id==='C1'&&poses.some(p=>p.id==='C2')&&state.rotation){const a=state.rotation*Math.PI/180,t=z+.63;const nx=x*Math.cos(a)+t*Math.sin(a);z=-x*Math.sin(a)+t*Math.cos(a)-.63;x=nx;}
+ return[x,y+(pose?.y||0)-bounds.center[1],z];
+}
+function projectFallback(point){const[x,y,z]=point,ca=Math.cos(yaw),sa=Math.sin(yaw),xx=x*ca+z*sa,zz=-x*sa+z*ca,cp=Math.cos(pitch),sp=Math.sin(pitch),yy=y*cp-zz*sp,depth=y*sp+zz*cp,base=Math.max(bounds.height*1.5,bounds.width*1.33,6.1),dist=base/state.zoom,px=Math.min($('gl').width,$('gl').height)*.82/4.0*(6.1/dist),p=dist/(dist-depth*.6);return{x:$('gl').width*.5+xx*px*p,y:$('gl').height*.52-yy*px*p,depth};}
+function drawFallback(){
+ const canvas=$('gl'),rect=cvsRect(),dpr=Math.min(2,window.devicePixelRatio||1),width=Math.max(1,Math.round(rect.width*dpr)),height=Math.max(1,Math.round(rect.height*dpr));
+ if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
+ const grad=ctx2d.createRadialGradient(width*.5,height*.38,5,width*.5,height*.5,Math.max(width,height)*.7);grad.addColorStop(0,'#304b65');grad.addColorStop(1,'#112035');ctx2d.fillStyle=grad;ctx2d.fillRect(0,0,width,height);
+ const all=[];
+ for(const[key,tris]of grouped){const[owner,part]=key.split('|'),m={owner,part};if(!meshVisible(m))continue;const highlight=isActive(m);const base=isGuide(m)?[86,216,237]:highlight?[255,215,108]:part==='disc'?[185,166,235]:part==='facetLink'||part==='ligament'?[130,232,176]:owner==='target'?[240,207,164]:[141,194,225];
+ for(const tri of tris){const pts=tri.map(v=>softwareTransform(v,owner)),p=pts.map(projectFallback),normal=norm(cross(sub(pts[1],pts[0]),sub(pts[2],pts[0]))),light=.47+.51*Math.abs(dot(normal,norm([-.45,.8,1]))),rgb=base.map(n=>Math.round(n*(highlight?Math.min(1.1,light+.17):light)));all.push({p,depth:p.reduce((s,v)=>s+v.depth,0)/3,owner,part,highlight,rgb});}}
+ all.sort((a,b)=>a.depth-b.depth);fallbackFaces=all.slice().reverse();
+ function paint(t){const v=t.p,c=t.rgb;ctx2d.beginPath();ctx2d.moveTo(v[0].x,v[0].y);ctx2d.lineTo(v[1].x,v[1].y);ctx2d.lineTo(v[2].x,v[2].y);ctx2d.closePath();ctx2d.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${state.selected!=='all'&&state.mode!=='quiz'&&state.dim&&!t.highlight?.14:1})`;ctx2d.fill();}
+ if(state.selected!=='all'&&state.mode!=='quiz'&&state.dim){all.filter(p=>!p.highlight).forEach(paint);all.filter(p=>p.highlight).forEach(paint);}else all.forEach(paint);
+}
+function pickFallback(e){const r=cvsRect(),point={x:(e.clientX-r.left)*$('gl').width/r.width,y:(e.clientY-r.top)*$('gl').height/r.height};
+ const side=(p,q,z)=>(p.x-z.x)*(q.y-z.y)-(q.x-z.x)*(p.y-z.y);
+ for(const m of fallbackFaces){const[a,b,c]=m.p,v1=side(point,a,b),v2=side(point,b,c),v3=side(point,c,a);if(!((v1<0||v2<0||v3<0)&&(v1>0||v2>0||v3>0)))return m;}return null;
+}
+
+function cvsRect(){return $('gl').getBoundingClientRect();}
+function rebuildPickBuffer(){if(!gl)return;if(pickBuffer){gl.deleteFramebuffer(pickBuffer);gl.deleteTexture(pickTexture);gl.deleteRenderbuffer(pickDepth);}pickBuffer=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,pickBuffer);pickTexture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,pickTexture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,$('gl').width,$('gl').height,0,gl.RGBA,gl.UNSIGNED_BYTE,null);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,pickTexture,0);pickDepth=gl.createRenderbuffer();gl.bindRenderbuffer(gl.RENDERBUFFER,pickDepth);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,$('gl').width,$('gl').height);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,pickDepth);gl.bindFramebuffer(gl.FRAMEBUFFER,null);}
+function pick(e){if(!gl)return pickFallback(e);const rect=cvsRect(),px=Math.floor((e.clientX-rect.left)*$('gl').width/rect.width),py=Math.floor((rect.bottom-e.clientY)*$('gl').height/rect.height);if(px<0||py<0||px>=$('gl').width||py>=$('gl').height)return null;gl.bindFramebuffer(gl.FRAMEBUFFER,pickBuffer);gl.viewport(0,0,$('gl').width,$('gl').height);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform1i(u.pick,true);const {vp}=cameraMats();gl.disable(gl.BLEND);gl.depthMask(true);for(const m of meshes){if(!meshVisible(m))continue;drawMesh(m,vp,true);}const pixel=new Uint8Array(4);gl.readPixels(px,py,1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.uniform1i(u.pick,false);gl.clearColor(.06,.11,.18,1);draw();const n=pixel[0]+pixel[1]*256+pixel[2]*65536;return meshes.find(m=>m.pick===n)||null;}
+function renderGuides(){// Guide meshes for empty spaces appear only when specifically selected.
+ if(state.category!=='spine')return;
+ const owner='target',id=state.vertebra,c=id.startsWith('L')?.55:.48;
+ if(!['C1','SAC','COC'].includes(id)){
+  ring(owner,'foramen',[0,.07,.46],c,.43,.042);
+  ring(owner,'canal',[0,.07,.46],c*.78,.32,.033);
+  for(const s of [-1,1]){emit(owner,'incSup',ellipsoid([s*c*.91,.26,.12],[.05,.05,.06]));emit(owner,'incInf',ellipsoid([s*c*.91,-.26,.12],[.05,.05,.06]));}
+ }
+ if(id==='C1')ring(owner,'atlasForamen',[0,.06,.23],.57,.75,.039);
+}
+// -------------------------------------------------------------
+function setView(v){if(v==='top'){yaw=.11;pitch=1.48;}if(v==='bottom'){yaw=.11;pitch=-1.46;}if(v==='front'){yaw=Math.PI;pitch=.02;}if(v==='back'){yaw=0;pitch=.02;}if(v==='side'){yaw=(state.category==='shoulder'||state.category==='upperfree')?(state.side==='right'?1.57:-1.57):1.57;pitch=.06;}if(v==='reset'){yaw=(state.category==='shoulder'||state.category==='upperfree')?(state.side==='right'?.48:-.48):.62;pitch=(state.category==='shoulder'||state.category==='upperfree')?.20:.37;state.zoom=1;$('zoom').value=100;$('zoomVal').textContent='100%';}draw();}
+let drag=null;
+$('gl').addEventListener('pointerdown',e=>{drag={sx:e.clientX,sy:e.clientY,x:e.clientX,y:e.clientY,moved:false};$('gl').setPointerCapture(e.pointerId);});
+$('gl').addEventListener('pointermove',e=>{if(!drag)return;if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>5)drag.moved=true;if(drag.moved){yaw+=(e.clientX-drag.x)*.010;pitch=Math.max(-1.43,Math.min(1.49,pitch-(e.clientY-drag.y)*.010));draw();}drag.x=e.clientX;drag.y=e.clientY;});
+$('gl').addEventListener('pointerup',e=>{if(drag&&!drag.moved){const found=pick(e);if(found){if(state.mode==='quiz'){grade(found.part);}else if(found.owner==='target'||found.owner==='link'){const p=found.part;if(visibleDefs().some(x=>x.id===p))selectPart(p);else if(p==='mass')selectPart('atlasSup');}else{tooltip(name(poses.find(p=>p.owner===found.owner)?.id)+' — მეზობელი მალა');}}}drag=null;});
+$('gl').addEventListener('pointercancel',()=>drag=null);
+$('gl').addEventListener('wheel',e=>{e.preventDefault();state.zoom=Math.min(1.9,Math.max(.6,state.zoom*(e.deltaY>0?.91:1.10)));updatePanel();draw();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))setView('reset');});
+$('category').addEventListener('change',e=>changeCategory(e.target.value));
+for(const b of document.querySelectorAll('[data-side]'))b.onclick=()=>{if(!['shoulder','upperfree'].includes(state.category)||state.side===b.dataset.side)return;state.side=b.dataset.side;state.selected='all';build();updatePanel();setView('reset');tooltip('');};
+$('vertebra').addEventListener('change',e=>changeVertebra(e.target.value));
+for(const b of document.querySelectorAll('[data-assembly]'))b.onclick=()=>{state.assembly=b.dataset.assembly;state.selected='all';state.explode=0;$('explode').value=0;build();updatePanel();if(state.mode==='quiz')makeQuestion();};
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>setView(b.dataset.view);
+$('search').addEventListener('input',renderPartList);
+$('explode').addEventListener('input',e=>{state.explode=+e.target.value;updatePanel();build();});
+$('rotate').addEventListener('input',e=>{state.rotation=+e.target.value;updatePanel();draw();});
+$('zoom').addEventListener('input',e=>{state.zoom=+e.target.value/100;updatePanel();draw();});
+$('isolate').addEventListener('change',e=>{state.dim=e.target.checked;draw();saveWorkspace();});
+$('labels').addEventListener('change',e=>{state.labels=e.target.checked;if(!state.labels)tooltip('');saveWorkspace();});
+function makeQuestion(){const avail=visibleDefs().filter(d=>d.id!=='all'&&!['normal-space','typical-space','atlas-space','sacrum-space','ordinary-link','disc-link','canal'].includes(d.kind));if(avail.length<2){$('quizQuestion').textContent='აირჩიე სხვა ძვალი ტესტისთვის';$('quizChoices').replaceChildren();return;}const target=avail[Math.floor(Math.random()*avail.length)];let choices=[target,...avail.filter(d=>d.id!==target).sort(()=>Math.random()-.5).slice(0,3)];choices=choices.sort(()=>Math.random()-.5);state.question=target;state.answered=false;state.selected='all';$('quizQuestion').textContent='მოძებნე: '+target.latin;$('quizChoices').replaceChildren();for(const d of choices){const b=document.createElement('button');b.textContent=d.ka;b.onclick=()=>grade(d.id);$('quizChoices').appendChild(b);}$('quizFeedback').textContent='მოდელზე დააწკაპუნე ან ქვემოთ მოცემულ ვარიანტს უპასუხე.';draw();}
+function grade(id){if(!state.question||state.answered)return;state.answered=true;const good=id===state.question.id;state.progress.total++;if(good)state.progress.correct++;try{localStorage.setItem('vertebraAtlasV7',JSON.stringify(state.progress));}catch(e){}saveWorkspace();$('quizFeedback').textContent=(good?'✓ სწორია! ':'✗ სწორი პასუხია: '+state.question.ka+'. ')+state.question.info;renderProgress();}
+$('tabStudy').onclick=()=>{state.mode='study';state.selected='all';updatePanel();draw();};
+$('tabQuiz').onclick=()=>{state.mode='quiz';updatePanel();makeQuestion();};
+$('next').onclick=makeQuestion;
+$('reveal').onclick=()=>{if(!state.question)return;$('quizFeedback').textContent=state.question.latin+' — '+state.question.ka+'. '+state.question.info;state.answered=true;};
+$('learnedBtn').onclick=()=>{
+ if(state.selected==='all')return;
+ const k=state.vertebra+':'+state.selected;
+ if(state.learned[k])delete state.learned[k];else state.learned[k]=true;
+ renderDetails();renderProgress();renderPartList();saveWorkspace();
+};
+$('exportProgress').onclick=()=>{
+ const data={app:'Anatomy 3D',version:'11.3.0-alpha.1',exported_at:new Date().toISOString(),workspace:{category:state.category,vertebra:state.vertebra,side:state.side,assembly:state.assembly,selected:state.selected,dim:state.dim,labels:state.labels},learned:state.learned,progress:state.progress};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='anatomy3d_backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+$('importProgress').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ if(file.size>2_000_000){alert('ფაილი ძალიან დიდია.');e.target.value='';return;}
+ try{
+   const data=JSON.parse(await file.text());
+   if(data.app!=='Anatomy 3D'||!data.progress||!Number.isFinite(data.progress.correct)||!Number.isFinite(data.progress.total))throw Error('Invalid backup');
+   if(!confirm('აღვადგინოთ შენახული მონაცემები? მიმდინარე პროგრესი ჩანაცვლდება.'))return;
+   state.progress={correct:data.progress.correct,total:data.progress.total};
+   state.learned=(data.learned&&typeof data.learned==='object'&&!Array.isArray(data.learned))?Object.fromEntries(Object.entries(data.learned).filter(([k,v])=>typeof k==='string'&&v===true).slice(0,1000)):{};
+   const ws=data.workspace||{};
+   if(categories.some(x=>x.id===ws.category))state.category=ws.category;
+   if(ids.includes(ws.vertebra))state.vertebra=ws.vertebra;
+   if(['right','left'].includes(ws.side))state.side=ws.side;
+   if(['solo','above','below','both'].includes(ws.assembly))state.assembly=ws.assembly;
+   if(state.vertebra==='COC'&&['below','both'].includes(state.assembly))state.assembly='above';
+   if(byId[ws.selected])state.selected=ws.selected;else state.selected='all';
+   if(typeof ws.dim==='boolean')state.dim=ws.dim;
+   if(typeof ws.labels==='boolean')state.labels=ws.labels;
+   state.mode='study';$('category').value=state.category;populateSelector();$('vertebra').value=state.vertebra;$('search').value='';
+   build();updatePanel();saveWorkspace();alert('სარეზერვო ასლი აღდგენილია.');
+ }catch(err){alert('ამ ფაილის წაკითხვა ვერ მოხერხდა. აირჩიე ამ აპიდან შენახული JSON ასლი.');}
+ finally{e.target.value='';}
+});
+$('clearProgress').onclick=()=>{if(confirm('ნამდვილად გინდა სასწავლო პროგრესის განულება?')){state.progress={correct:0,total:0};state.learned={};try{localStorage.removeItem('vertebraAtlasV7');}catch(e){}renderProgress();renderDetails();saveWorkspace();}};
+window.addEventListener('resize',()=>draw());
+// Override the builder so that space markers are part of the GPU-selectable scene.
+const originalBuild=build;
+build=function(){grouped.clear();poses=makePoses();for(const p of poses){if(p.id==='OCC')occiput(p.owner);else if(p.id==='C1')atlas(p.owner);else if(p.id==='SAC')sacrum(p.owner);else if(p.id==='COC')coccyx(p.owner);else if(p.id==='CLAV')clavicle(p.owner);else if(p.id==='SCAP')scapula(p.owner);else if(p.id==='HUM')humerus(p.owner);else if(p.id==='ULNA')ulna(p.owner);else if(p.id==='RADIUS')radius(p.owner);else typical(p.id,p.owner);}if(state.category==='spine')drawConnections();renderGuides();compileMeshes();updateScale();draw();};
+// App installation appears only in browsers that support secure-origin PWA installation.
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstall=event;$('installBtn').classList.remove('hidden');});
+$('installBtn').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$('installBtn').classList.add('hidden');};
+$('shareApp').onclick=async()=>{
+  const feedback=$('shareFeedback');
+  if(!['https:','http:'].includes(location.protocol)||['localhost','127.0.0.1'].includes(location.hostname)){
+    feedback.textContent='ჯერ გამოაქვეყნე ვებგვერდი საჯარო მისამართზე.';return;
+  }
+  const url=location.href.split('#')[0];
+  if(navigator.share){
+    try {await navigator.share({title:'Anatomy 3D',text:'ინტერაქტიული 3D ჩონჩხის ატლასი',url});feedback.textContent='';return;}
+    catch(e){if(e?.name==='AbortError')return;}
+  }
+  try {await navigator.clipboard.writeText(url);feedback.textContent='ლინკი დაკოპირებულია — ჩასვი Instagram DM-ში.';}
+  catch(e){window.prompt('დააკოპირე აპლიკაციის საჯარო ლინკი:',url);feedback.textContent='ლინკის კოპირება შეგიძლიათ ზემოთ.';}
+};
+
+window.addEventListener('appinstalled',()=>{$('installBtn').classList.add('hidden');deferredInstall=null;});
+populateCategories();populateSelector();initGL();build();updatePanel();
+if(state.selected!=='all'&&!visibleDefs().some(x=>x.id===state.selected)){state.selected='all';updatePanel();}
+
+window.__anatomyDebug={state,ids,defs,connected,visibleDefs,meshes:()=>meshes,poses:()=>poses,categories,categoryBones,version:'11.3.0-alpha.1'};
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
+</body>
 </html>

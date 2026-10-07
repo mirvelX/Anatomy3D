@@ -1,6 +1,6 @@
 {
   "name": "anatomy3d",
-  "version": "10.8.0-alpha.1",
+  "version": "11.3.0-alpha.1",
   "private": true,
   "packageManager": "pnpm@11.19.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.js",
-    "test:browser": "node tests/browser.mjs && node tests/pilot-browser.mjs && node tests/curriculum-browser.mjs",
+    "test:browser": "node tests/v11-browser.mjs",
     "format": "prettier --write src styles scripts tests index.html sw.js package.json",
     "audit:curriculum": "node scripts/curriculum-audit.mjs"
   },
